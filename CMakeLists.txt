@@ -11,7 +11,8 @@ set(CMAKE_AUTOUIC ON)
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
 
 file(GLOB_RECURSE c64emu_src src/*.cpp src/*.h src/*.ui)
+file(GLOB_RECURSE c64emu_res data/*.qrc)
 
-add_executable(c64pp ${c64emu_src})
+add_executable(c64pp ${c64emu_src} ${c64emu_res})
 
 target_link_libraries(c64pp PRIVATE Qt6::Widgets)

@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>roms/basic</file>
+        <file>roms/chargen</file>
+        <file>roms/kernal</file>
+    </qresource>
+</RCC>
