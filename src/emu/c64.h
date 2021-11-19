@@ -9,8 +9,8 @@ class C64 {
 public:
     C64(const std::vector<uint8_t>& basicROM, const std::vector<uint8_t>& kernalROM, const std::vector<uint8_t>& chargenROM)
         : mpu(&mpuMemoryView), mainRAM(64 * 1024),
-          mpuMemoryView(&mpu, &this->mainRAM, &this->basicROM, &this->kernalROM),
-          basicROM(basicROM), kernalROM(kernalROM) {
+          mpuMemoryView(&mpu, &this->mainRAM, &this->basicROM, &this->kernalROM, &this->chargenROM),
+          basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM) {
         mpu.reset();
     }
 
@@ -19,6 +19,7 @@ public:
     RAMMemory mainRAM;
     ROMMemory basicROM;
     ROMMemory kernalROM;
+    ROMMemory chargenROM;
     MPUMemoryView mpuMemoryView;
 };
 

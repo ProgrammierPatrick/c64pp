@@ -8,8 +8,13 @@ uint8_t MPUMemoryView::read(uint16_t addr) {
     // ROMs
     if (addr >= 0xA000 && addr <= 0xBFFF && (bankSetting & 0x1))
         return basicROM->read(addr - 0xA000);
-    if (addr >= 0xD000 && addr <= 0xDFFF && (bankSetting & 0x2))
-        return kernalROM->read(addr - 0xD000);
+    if (addr >= 0xD000 && addr <= 0xDFFF && (bankSetting & 0x3) != 0x0) {
+        if (bankSetting & 0x4) return 0x00; // TODO: read from IO
+        else
+            return chargenROM->read(addr - 0xD000);
+    }
+    if (addr >= 0xE000 && addr <= 0xEFFF && (bankSetting & 0x2))
+        return kernalROM->read(addr - 0xE000);
 
     // Main RAM
     return mainRAM->read(addr);
@@ -19,6 +24,11 @@ void MPUMemoryView::write(uint16_t addr, uint8_t data) {
     // MCU IO Port
     if (addr == 0x0000) return;
     else if (addr == 0x0001) bankSetting = data & 0x7;
+
+    // IO region
+    else if (addr >= 0xD000 && addr <= 0xDFFF && (bankSetting & 0x3) != 0x0 && (bankSetting & 0x4)) {
+        // TODO: write to IO
+    }
 
     // Main RAM
     else mainRAM->write(addr, data);

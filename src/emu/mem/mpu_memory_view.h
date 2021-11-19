@@ -5,8 +5,8 @@
 
 class MPUMemoryView : public Memory {
 public:
-    MPUMemoryView(MPU* mpu, Memory* mainRAM, Memory* basicROM, Memory* kernalROM)
-        : mpu(mpu), mainRAM(mainRAM), basicROM(basicROM), kernalROM(kernalROM) { }
+    MPUMemoryView(MPU* mpu, Memory* mainRAM, Memory* basicROM, Memory* kernalROM, Memory* chargenROM)
+        : mpu(mpu), mainRAM(mainRAM), basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM) { }
 
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t data) override;
@@ -21,4 +21,5 @@ private:
     Memory* mainRAM;
     Memory* basicROM;
     Memory* kernalROM;
+    Memory* chargenROM;
 };
