@@ -5,14 +5,20 @@
 
 class MPUMemoryView : public Memory {
 public:
-    MPUMemoryView(MPU* mpu, Memory* mainRAM) : mpu(mpu), mainRAM(mainRAM) { }
+    MPUMemoryView(MPU* mpu, Memory* mainRAM, Memory* basicROM, Memory* kernalROM)
+        : mpu(mpu), mainRAM(mainRAM), basicROM(basicROM), kernalROM(kernalROM) { }
 
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t data) override;
 
 private:
-    uint8_t bankSetting = 0x07; // 3 bits, connected to P0-P2 from MPU
+    // 3 bits, connected to P0-P2 from MPU
+    // bit 0: LORAM:  controls BASIC  rom (A000-BFFF)
+    // bit 1: HIRAM:  controls KERNAL rom (E000-FFFF)
+    // bit 2: CHAREN: controls IO/ROM (D000-DFFF)
+    uint8_t bankSetting = 0x07;
     MPU* mpu;
     Memory* mainRAM;
-    // TODO: add Kernal, charrom, etc
+    Memory* basicROM;
+    Memory* kernalROM;
 };

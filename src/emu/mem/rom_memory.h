@@ -5,10 +5,10 @@
 #include <vector>
 #include <string>
 
-class RomMemory : public Memory {
+class ROMMemory : public Memory {
 public:
-    RomMemory(const std::vector<uint8_t>& data) : data(data) { }
-    RomMemory(const std::string& filename);
+    ROMMemory(const std::vector<uint8_t>& data) : data(data) { }
+    ROMMemory(const std::string& filename);
 
     uint8_t read(uint16_t addr) override {
         if (addr < data.size())
