@@ -27,8 +27,10 @@ int main() {
 
     c64.mainRAM.write(2, 0x69);
     c64.mainRAM.write(3, 3);
-    c64.mainRAM.write(4, 0x69);
-    c64.mainRAM.write(5, 5);
+    c64.mainRAM.write(4, 0x6D);
+    c64.mainRAM.write(5, 0x07);
+    c64.mainRAM.write(6, 0x00);
+    c64.mainRAM.write(7, 12);
 
     MPU& mpu = c64.mpu;
     mpu.PCL = 2;
@@ -37,7 +39,9 @@ int main() {
     mpu.P = 1;
     mpu.tick();
     mpu.tick();
-    mpu.P = 0;
+    std::cout << "A: " << (int)mpu.A << std::endl;
+    mpu.P = 1;
+    mpu.tick();
     mpu.tick();
     mpu.tick();
     std::cout << "A: " << (int)mpu.A << std::endl;

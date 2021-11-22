@@ -13,6 +13,8 @@ public:
         PCH = mem->read(0xFFFD);
     }
 private:
+    void get_lower_abs_address();
+    void get_higher_abs_address();
     uint16_t pc() { return PCH * (1<<8) | PCL; }
     void pc_inc() {
         if (PCL == 0xFF) {
@@ -47,6 +49,10 @@ private:
 
     uint8_t instr;
     int cycle = 0;
+
+    // temp values for addresses during opcode processing
+    uint16_t abs_address;
+    uint8_t indexed_address;
 
     Memory* mem;
 };
