@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>C64++</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
@@ -34,6 +34,7 @@
     </property>
     <addaction name="actionPause"/>
     <addaction name="actionStep"/>
+    <addaction name="actionStep_Frame"/>
     <addaction name="separator"/>
     <addaction name="actionHard_Reset"/>
    </widget>
@@ -41,6 +42,7 @@
     <property name="title">
      <string>Tools</string>
     </property>
+    <addaction name="actionMPU_Viewer"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEmulation"/>
@@ -50,6 +52,15 @@
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonIconOnly</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -62,15 +73,37 @@
    <property name="text">
     <string>Step</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+S</string>
+   </property>
   </action>
   <action name="actionPause">
    <property name="text">
     <string>Pause</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+P</string>
+   </property>
   </action>
   <action name="actionHard_Reset">
    <property name="text">
     <string>Hard Reset</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+H</string>
+   </property>
+  </action>
+  <action name="actionStep_Frame">
+   <property name="text">
+    <string>Step Frame</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+F</string>
+   </property>
+  </action>
+  <action name="actionMPU_Viewer">
+   <property name="text">
+    <string>MPU Viewer</string>
    </property>
   </action>
  </widget>
