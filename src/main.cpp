@@ -1,11 +1,21 @@
 #include "emu/mpu.h"
 #include "emu/mem/ram_memory.h"
 #include "emu/c64.h"
+#include "gui/main_window.h"
 
 #include <QFile>
+#include <QApplication>
 
 #include <iostream>
 
+int main(int argc, char** argv) {
+    QApplication app(argc, argv);
+    MainWindow win;
+    win.show();
+    return app.exec();
+}
+
+/*
 
 std::vector<uint8_t> loadRes(const char* name) {
     QFile file(name);
@@ -15,7 +25,6 @@ std::vector<uint8_t> loadRes(const char* name) {
     }
     auto data = file.readAll();
     return std::vector<uint8_t>(data.begin(), data.end());
-
 }
 
 int main() {
@@ -46,3 +55,4 @@ int main() {
     mpu.tick();
     std::cout << "A: " << (int)mpu.A << std::endl;
 }
+*/
