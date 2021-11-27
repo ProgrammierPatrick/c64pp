@@ -4,5 +4,6 @@
 
 class Keyboard {
 public:
-    uint8_t query(uint8_t mask) = 0;
+    virtual ~Keyboard() { }
+    virtual uint8_t query(uint8_t mask) = 0;
 };
