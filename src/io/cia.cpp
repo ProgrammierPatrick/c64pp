@@ -64,8 +64,9 @@ void CIA::write(uint16_t addr, uint8_t data) {
     if (addr == 0x010F) timerCIA2.writeCRB(data);
 }
 
-void CIA::tick(bool& IRQ) {
+void CIA::tick(bool& IRQ, bool& NMI) {
     IRQ = false;
+    NMI = false;
     bool underflowA1, underflowA2, underflowB1, underflowB2;
     timerCIA1.tick(underflowA1, underflowB1);
     timerCIA2.tick(underflowA2, underflowB2);
@@ -79,11 +80,11 @@ void CIA::tick(bool& IRQ) {
     }
     if (underflowA2 && (ICRMask2 & 0x01)) {
         ICRData2 |= 0x81;
-        IRQ = true;
+        NMI = true;
     }
     if (underflowB2 && (ICRMask2 & 0x02)) {
         ICRData2 |= 0x82;
-        IRQ = true;
+        NMI = true;
     }
 
 }

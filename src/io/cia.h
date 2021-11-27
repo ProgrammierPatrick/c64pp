@@ -13,7 +13,7 @@ public:
 
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t data) override;
-    void tick(bool& IRQ);
+    void tick(bool& IRQ, bool& NMI);
 
     Timer timerCIA1;
     Timer timerCIA2;
