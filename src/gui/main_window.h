@@ -1,11 +1,10 @@
 #pragma once
 
+#include "c64_runner.h"
+#include "mpu_viewer.h"
+
 #include <QMainWindow>
 #include <QTimer>
-
-#include "c64_runner.h"
-
-#include "mpu_viewer.h"
 
 namespace Ui {
 class MainWindow;
@@ -19,8 +18,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private:
-    void updateMessage();
+    void updateUI();
 
 private:
     Ui::MainWindow *ui;

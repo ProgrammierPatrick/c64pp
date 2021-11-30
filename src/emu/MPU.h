@@ -35,7 +35,6 @@ public:
     uint8_t PCH; // program counter high
     uint8_t PCL; // program counter low
 
-private:
     // status flags
     enum Flag : uint8_t {
         C = 0x01, // carry
@@ -46,6 +45,8 @@ private:
         V = 0x40, // overflow
         N = 0x80, // negative
     };
+
+private:
 
     uint8_t instr;
     int cycle = 0;

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>257</width>
-    <height>243</height>
+    <width>277</width>
+    <height>268</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -23,8 +23,8 @@
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>20</y>
+      <x>20</x>
+      <y>60</y>
       <width>121</width>
       <height>151</height>
      </rect>
@@ -82,34 +82,108 @@
      </item>
     </layout>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>200</y>
-      <width>201</width>
-      <height>31</height>
+      <x>150</x>
+      <y>10</y>
+      <width>81</width>
+      <height>251</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Note: This is currently read only</string>
+    <property name="title">
+     <string>P</string>
     </property>
-   </widget>
-   <widget class="QLabel" name="label_7">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>180</y>
-      <width>141</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TODO: P as checkboxes</string>
-    </property>
+    <widget class="QWidget" name="verticalLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>61</width>
+       <height>221</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="checkboxN">
+        <property name="text">
+         <string>7: N</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkboxV">
+        <property name="text">
+         <string>6: V</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkboxB">
+        <property name="text">
+         <string>4: B</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkboxD">
+        <property name="text">
+         <string>3: D</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkboxI">
+        <property name="text">
+         <string>2: I</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkboxZ">
+        <property name="text">
+         <string>1: Z</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkboxC">
+        <property name="text">
+         <string>0: C</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>lineEditA</tabstop>
+  <tabstop>lineEditX</tabstop>
+  <tabstop>lineEditY</tabstop>
+  <tabstop>lineEditS</tabstop>
+  <tabstop>lineEditPC</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -22,7 +22,7 @@ std::string toHexStr(uint16_t number) {
 }
 
 bool isValidHexChar(char c) {
-    return c >= '0' && c <= '0' || c >= 'A' && c <= 'F' || c >= 'a' && c <= 'z';
+    return c >= '0' && c <= '9' || c >= 'A' && c <= 'F' || c >= 'a' && c <= 'f';
 }
 
 bool isValidHex8(const std::string& str) {
@@ -45,7 +45,7 @@ uint8_t fromHexStr8(const std::string& str) {
     return fromHexChar(str[0]) << 4 | fromHexChar(str[1]);
 }
 
-uint8_t fromHexStr16(const std::string& str) {
+uint16_t fromHexStr16(const std::string& str) {
     if (str.size() != 4) return 0;
     return fromHexChar(str[0]) << 12 | fromHexChar(str[1]) << 8 | fromHexChar(str[2]) << 4  | fromHexChar(str[3]);
 }

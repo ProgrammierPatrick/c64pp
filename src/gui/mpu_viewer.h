@@ -8,12 +8,14 @@ namespace Ui {
 class MPUViewer;
 }
 
+class MainWindow;
+
 class MPUViewer : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MPUViewer(QWidget *parent, C64Runner* c64Runner);
+    explicit MPUViewer(MainWindow *parent, C64Runner* c64Runner);
     ~MPUViewer();
 
     void updateC64();
@@ -21,5 +23,6 @@ public:
 private:
     Ui::MPUViewer *ui;
     C64Runner *c64Runner;
+    MainWindow *mainWindow;
 };
 

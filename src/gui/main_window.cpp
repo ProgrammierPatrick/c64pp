@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
         frame = 0;
         cycle = 0;
         std::cout << "frame: " << frame << std::endl;
-        updateMessage();
+        updateUI();
     };
     auto start = [this]() {
         running = true;
@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
         cycle++;
         if (cycle % 19704 == 0) frame++;
         std::cout << "frame: " << frame << std::endl;
-        updateMessage();
+        updateUI();
     };
     auto stepFrame = [this, stop]() {
         if (running) {
@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
         cycle += 19704;
         frame++;
         std::cout << "frame: " << frame << std::endl;
-        updateMessage();
+        updateUI();
     };
     auto mpuViewer = [this]() {
         if (toolMPUViewer) {
@@ -83,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
         cycle += 19704;
         frame++;
         std::cout << "frame: " << frame << std::endl;
-        updateMessage();
+        updateUI();
     });
 
     frameTimer.setInterval(20); // 50Hz -> 20ms
@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addSeparator();
     ui->toolBar->addAction("MPU Viewer", mpuViewer);
 
-    updateMessage();
+    updateUI();
 }
 
 MainWindow::~MainWindow()
@@ -107,7 +107,7 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::updateMessage() {
+void MainWindow::updateUI() {
     if(toolMPUViewer)
         toolMPUViewer->updateC64();
 
