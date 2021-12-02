@@ -27,6 +27,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionEnter_Hex_Data"/>
    </widget>
    <widget class="QMenu" name="menuEmulation">
     <property name="title">
@@ -104,6 +105,17 @@
   <action name="actionMPU_Viewer">
    <property name="text">
     <string>MPU Viewer</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+M</string>
+   </property>
+  </action>
+  <action name="actionEnter_Hex_Data">
+   <property name="text">
+    <string>Enter Hex Data...</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+E</string>
    </property>
   </action>
  </widget>

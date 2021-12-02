@@ -2,6 +2,7 @@
 #include "ui_main_window.h"
 
 #include "text_utils.h"
+#include "enterhexdialog.h"
 
 #include <iostream>
 #include <sstream>
@@ -83,6 +84,13 @@ MainWindow::MainWindow(QWidget *parent) :
         cycle += 19704;
         frame++;
         std::cout << "frame: " << frame << std::endl;
+        updateUI();
+    });
+
+    QObject::connect(ui->actionEnter_Hex_Data, &QAction::triggered, [this]() {
+        EnterHexDialog diag(this, &c64Runner);
+        diag.exec();
+        diag.accept();
         updateUI();
     });
 
