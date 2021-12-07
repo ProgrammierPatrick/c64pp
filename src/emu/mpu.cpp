@@ -117,6 +117,14 @@ void opADC(MPU& mpu, uint8_t value) {
     mpu.P |= (carry ? MPU::Flag::C : 0) | (zero ? MPU::Flag::Z : 0) | (overflow ? MPU::Flag::V : 0) | (neg ? MPU::Flag::N : 0);
 }
 
+void opAND(MPU& mpu, uint8_t value) {
+    mpu.A &= value;
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    bool zero = mpu.A == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+}
+
 std::array<OpCode, 256> createOpcodes() {
     std::array<OpCode, 256> opcodes{};
     for(auto& op : opcodes) op.handlers = { fetchOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
@@ -124,6 +132,10 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x6D] = absoluteMode(opADC);
     opcodes[0x65] = zeroPageMode(opADC);
     opcodes[0x61] = indirectXMode(opADC);
+    opcodes[0x29] = immediateMode(opAND);
+    opcodes[0x2D] = absoluteMode(opAND);
+    opcodes[0x25] = zeroPageMode(opAND);
+    opcodes[0x21] = indirectXMode(opAND);
 
     return opcodes;
 }
