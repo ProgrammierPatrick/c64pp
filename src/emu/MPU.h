@@ -9,31 +9,22 @@ public:
     void tick();
     void reset() {
         // TODO: set mask interrupt flag
-        PCL = mem->read(0xFFFC);
-        PCH = mem->read(0xFFFD);
+        auto PCL = mem->read(0xFFFC);
+        auto PCH = mem->read(0xFFFD);
+        PC = (static_cast<uint16_t>(PCH) << 8) | PCL;
     }
 private:
     void get_lower_abs_address();
     void get_higher_abs_address();
-    uint16_t pc() { return PCH * (1<<8) | PCL; }
-    void pc_inc() {
-        if (PCL == 0xFF) {
-            PCL = 0;
-            PCH++;
-        } else {
-            PCL++;
-        }
-    }
 
 public:
     // registers
-    uint8_t A; // accumulator
-    uint8_t X; // index
-    uint8_t Y; // index
-    uint8_t P; // status
-    uint8_t S; // stack pointer
-    uint8_t PCH; // program counter high
-    uint8_t PCL; // program counter low
+    uint8_t A;   // accumulator
+    uint8_t X;   // index
+    uint8_t Y;   // index
+    uint8_t P;   // status
+    uint8_t S;   // stack pointer
+    uint16_t PC; // program counter
 
     // status flags
     enum Flag : uint8_t {
@@ -46,14 +37,16 @@ public:
         N = 0x80, // negative
     };
 
-private:
-
-    uint8_t instr;
+    uint8_t opcode;
     int cycle = 0;
 
     // temp values for addresses during opcode processing
-    uint16_t abs_address;
-    uint8_t indexed_address;
+    uint16_t effectiveAddr;
+    uint16_t baseAddr;
 
     Memory* mem;
+
+private:
+
+
 };

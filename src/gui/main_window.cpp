@@ -131,7 +131,7 @@ void MainWindow::updateUI() {
     ss << " P:" << (mpu.P & 0x80 ? 'M' : '-') << (mpu.P & 0x40 ? 'V' : '-');
     ss << '-' << (mpu.P & 0x10 ? 'B' : '-') << (mpu.P & 0x08 ? 'D' : '-');
     ss << (mpu.P & 0x04 ? 'I' : '-') << (mpu.P & 0x02 ? 'Z' : '-') << (mpu.P & 0x01 ? 'C' : '-');
-    ss << " PC:" << toHexStr(static_cast<uint16_t>(static_cast<int>(mpu.PCH) << 8 | mpu.PCL));
+    ss << " PC:" << toHexStr(mpu.PC);
 
     ui->statusbar->showMessage(QString::fromStdString(ss.str()));
 }

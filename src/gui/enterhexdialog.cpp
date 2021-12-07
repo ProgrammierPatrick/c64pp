@@ -64,8 +64,7 @@ void EnterHexDialog::accept() {
     std::cout << data.size() << " Bytes written to memory at offset " << toHexStr(offset) << std::endl;
 
     if (ui->setPCCheckBox) {
-        c64Runner->c64->mpu.PCL = offset & 0xFF;
-        c64Runner->c64->mpu.PCH = (offset >> 8) & 0xFF;
+        c64Runner->c64->mpu.PC = offset;
     }
 
     QDialog::accept();

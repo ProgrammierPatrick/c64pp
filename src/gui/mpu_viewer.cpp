@@ -68,10 +68,8 @@ MPUViewer::MPUViewer(MainWindow *parent, C64Runner *c64Runner) :
         auto text = ui->lineEditPC->text().toStdString();
         if (isValidHex16(text)) {
             auto& mpu = this->c64Runner->c64->mpu;
-            uint16_t val = fromHexStr16(text);
-            mpu.PCL = val & 0xFF;
-            mpu.PCH = (val >> 8) & 0xFF;
-            ui->lineEditPC->setText(QString::fromStdString(toHexStr(val)));
+            mpu.PC = fromHexStr16(text);
+            ui->lineEditPC->setText(QString::fromStdString(toHexStr(mpu.PC)));
             mainWindow->updateUI();
         }
     });
@@ -148,7 +146,7 @@ void MPUViewer::updateC64() {
     setText(*ui->lineEditX, toHexStr(mpu.X));
     setText(*ui->lineEditY, toHexStr(mpu.Y));
     setText(*ui->lineEditS, toHexStr(mpu.S));
-    setText(*ui->lineEditPC, toHexStr(static_cast<uint16_t>(static_cast<int>(mpu.PCH) << 8 | mpu.PCL)));
+    setText(*ui->lineEditPC, toHexStr(mpu.PC));
 
     if (ui->checkboxC->isChecked() != (mpu.P & MPU::Flag::C)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::C);
     if (ui->checkboxZ->isChecked() != (mpu.P & MPU::Flag::Z)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::Z);
