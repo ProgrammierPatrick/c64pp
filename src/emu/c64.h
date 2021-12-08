@@ -13,10 +13,14 @@ public:
           mpuMemoryView(&mpu, &this->mainRAM, &this->basicROM, &this->kernalROM, &this->chargenROM, &this->cia),
           basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM),
           cia(keyboard) {
-        mpu.reset();
+        reset();
     }
 
     void tick();
+
+    void reset() {
+        mpu.reset();
+    }
 
 public:
     MPU mpu;

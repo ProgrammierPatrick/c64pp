@@ -12,7 +12,7 @@ void dataHandlerNop(MPU& mpu, uint8_t data) { }
 
 struct OpCode {
     // int numBytes; // length of istruction including opcode
-    std::array<void (*)(MPU&), 6> handlers;
+    std::array<void (*)(MPU&), 7> handlers;
     void (*dataHandler)(MPU& mpu, uint8_t data) = dataHandlerNop;
 };
 extern std::array<OpCode, 256> opcodes;
@@ -40,7 +40,7 @@ void fetchImmediate(MPU& mpu) {
 OpCode immediateMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
     // opcodeData.numBytes = 2;
-    opcodeData.handlers = { fetchOpCode, fetchImmediate, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchImmediate, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -62,7 +62,7 @@ void fetchAbsoluteData(MPU& mpu) {
 OpCode absoluteMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
     // opcodeData.numBytes = 3;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, fetchAbsoluteData, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, fetchAbsoluteData, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -79,7 +79,7 @@ void fetchZeroPageData(MPU& mpu) {
 }
 OpCode zeroPageMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, fetchZeroPageData, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, fetchZeroPageData, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -101,7 +101,7 @@ void fetchIndirectXData(MPU& mpu) {
 }
 OpCode indirectXMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchIndirectXBase, handlerNop, fetchIndirectXAddrLow, fetchIndirectXAddrHigh, fetchIndirectXData };
+    opcodeData.handlers = { fetchOpCode, fetchIndirectXBase, handlerNop, fetchIndirectXAddrLow, fetchIndirectXAddrHigh, fetchIndirectXData, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -255,13 +255,14 @@ void rtiPullPCH(MPU& mpu) {
 }
 OpCode createRTIOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullP, rtiPullPCL, rtiPullPCH };
+    opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullP, rtiPullPCL, rtiPullPCH, undefinedOpcode };
     return opcodeData;
 }
 
 std::array<OpCode, 256> createOpcodes() {
     std::array<OpCode, 256> opcodes{};
-    for(auto& op : opcodes) op.handlers = { fetchOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    for(auto& op : opcodes) op.handlers = { fetchOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+
     // Internal Execution On Memory Data
     opcodes[0x69] = immediateMode(opADC);
     opcodes[0x6D] = absoluteMode(opADC);

@@ -14,11 +14,16 @@ std::vector<uint8_t> loadRes(const char* name) {
     return std::vector<uint8_t>(data.begin(), data.end());
 }
 
+class NullKeyboard : public Keyboard {
+public:
+    uint8_t query(uint8_t mask) override { return 0x00; }
+};
 
 void C64Runner::hardReset() {
     auto basic = loadRes(":/roms/basic");
     auto kernal = loadRes(":/roms/kernal");
     auto chargen = loadRes(":/roms/chargen");
 
-    c64 = std::make_unique<C64>(basic, kernal, chargen);
+    static NullKeyboard keyboard;
+    c64 = std::make_unique<C64>(basic, kernal, chargen, &keyboard);
 }
