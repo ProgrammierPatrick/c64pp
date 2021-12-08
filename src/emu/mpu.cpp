@@ -50,7 +50,7 @@ void fetchAbsoluteLowAddr(MPU& mpu) {
     mpu.cycle++;
 }
 void fetchAbsoluteHighAddr(MPU& mpu) {
-    mpu.effectiveAddr |= static_cast<uint16_t>(mpu.mem->read(mpu.PC + 2)) << 8;
+    mpu.effectiveAddr |= mpu.mem->read(mpu.PC + 2) << 8;
     mpu.cycle++;
 }
 void fetchAbsoluteData(MPU& mpu) {
@@ -61,7 +61,6 @@ void fetchAbsoluteData(MPU& mpu) {
 }
 OpCode absoluteMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    // opcodeData.numBytes = 3;
     opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, fetchAbsoluteData, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
@@ -86,12 +85,15 @@ OpCode zeroPageMode(void (*handler)(MPU&,uint8_t)) {
 
 void fetchIndirectXBase(MPU& mpu) {
     mpu.baseAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.cycle++;
 }
 void fetchIndirectXAddrLow(MPU& mpu) {
-    mpu.effectiveAddr = mpu.mem->read(mpu.baseAddr + mpu.X);
+    mpu.effectiveAddr = mpu.mem->read((mpu.baseAddr + mpu.X) & 0x00FF);
+    mpu.cycle++;
 }
 void fetchIndirectXAddrHigh(MPU& mpu) {
-    mpu.effectiveAddr |= mpu.mem->read(mpu.baseAddr + mpu.X + 1) << 8;
+    mpu.effectiveAddr |= mpu.mem->read((mpu.baseAddr + mpu.X + 1) & 0x00FF) << 8;
+    mpu.cycle++;
 }
 void fetchIndirectXData(MPU& mpu) {
     uint8_t value = mpu.mem->read(mpu.effectiveAddr);
@@ -102,6 +104,140 @@ void fetchIndirectXData(MPU& mpu) {
 OpCode indirectXMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
     opcodeData.handlers = { fetchOpCode, fetchIndirectXBase, handlerNop, fetchIndirectXAddrLow, fetchIndirectXAddrHigh, fetchIndirectXData, undefinedOpcode };
+    opcodeData.dataHandler = handler;
+    return opcodeData;
+}
+
+void fetchAbsoluteXAddrLow(MPU& mpu) {
+    mpu.baseAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.cycle++;
+}
+void fetchAbsoluteXAddrHigh(MPU& mpu) {
+    mpu.baseAddr |= mpu.mem->read(mpu.PC + 2);
+    mpu.cycle++;
+}
+void fetchAbsoluteXData(MPU& mpu) {
+    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.X);
+    bool boundaryCrossed = (mpu.baseAddr & 0x00FF) + mpu.X > 0x00FF;
+    if (boundaryCrossed) {
+        mpu.cycle++;
+    } else {
+        opcodes[mpu.opcode].dataHandler(mpu, value);
+        mpu.cycle = 0;
+        mpu.PC += 3;
+    }
+}
+void fetchAbsoluteXDataNextPage(MPU& mpu) {
+    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.X);
+    opcodes[mpu.opcode].dataHandler(mpu, value);
+    mpu.cycle = 0;
+    mpu.PC += 3;
+}
+OpCode absoluteXMode(void (*handler)(MPU&,uint8_t)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteXAddrLow, fetchAbsoluteXAddrHigh, fetchAbsoluteXData, fetchAbsoluteXDataNextPage, undefinedOpcode, undefinedOpcode };
+    opcodeData.dataHandler = handler;
+    return opcodeData;
+}
+
+void fetchAbsoluteYAddrLow(MPU& mpu) {
+    mpu.baseAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.cycle++;
+}
+void fetchAbsoluteYAddrHigh(MPU& mpu) {
+    mpu.baseAddr |= mpu.mem->read(mpu.PC + 2);
+    mpu.cycle++;
+}
+void fetchAbsoluteYData(MPU& mpu) {
+    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.Y);
+    bool boundaryCrossed = (mpu.baseAddr & 0x00FF) + mpu.Y > 0x00FF;
+    if (boundaryCrossed) {
+        mpu.cycle++;
+    } else {
+        opcodes[mpu.opcode].dataHandler(mpu, value);
+        mpu.cycle = 0;
+        mpu.PC += 3;
+    }
+}
+void fetchAbsoluteYDataNextPage(MPU& mpu) {
+    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.Y);
+    opcodes[mpu.opcode].dataHandler(mpu, value);
+    mpu.cycle = 0;
+    mpu.PC += 3;
+}
+OpCode absoluteYMode(void (*handler)(MPU&,uint8_t)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteYAddrLow, fetchAbsoluteYAddrHigh, fetchAbsoluteYData, fetchAbsoluteYDataNextPage, undefinedOpcode, undefinedOpcode };
+    opcodeData.dataHandler = handler;
+    return opcodeData;
+}
+
+void fetchZeroPageXBase(MPU& mpu) {
+    mpu.baseAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.cycle++;
+}
+void fetchZeroPageXData(MPU& mpu) {
+    uint8_t value = mpu.mem->read((mpu.baseAddr + mpu.X) & 0x00FF);
+    opcodes[mpu.opcode].dataHandler(mpu, value);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+OpCode zeroPageXMode(void (*handler)(MPU&,uint8_t)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, fetchZeroPageXData, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.dataHandler = handler;
+    return opcodeData;
+}
+
+void fetchZeroPageYBase(MPU& mpu) {
+    mpu.baseAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.cycle++;
+}
+void fetchZeroPageYData(MPU& mpu) {
+    uint8_t value = mpu.mem->read((mpu.baseAddr + mpu.Y) & 0x00FF);
+    opcodes[mpu.opcode].dataHandler(mpu, value);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+OpCode zeroPageYMode(void (*handler)(MPU&,uint8_t)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageYBase, handlerNop, fetchZeroPageYData, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.dataHandler = handler;
+    return opcodeData;
+}
+
+void fetchIndirectYIndirectAddr(MPU& mpu) {
+    mpu.indirectAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.cycle++;
+}
+void fetchIndirectYAddrLow(MPU& mpu) {
+    mpu.baseAddr = mpu.mem->read(mpu.indirectAddr);
+    mpu.cycle++;
+}
+void fetchIndirectYAddrHigh(MPU& mpu) {
+    mpu.baseAddr |= mpu.mem->read((mpu.indirectAddr + 1) & 0x00FF) << 8;
+    mpu.cycle++;
+}
+void fetchIndirectYData(MPU& mpu) {
+    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.Y);
+    bool boundaryCrossed = ((mpu.baseAddr & 0x00FF) + mpu.Y) > 0x00FF;
+    if (boundaryCrossed) {
+        mpu.cycle++;
+    } else {
+        opcodes[mpu.opcode].dataHandler(mpu, value);
+        mpu.cycle = 0;
+        mpu.PC += 2;
+    }
+}
+void fetchIndirectYDataNextPage(MPU& mpu) {
+    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.Y);
+    opcodes[mpu.opcode].dataHandler(mpu, value);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+OpCode indirectYMode(void (*handler)(MPU&,uint8_t)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchIndirectYIndirectAddr, fetchIndirectYAddrLow, fetchIndirectYAddrHigh, fetchIndirectYData, fetchIndirectYDataNextPage, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -268,16 +404,28 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x6D] = absoluteMode(opADC);
     opcodes[0x65] = zeroPageMode(opADC);
     opcodes[0x61] = indirectXMode(opADC);
+    opcodes[0x7D] = absoluteXMode(opADC);
+    opcodes[0x79] = absoluteYMode(opADC);
+    opcodes[0x75] = zeroPageXMode(opADC);
+    opcodes[0x71] = indirectYMode(opADC);
     opcodes[0x29] = immediateMode(opAND);
     opcodes[0x2D] = absoluteMode(opAND);
     opcodes[0x25] = zeroPageMode(opAND);
     opcodes[0x21] = indirectXMode(opAND);
+    opcodes[0x3D] = absoluteXMode(opAND);
+    opcodes[0x39] = absoluteYMode(opAND);
+    opcodes[0x35] = zeroPageXMode(opAND);
+    opcodes[0x31] = indirectYMode(opAND);
     opcodes[0x2C] = absoluteMode(opBIT);
     opcodes[0x24] = zeroPageMode(opBIT);
     opcodes[0xC9] = immediateMode(opCMP);
     opcodes[0xCD] = absoluteMode(opCMP);
     opcodes[0xC5] = zeroPageMode(opCMP);
     opcodes[0xC1] = indirectXMode(opCMP);
+    opcodes[0xDD] = absoluteXMode(opCMP);
+    opcodes[0xD9] = absoluteYMode(opCMP);
+    opcodes[0xD5] = zeroPageXMode(opCMP);
+    opcodes[0xD1] = indirectYMode(opCMP);
     opcodes[0xE0] = immediateMode(opCPX);
     opcodes[0xEC] = absoluteMode(opCPX);
     opcodes[0xE4] = zeroPageMode(opCPX);
@@ -288,24 +436,44 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x4D] = absoluteMode(opEOR);
     opcodes[0x45] = zeroPageMode(opEOR);
     opcodes[0x41] = indirectXMode(opEOR);
+    opcodes[0x5D] = absoluteXMode(opEOR);
+    opcodes[0x59] = absoluteYMode(opEOR);
+    opcodes[0x55] = zeroPageXMode(opEOR);
+    opcodes[0x51] = indirectYMode(opEOR);
     opcodes[0xA9] = immediateMode(opLDA);
     opcodes[0xAD] = absoluteMode(opLDA);
     opcodes[0xA5] = zeroPageMode(opLDA);
     opcodes[0xA1] = indirectXMode(opLDA);
+    opcodes[0xBD] = absoluteXMode(opLDA);
+    opcodes[0xB9] = absoluteYMode(opLDA);
+    opcodes[0xB5] = zeroPageXMode(opLDA);
+    opcodes[0xB1] = indirectYMode(opLDA);
     opcodes[0xA2] = immediateMode(opLDX);
     opcodes[0xAE] = absoluteMode(opLDX);
     opcodes[0xA6] = zeroPageMode(opLDX);
+    opcodes[0xBE] = absoluteYMode(opLDX);
+    opcodes[0xB6] = zeroPageYMode(opLDX);
     opcodes[0xA0] = immediateMode(opLDY);
     opcodes[0xAC] = absoluteMode(opLDY);
     opcodes[0xA4] = zeroPageMode(opLDY);
+    opcodes[0xBC] = absoluteXMode(opLDY);
+    opcodes[0xB4] = zeroPageXMode(opLDY);
     opcodes[0x09] = immediateMode(opORA);
     opcodes[0x0D] = absoluteMode(opORA);
     opcodes[0x05] = zeroPageMode(opORA);
     opcodes[0x01] = indirectXMode(opORA);
+    opcodes[0x1D] = absoluteXMode(opORA);
+    opcodes[0x19] = absoluteYMode(opORA);
+    opcodes[0x15] = zeroPageXMode(opORA);
+    opcodes[0x11] = indirectYMode(opORA);
     opcodes[0xE9] = immediateMode(opSBC);
     opcodes[0xED] = absoluteMode(opSBC);
     opcodes[0xE5] = zeroPageMode(opSBC);
     opcodes[0xE1] = indirectXMode(opSBC);
+    opcodes[0xFD] = absoluteXMode(opSBC);
+    opcodes[0xF9] = absoluteYMode(opSBC);
+    opcodes[0xF5] = zeroPageXMode(opSBC);
+    opcodes[0xF1] = indirectYMode(opSBC);
 
     opcodes[0x00] = createBRKOpCode();
     opcodes[0x40] = createBRKOpCode();

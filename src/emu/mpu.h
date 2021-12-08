@@ -43,6 +43,7 @@ public:
     // temp values for addresses during opcode processing
     uint16_t effectiveAddr;
     uint16_t baseAddr;
+    uint8_t indirectAddr;
 
     // MNI is edge sensitive. If NMI is already handled, it needs to return to zero before being detected again
     // NMI_valid will be false after NMI has been received, returns to true when NMI=0
