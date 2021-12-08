@@ -242,6 +242,12 @@ OpCode indirectYMode(void (*handler)(MPU&,uint8_t)) {
     return opcodeData;
 }
 
+OpCode impliedSingleByte(void (*handler)(MPU&)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, handler, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+
 void opADC(MPU& mpu, uint8_t value) {
     uint8_t oldA = mpu.A;
     mpu.A = oldA + value + (mpu.P & MPU::Flag::C);
@@ -345,6 +351,196 @@ void opSBC(MPU& mpu, uint8_t value) {
     bool overflow = (oldA - static_cast<int16_t>(value) - (0x01 ^ (mpu.P & MPU::Flag::C))) != mpu.A;
     mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::V | MPU::Flag::N);
     mpu.P |= (carry ? MPU::Flag::C : 0) | (zero ? MPU::Flag::Z : 0) | (overflow ? MPU::Flag::V : 0) | (neg ? MPU::Flag::N : 0);
+}
+
+void opASL(MPU& mpu) {
+    uint8_t oldA = mpu.A;
+    mpu.A = mpu.A << 1;
+    bool carry = 0x80 & oldA;
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    bool zero = mpu.A == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z | MPU::Flag::C);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0) | (carry ? MPU::Flag::C : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opLSR(MPU& mpu) {
+    uint8_t oldA = mpu.A;
+    mpu.A = mpu.A >> 1;
+    bool carry = 0x01 & oldA;
+    bool zero = mpu.A == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z | MPU::Flag::C);
+    mpu.P |= (zero ? MPU::Flag::Z : 0) | (carry ? MPU::Flag::C : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opROL(MPU& mpu) {
+    uint8_t oldA = mpu.A;
+    mpu.A = (mpu.A << 1) | (mpu.P & MPU::Flag::C);
+    bool carry = 0x80 & oldA;
+    bool zero = mpu.A == 0;
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z | MPU::Flag::C);
+    mpu.P |= (zero ? MPU::Flag::Z : 0) | (carry ? MPU::Flag::C : 0) | (neg ? MPU::Flag::N : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opROR(MPU& mpu) {
+    uint8_t oldA = mpu.A;
+    mpu.A = (mpu.A >> 1) | ((mpu.P & MPU::Flag::C) << 7);
+    bool carry = 0x01 & oldA;
+    bool zero = mpu.A == 0;
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z | MPU::Flag::C);
+    mpu.P |= (zero ? MPU::Flag::Z : 0) | (carry ? MPU::Flag::C : 0) | (neg ? MPU::Flag::N : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opCLC(MPU& mpu) {
+    mpu.P &= ~(MPU::Flag::C);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opCLD(MPU& mpu) {
+    mpu.P &= ~(MPU::Flag::D);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opCLI(MPU& mpu) {
+    mpu.P &= ~(MPU::Flag::I);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opCLV(MPU& mpu) {
+    mpu.P &= ~(MPU::Flag::V);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opDEX(MPU& mpu) {
+    mpu.X--;
+    bool neg = static_cast<int8_t>(mpu.X) < 0;
+    bool zero = mpu.X == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opDEY(MPU& mpu) {
+    mpu.Y--;
+    bool neg = static_cast<int8_t>(mpu.Y) < 0;
+    bool zero = mpu.Y == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opINX(MPU& mpu) {
+    mpu.X++;
+    bool neg = static_cast<int8_t>(mpu.X) < 0;
+    bool zero = mpu.X == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opINY(MPU& mpu) {
+    mpu.Y++;
+    bool neg = static_cast<int8_t>(mpu.Y) < 0;
+    bool zero = mpu.Y == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opNOP(MPU& mpu) {
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opSEC(MPU& mpu) {
+    mpu.P |= MPU::Flag::C;
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opSED(MPU& mpu) {
+    mpu.P |= MPU::Flag::D;
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opSEI(MPU& mpu) {
+    mpu.P |= MPU::Flag::I;
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opTAX(MPU& mpu) {
+    mpu.X = mpu.A;
+    bool neg = static_cast<int8_t>(mpu.X) < 0;
+    bool zero = mpu.X == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opTAY(MPU& mpu) {
+    mpu.Y = mpu.A;
+    bool neg = static_cast<int8_t>(mpu.Y) < 0;
+    bool zero = mpu.Y == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opTSX(MPU& mpu) {
+    mpu.X = mpu.S;
+    bool neg = static_cast<int8_t>(mpu.X) < 0;
+    bool zero = mpu.X == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opTXA(MPU& mpu) {
+    mpu.A = mpu.X;
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    bool zero = mpu.A == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opTXS(MPU& mpu) {
+    mpu.S = mpu.X;
+    mpu.cycle = 0;
+    mpu.PC++;
+}
+
+void opTYA(MPU& mpu) {
+    mpu.A = mpu.Y;
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    bool zero = mpu.A == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+    mpu.cycle = 0;
+    mpu.PC++;
 }
 
 
@@ -475,8 +671,33 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0xF5] = zeroPageXMode(opSBC);
     opcodes[0xF1] = indirectYMode(opSBC);
 
+    // Single Byte Instructions
+    opcodes[0x0A] = impliedSingleByte(opASL);
+    opcodes[0x18] = impliedSingleByte(opCLC);
+    opcodes[0xD8] = impliedSingleByte(opCLD);
+    opcodes[0x58] = impliedSingleByte(opCLI);
+    opcodes[0xB8] = impliedSingleByte(opCLV);
+    opcodes[0xCA] = impliedSingleByte(opDEX);
+    opcodes[0xB8] = impliedSingleByte(opDEY);
+    opcodes[0xE8] = impliedSingleByte(opINX);
+    opcodes[0xC8] = impliedSingleByte(opINY);
+    opcodes[0x4A] = impliedSingleByte(opLSR);
+    opcodes[0xEA] = impliedSingleByte(opNOP);
+    opcodes[0x2A] = impliedSingleByte(opROL);
+    opcodes[0x6A] = impliedSingleByte(opROR);
+    opcodes[0x38] = impliedSingleByte(opSEC);
+    opcodes[0xF8] = impliedSingleByte(opSED);
+    opcodes[0x78] = impliedSingleByte(opSEI);
+    opcodes[0xAA] = impliedSingleByte(opTAX);
+    opcodes[0xA8] = impliedSingleByte(opTAY);
+    opcodes[0xBA] = impliedSingleByte(opTSX);
+    opcodes[0x8A] = impliedSingleByte(opTXA);
+    opcodes[0x9A] = impliedSingleByte(opTXS);
+    opcodes[0x98] = impliedSingleByte(opTYA);
+
+
     opcodes[0x00] = createBRKOpCode();
-    opcodes[0x40] = createBRKOpCode();
+    opcodes[0x40] = createRTIOpCode();
 
     return opcodes;
 }
