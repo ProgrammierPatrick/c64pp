@@ -9,9 +9,15 @@ uint8_t MPUMemoryView::read(uint16_t addr) {
     if (addr >= 0xA000 && addr <= 0xBFFF && (bankSetting & 0x1))
         return basicROM->read(addr - 0xA000);
     if (addr >= 0xD000 && addr <= 0xDFFF && (bankSetting & 0x3) != 0x0) {
-        if (bankSetting & 0x4) return 0x00; // TODO: read from IO
-        else
+        if (bankSetting & 0x4) {
+            if (addr >= 0xDC00 && addr <= 0xDDFF)
+                return cia->read(addr - 0xDC00);
+            else return 0x00;
+            // TODO: VIC-II, SID, Color-RAM
+        }
+        else {
             return chargenROM->read(addr - 0xD000);
+        }
     }
     if (addr >= 0xE000 && addr <= 0xEFFF && (bankSetting & 0x2))
         return kernalROM->read(addr - 0xE000);
@@ -27,7 +33,8 @@ void MPUMemoryView::write(uint16_t addr, uint8_t data) {
 
     // IO region
     else if (addr >= 0xD000 && addr <= 0xDFFF && (bankSetting & 0x3) != 0x0 && (bankSetting & 0x4)) {
-        // TODO: write to IO
+        if (addr >= 0xDC00 && addr <= 0xDDFF) cia->write(addr - 0xDC00, data);
+        // TODO: VIC-II, SID, Color-RAM
     }
 
     // Main RAM

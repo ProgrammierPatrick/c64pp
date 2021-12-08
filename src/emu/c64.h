@@ -10,7 +10,7 @@ class C64 {
 public:
     C64(const std::vector<uint8_t>& basicROM, const std::vector<uint8_t>& kernalROM, const std::vector<uint8_t>& chargenROM, Keyboard* keyboard)
         : mpu(&mpuMemoryView), mainRAM(64 * 1024),
-          mpuMemoryView(&mpu, &this->mainRAM, &this->basicROM, &this->kernalROM, &this->chargenROM),
+          mpuMemoryView(&mpu, &this->mainRAM, &this->basicROM, &this->kernalROM, &this->chargenROM, &this->cia),
           basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM),
           cia(keyboard) {
         mpu.reset();

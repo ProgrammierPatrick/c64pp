@@ -111,7 +111,7 @@ void opADC(MPU& mpu, uint8_t value) {
     mpu.A = oldA + value + (mpu.P & MPU::Flag::C);
     bool neg = static_cast<int8_t>(mpu.A) < 0;
     bool zero = mpu.A == 0;
-    bool carry = (oldA + static_cast<uint16_t>(value) + (mpu.P & MPU::Flag::C)) > 0xFFFF;
+    bool carry = (oldA + static_cast<uint16_t>(value) + (mpu.P & MPU::Flag::C)) > 0x00FF;
     bool overflow = (oldA + static_cast<int16_t>(value) + (mpu.P & MPU::Flag::C)) != mpu.A;
     mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::V | MPU::Flag::N);
     mpu.P |= (carry ? MPU::Flag::C : 0) | (zero ? MPU::Flag::Z : 0) | (overflow ? MPU::Flag::V : 0) | (neg ? MPU::Flag::N : 0);
@@ -124,6 +124,93 @@ void opAND(MPU& mpu, uint8_t value) {
     mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
     mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
 }
+
+void opBIT(MPU& mpu, uint8_t value) {
+    bool neg = 0x80 & value;
+    bool overflow = 0x40 & value;
+    bool zero = (0x3F & mpu.A & value) == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::V | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (overflow ? MPU::Flag::V : 0) |(zero ? MPU::Flag::Z : 0);
+}
+
+void opCMP(MPU& mpu, uint8_t value) {
+    int8_t diff = mpu.A - value;
+    bool neg = diff & 0x80;
+    bool zero = diff == 0;
+    bool carry = static_cast<int16_t>(mpu.A) - static_cast<int16_t>(value) < 0;
+    mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::N);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (carry ? MPU::Flag::C : 0) |(zero ? MPU::Flag::Z : 0);
+}
+
+void opCPX(MPU& mpu, uint8_t value) {
+    int8_t diff = mpu.X - value;
+    bool neg = diff & 0x80;
+    bool zero = diff == 0;
+    bool carry = static_cast<int16_t>(mpu.X) - static_cast<int16_t>(value) < 0;
+    mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::N);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (carry ? MPU::Flag::C : 0) |(zero ? MPU::Flag::Z : 0);
+}
+
+void opCPY(MPU& mpu, uint8_t value) {
+    int8_t diff = mpu.Y - value;
+    bool neg = diff & 0x80;
+    bool zero = diff == 0;
+    bool carry = static_cast<int16_t>(mpu.Y) - static_cast<int16_t>(value) < 0;
+    mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::N);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (carry ? MPU::Flag::C : 0) |(zero ? MPU::Flag::Z : 0);
+}
+
+void opEOR(MPU& mpu, uint8_t value) {
+    mpu.A ^= value;
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    bool zero = mpu.A == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+}
+
+void opLDA(MPU& mpu, uint8_t value) {
+    mpu.A = value;
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    bool zero = mpu.A == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+}
+
+void opLDX(MPU& mpu, uint8_t value) {
+    mpu.X = value;
+    bool neg = static_cast<int8_t>(mpu.X) < 0;
+    bool zero = mpu.X == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+}
+
+void opLDY(MPU& mpu, uint8_t value) {
+    mpu.Y = value;
+    bool neg = static_cast<int8_t>(mpu.Y) < 0;
+    bool zero = mpu.Y == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+}
+
+void opORA(MPU& mpu, uint8_t value) {
+    mpu.A |= value;
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    bool zero = mpu.A == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
+}
+
+void opSBC(MPU& mpu, uint8_t value) {
+    uint8_t oldA = mpu.A;
+    mpu.A = mpu.A - value - ((mpu.P & MPU::Flag::C) ^ 0x01);
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    bool zero = mpu.A == 0;
+    bool carry = (oldA - static_cast<uint16_t>(value) - (0x01 ^ (mpu.P & MPU::Flag::C))) > 0x00FF;
+    bool overflow = (oldA - static_cast<int16_t>(value) - (0x01 ^ (mpu.P & MPU::Flag::C))) != mpu.A;
+    mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::V | MPU::Flag::N);
+    mpu.P |= (carry ? MPU::Flag::C : 0) | (zero ? MPU::Flag::Z : 0) | (overflow ? MPU::Flag::V : 0) | (neg ? MPU::Flag::N : 0);
+}
+
 
 // BRK instruction (called for hardware interrupt)
 void brkPushPCH(MPU& mpu) {
@@ -175,6 +262,7 @@ OpCode createRTIOpCode() {
 std::array<OpCode, 256> createOpcodes() {
     std::array<OpCode, 256> opcodes{};
     for(auto& op : opcodes) op.handlers = { fetchOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    // Internal Execution On Memory Data
     opcodes[0x69] = immediateMode(opADC);
     opcodes[0x6D] = absoluteMode(opADC);
     opcodes[0x65] = zeroPageMode(opADC);
@@ -183,6 +271,40 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x2D] = absoluteMode(opAND);
     opcodes[0x25] = zeroPageMode(opAND);
     opcodes[0x21] = indirectXMode(opAND);
+    opcodes[0x2C] = absoluteMode(opBIT);
+    opcodes[0x24] = zeroPageMode(opBIT);
+    opcodes[0xC9] = immediateMode(opCMP);
+    opcodes[0xCD] = absoluteMode(opCMP);
+    opcodes[0xC5] = zeroPageMode(opCMP);
+    opcodes[0xC1] = indirectXMode(opCMP);
+    opcodes[0xE0] = immediateMode(opCPX);
+    opcodes[0xEC] = absoluteMode(opCPX);
+    opcodes[0xE4] = zeroPageMode(opCPX);
+    opcodes[0xC0] = immediateMode(opCPY);
+    opcodes[0xCC] = absoluteMode(opCPY);
+    opcodes[0xC4] = zeroPageMode(opCPY);
+    opcodes[0x49] = immediateMode(opEOR);
+    opcodes[0x4D] = absoluteMode(opEOR);
+    opcodes[0x45] = zeroPageMode(opEOR);
+    opcodes[0x41] = indirectXMode(opEOR);
+    opcodes[0xA9] = immediateMode(opLDA);
+    opcodes[0xAD] = absoluteMode(opLDA);
+    opcodes[0xA5] = zeroPageMode(opLDA);
+    opcodes[0xA1] = indirectXMode(opLDA);
+    opcodes[0xA2] = immediateMode(opLDX);
+    opcodes[0xAE] = absoluteMode(opLDX);
+    opcodes[0xA6] = zeroPageMode(opLDX);
+    opcodes[0xA0] = immediateMode(opLDY);
+    opcodes[0xAC] = absoluteMode(opLDY);
+    opcodes[0xA4] = zeroPageMode(opLDY);
+    opcodes[0x09] = immediateMode(opORA);
+    opcodes[0x0D] = absoluteMode(opORA);
+    opcodes[0x05] = zeroPageMode(opORA);
+    opcodes[0x01] = indirectXMode(opORA);
+    opcodes[0xE9] = immediateMode(opSBC);
+    opcodes[0xED] = absoluteMode(opSBC);
+    opcodes[0xE5] = zeroPageMode(opSBC);
+    opcodes[0xE1] = indirectXMode(opSBC);
 
     opcodes[0x00] = createBRKOpCode();
     opcodes[0x40] = createBRKOpCode();

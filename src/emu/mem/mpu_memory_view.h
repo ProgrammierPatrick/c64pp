@@ -2,11 +2,12 @@
 
 #include "memory.h"
 #include "../mpu.h"
+#include "../io/cia.h"
 
 class MPUMemoryView : public Memory {
 public:
-    MPUMemoryView(MPU* mpu, Memory* mainRAM, Memory* basicROM, Memory* kernalROM, Memory* chargenROM)
-        : mpu(mpu), mainRAM(mainRAM), basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM) { }
+    MPUMemoryView(MPU* mpu, Memory* mainRAM, Memory* basicROM, Memory* kernalROM, Memory* chargenROM, CIA* cia)
+        : mpu(mpu), mainRAM(mainRAM), basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM), cia(cia) { }
 
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t data) override;
@@ -22,4 +23,5 @@ private:
     Memory* basicROM;
     Memory* kernalROM;
     Memory* chargenROM;
+    CIA* cia;
 };
