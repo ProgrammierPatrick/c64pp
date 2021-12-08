@@ -3,5 +3,7 @@
         <file>roms/basic</file>
         <file>roms/chargen</file>
         <file>roms/kernal</file>
+        <file>c64_images/C64C_cropped.jpg</file>
+        <file>keymaps/gtk3_sym_de.vkm</file>
     </qresource>
 </RCC>

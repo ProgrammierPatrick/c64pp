@@ -106,6 +106,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addSeparator();
     ui->toolBar->addAction("MPU Viewer", mpuViewer);
 
+    keyboardWidget = new KeyboardWidget(this, &c64Runner, this);
+    keyboardWidget->move(0, 50);
+
     updateUI();
 }
 
@@ -115,9 +118,22 @@ MainWindow::~MainWindow()
 }
 
 
+void MainWindow::keyPressEvent(QKeyEvent* event) {
+    c64Runner.keyboard->handleKeyPressEvent(event);
+    updateUI();
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent* event) {
+    c64Runner.keyboard->handleKeyReleaseEvent(event);
+    updateUI();
+}
+
+
 void MainWindow::updateUI() {
     if(toolMPUViewer)
         toolMPUViewer->updateC64();
+
+    keyboardWidget->updateUI();
 
     std::stringstream ss;
 

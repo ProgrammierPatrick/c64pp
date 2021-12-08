@@ -2,6 +2,7 @@
 
 #include "c64_runner.h"
 #include "mpu_viewer.h"
+#include "keyboard/keyboard_widget.h"
 
 #include <QMainWindow>
 #include <QTimer>
@@ -20,6 +21,9 @@ public:
 
     void updateUI();
 
+    void keyPressEvent(QKeyEvent* event) override;
+    void keyReleaseEvent(QKeyEvent* event) override;
+
 private:
     Ui::MainWindow *ui;
 
@@ -31,6 +35,9 @@ private:
     QTimer frameTimer;
 
     QAction* toolbarPauseAction;
+
+    // TODO: remove if proper keyboard window, only temporary
+    KeyboardWidget *keyboardWidget;
 
     MPUViewer* toolMPUViewer = nullptr;
 };
