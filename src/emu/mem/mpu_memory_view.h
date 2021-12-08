@@ -12,6 +12,8 @@ public:
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t data) override;
 
+    void reset() { bankSetting = 0x07; }
+
 private:
     // 3 bits, connected to P0-P2 from MPU
     // bit 0: LORAM:  controls BASIC  rom (A000-BFFF)
