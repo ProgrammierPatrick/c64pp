@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdint>
 
-#include "../emu/mem/memory.h"
+#include "../mem/memory.h"
 #include "keyboard.h"
 #include "timer.h"
 
@@ -13,7 +13,7 @@ public:
 
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t data) override;
-    void tick(bool& IRQ, bool& NMI);
+    void tick();
 
     Timer timerCIA1;
     Timer timerCIA2;
@@ -32,6 +32,10 @@ public:
     uint8_t ICRData2 = 0x00;
     uint8_t ICRMask1;
     uint8_t ICRMask2;
+
+    // interrupt outputs
+    bool IRQ = false;
+    bool NMI = false;
 
     Keyboard *keyboard;
 };

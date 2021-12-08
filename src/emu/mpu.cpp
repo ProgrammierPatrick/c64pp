@@ -125,6 +125,53 @@ void opAND(MPU& mpu, uint8_t value) {
     mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
 }
 
+// BRK instruction (called for hardware interrupt)
+void brkPushPCH(MPU& mpu) {
+    mpu.mem->write(0x0100 | mpu.S, mpu.PC & 0xFF);
+    mpu.S--;
+}
+void brkPushPCL(MPU& mpu) {
+    mpu.mem->write(0x0100 | mpu.S, (mpu.PC >> 8) & 0xFF);
+    mpu.S--;
+}
+void brkPushP(MPU& mpu) {
+    mpu.mem->write(0x0100 | mpu.S, mpu.P);
+    mpu.S--;
+}
+void brkFetchAddrLow(MPU& mpu) {
+    mpu.PC = mpu.mem->read(mpu.handlingNMI ? 0xFFFA : 0xFFFE);
+}
+void brkFetchAddrHigh(MPU& mpu) {
+    mpu.PC |= mpu.mem->read(mpu.handlingNMI ? 0xFFFB : 0xFFFF) << 8;
+    mpu.handlingNMI = false;
+    mpu.cycle = 0;
+}
+OpCode createBRKOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, handlerNop, brkPushPCH, brkPushPCL, brkPushP, brkFetchAddrLow, brkFetchAddrHigh };
+    return opcodeData;
+}
+
+// RTI instruction (return from interrupt)
+void rtiPullP(MPU& mpu) {
+    mpu.S--;
+    mpu.P = mpu.mem->read(0x0100 | mpu.S);
+}
+void rtiPullPCL(MPU& mpu) {
+    mpu.S--;
+    mpu.PC = mpu.mem->read(0x0100 | mpu.S);
+}
+void rtiPullPCH(MPU& mpu) {
+    mpu.S--;
+    mpu.PC |= mpu.mem->read(0x0100 | mpu.S) << 8;
+    mpu.cycle = 0;
+}
+OpCode createRTIOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullP, rtiPullPCL, rtiPullPCH };
+    return opcodeData;
+}
+
 std::array<OpCode, 256> createOpcodes() {
     std::array<OpCode, 256> opcodes{};
     for(auto& op : opcodes) op.handlers = { fetchOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
@@ -137,10 +184,25 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x25] = zeroPageMode(opAND);
     opcodes[0x21] = indirectXMode(opAND);
 
+    opcodes[0x00] = createBRKOpCode();
+    opcodes[0x40] = createBRKOpCode();
+
     return opcodes;
 }
 std::array<OpCode, 256> opcodes = createOpcodes();
 
-void MPU::tick() {
+void MPU::tick(bool IRQ, bool NMI) {
+    if (!NMI) NMI_valid = true;
+
+    if (cycle == 0) {
+        if (NMI_valid && NMI)
+            handlingNMI = true;
+
+        if (!(P & Flag::I) && IRQ || handlingNMI) {
+            if(handlingNMI) NMI_valid = false;
+            opcode = 0x00; // BRK
+        }
+    }
+
     opcodes[opcode].handlers[cycle](*this);
 }

@@ -15,6 +15,7 @@ uint8_t CIA::read(uint16_t addr) {
     if (addr == 0x000D) {
         auto tmp = ICRData1;
         ICRData1 = 0x00;
+        IRQ = false;
         return tmp;
     }
     if (addr == 0x000E) return timerCIA1.readCRA();
@@ -27,6 +28,7 @@ uint8_t CIA::read(uint16_t addr) {
     if (addr == 0x010D) {
         auto tmp = ICRData2;
         ICRData2 = 0x00;
+        NMI = false;
         return tmp;
     }
     if (addr == 0x010E) return timerCIA2.readCRA();
@@ -64,9 +66,7 @@ void CIA::write(uint16_t addr, uint8_t data) {
     if (addr == 0x010F) timerCIA2.writeCRB(data);
 }
 
-void CIA::tick(bool& IRQ, bool& NMI) {
-    IRQ = false;
-    NMI = false;
+void CIA::tick() {
     bool underflowA1, underflowA2, underflowB1, underflowB2;
     timerCIA1.tick(underflowA1, underflowB1);
     timerCIA2.tick(underflowA2, underflowB2);

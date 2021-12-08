@@ -6,7 +6,7 @@ class MPU {
 public:
     MPU(Memory* memory) : mem(memory) { }
 
-    void tick();
+    void tick(bool IRQ, bool NMI);
     void reset() {
         // TODO: set mask interrupt flag
         auto PCL = mem->read(0xFFFC);
@@ -43,6 +43,13 @@ public:
     // temp values for addresses during opcode processing
     uint16_t effectiveAddr;
     uint16_t baseAddr;
+
+    // MNI is edge sensitive. If NMI is already handled, it needs to return to zero before being detected again
+    // NMI_valid will be false after NMI has been received, returns to true when NMI=0
+    bool NMI_valid = true;
+
+    // true when NMI is handled currently
+    bool handlingNMI = false;
 
     Memory* mem;
 

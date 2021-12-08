@@ -20,13 +20,13 @@ public:
     void hardReset();
 
     void singleStepMPU() {
-        c64->mpu.tick();
+        c64->tick();
     }
     void stepFrame() {
         // 0,9852486 MHz / 50Hz ~ 19704 Ticks per frame
         // of couse not quite correct, since VIC controlls the MPU clock
         for(int i = 0; i < 19704; i++) {
-            c64->mpu.tick();
+            c64->tick();
         }
     }
 
