@@ -71,6 +71,20 @@ MainWindow::MainWindow(QWidget *parent) :
             toolMPUViewer->show();
         }
     };
+    auto virtualKeyboard = [this]() {
+        if (toolKeyboardWindow) {
+            delete toolKeyboardWindow;
+            toolKeyboardWindow = nullptr;
+        } else {
+            toolKeyboardWindow = new KeyboardWindow(this, &c64Runner, this);
+            QObject::connect(toolKeyboardWindow, &QObject::destroyed, [this](QObject *o) { toolKeyboardWindow = nullptr; });
+            toolKeyboardWindow->setAttribute(Qt::WA_DeleteOnClose, true);
+
+            auto screenSize = qApp->primaryScreen()->size();
+            toolKeyboardWindow->move(screenSize.width() / 2 - toolKeyboardWindow->width() / 2, screenSize.height() - toolKeyboardWindow->height() - 100);
+            toolKeyboardWindow->show();
+        }
+    };
 
     QObject::connect(ui->actionHard_Reset, &QAction::triggered, hardReset);
     QObject::connect(ui->actionPause, &QAction::triggered, pauseUnpause);
@@ -78,6 +92,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionStep_Frame, &QAction::triggered, stepFrame);
 
     QObject::connect(ui->actionMPU_Viewer, &QAction::triggered, mpuViewer);
+    QObject::connect(ui->actionVirtual_Keyboard, &QAction::triggered, virtualKeyboard);
 
     QObject::connect(&frameTimer, &QTimer::timeout, this, [this]() {
         c64Runner.stepFrame();
@@ -104,7 +119,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addSeparator();
     ui->toolBar->addAction("Reset", hardReset);
     ui->toolBar->addSeparator();
-    ui->toolBar->addAction("MPU Viewer", mpuViewer);
+    ui->toolBar->addAction("MPU..", mpuViewer);
+    ui->toolBar->addAction("Keyboard..", virtualKeyboard);
 
     keyboardWidget = new KeyboardWidget(this, &c64Runner, this);
     keyboardWidget->move(0, 50);
@@ -132,6 +148,8 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event) {
 void MainWindow::updateUI() {
     if(toolMPUViewer)
         toolMPUViewer->updateC64();
+    if(toolKeyboardWindow)
+        toolKeyboardWindow->updateUI();
 
     keyboardWidget->updateUI();
 

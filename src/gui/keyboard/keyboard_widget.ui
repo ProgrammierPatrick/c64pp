@@ -883,6 +883,19 @@
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QPushButton" name="resetKeysButton">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>200</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>reset Keys</string>
+   </property>
+  </widget>
  </widget>
  <resources>
   <include location="../../../data/data_res.qrc"/>

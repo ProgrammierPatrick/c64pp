@@ -3,6 +3,7 @@
 #include "c64_runner.h"
 #include "mpu_viewer.h"
 #include "keyboard/keyboard_widget.h"
+#include "keyboard/keyboard_window.h"
 
 #include <QMainWindow>
 #include <QTimer>
@@ -39,6 +40,7 @@ private:
     // TODO: remove if proper keyboard window, only temporary
     KeyboardWidget *keyboardWidget;
 
-    MPUViewer* toolMPUViewer = nullptr;
+    MPUViewer *toolMPUViewer = nullptr;
+    KeyboardWindow *toolKeyboardWindow = nullptr;
 };
 

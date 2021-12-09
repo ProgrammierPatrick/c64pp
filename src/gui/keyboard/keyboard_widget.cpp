@@ -39,6 +39,13 @@ KeyboardWidget::KeyboardWidget(QWidget *parent, C64Runner *c64Runner, MainWindow
     });
     ui->keyRestore->setFocusPolicy(Qt::FocusPolicy::NoFocus);
     ui->keyRestore->setFlat(true);
+
+    // setup reset key
+    QObject::connect(ui->resetKeysButton, &QPushButton::pressed,  [this](){
+        this->c64Runner->keyboard->resetPressedKeys();
+        this->mainWindow->updateUI();
+    });
+    ui->resetKeysButton->setFocusPolicy(Qt::FocusPolicy::NoFocus);
 }
 
 KeyboardWidget::~KeyboardWidget()
