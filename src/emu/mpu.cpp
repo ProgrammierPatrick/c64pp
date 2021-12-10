@@ -543,22 +543,88 @@ void opTYA(MPU& mpu) {
     mpu.PC++;
 }
 
+// STA, STX, STY
+void storeALen2(MPU& mpu) {
+    mpu.mem->write(mpu.effectiveAddr, mpu.A);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+void storeXLen2(MPU& mpu) {
+    mpu.mem->write(mpu.effectiveAddr, mpu.X);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+void storeYLen2(MPU& mpu) {
+    mpu.mem->write(mpu.effectiveAddr, mpu.Y);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+void storeALen3(MPU& mpu) {
+    mpu.mem->write(mpu.effectiveAddr, mpu.A);
+    mpu.cycle = 0;
+    mpu.PC += 3;
+}
+void storeXLen3(MPU& mpu) {
+    mpu.mem->write(mpu.effectiveAddr, mpu.X);
+    mpu.cycle = 0;
+    mpu.PC += 3;
+}
+void storeYLen3(MPU& mpu) {
+    mpu.mem->write(mpu.effectiveAddr, mpu.Y);
+    mpu.cycle = 0;
+    mpu.PC += 3;
+}
+OpCode createSTAZeroPageOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, storeALen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+OpCode createSTXZeroPageOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, storeXLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+OpCode createSTYZeroPageOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, storeYLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+OpCode createSTAAbsoluteOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeALen3, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+OpCode createSTXAbsoluteOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeXLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+OpCode createSTYAbsoluteOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeYLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+
 
 // BRK instruction (called for hardware interrupt)
 void brkPushPCH(MPU& mpu) {
     mpu.mem->write(0x0100 | mpu.S, mpu.PC & 0xFF);
     mpu.S--;
+    mpu.cycle++;
 }
 void brkPushPCL(MPU& mpu) {
     mpu.mem->write(0x0100 | mpu.S, (mpu.PC >> 8) & 0xFF);
     mpu.S--;
+    mpu.cycle++;
 }
 void brkPushP(MPU& mpu) {
     mpu.mem->write(0x0100 | mpu.S, mpu.P);
     mpu.S--;
+    mpu.cycle++;
 }
 void brkFetchAddrLow(MPU& mpu) {
     mpu.PC = mpu.mem->read(mpu.handlingNMI ? 0xFFFA : 0xFFFE);
+    mpu.cycle++;
 }
 void brkFetchAddrHigh(MPU& mpu) {
     mpu.PC |= mpu.mem->read(mpu.handlingNMI ? 0xFFFB : 0xFFFF) << 8;
@@ -575,10 +641,12 @@ OpCode createBRKOpCode() {
 void rtiPullP(MPU& mpu) {
     mpu.S--;
     mpu.P = mpu.mem->read(0x0100 | mpu.S);
+    mpu.cycle++;
 }
 void rtiPullPCL(MPU& mpu) {
     mpu.S--;
     mpu.PC = mpu.mem->read(0x0100 | mpu.S);
+    mpu.cycle++;
 }
 void rtiPullPCH(MPU& mpu) {
     mpu.S--;
@@ -695,7 +763,15 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x9A] = impliedSingleByte(opTXS);
     opcodes[0x98] = impliedSingleByte(opTYA);
 
+    // store operations
+    opcodes[0x8D] = createSTAAbsoluteOpCode();
+    opcodes[0x8E] = createSTXAbsoluteOpCode();
+    opcodes[0x8C] = createSTYAbsoluteOpCode();
+    opcodes[0x85] = createSTAZeroPageOpCode();
+    opcodes[0x86] = createSTXZeroPageOpCode();
+    opcodes[0x84] = createSTYZeroPageOpCode();
 
+    // misc operations
     opcodes[0x00] = createBRKOpCode();
     opcodes[0x40] = createRTIOpCode();
 
