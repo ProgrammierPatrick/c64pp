@@ -20,6 +20,5 @@ public:
             this->data[addr] = data;
     }
 
-private:
     std::vector<uint8_t> data;
 };

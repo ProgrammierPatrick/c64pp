@@ -6,7 +6,7 @@ class MPU {
 public:
     MPU(Memory* memory) : mem(memory) { }
 
-    void tick(bool IRQ, bool NMI);
+    void tick(bool IRQ = false, bool NMI = false);
     void reset() {
         // TODO: set mask interrupt flag
         auto PCL = mem->read(0xFFFC);
