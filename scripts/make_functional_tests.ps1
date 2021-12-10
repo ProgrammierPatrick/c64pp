@@ -8,7 +8,8 @@ Push-Location
 Set-Location ..\..\build-c64pp-*-Debug
 
 $env:Path += ";C:\Qt\6.2.1\mingw81_64\bin"
-& '.\c64pp.exe' 'functional_test' '..\c64pp\6502_65C02_functional_tests/65C02_extended_opcodes_test.bin'
+& '.\c64pp.exe' 'functional_test' '..\c64pp\scripts\6502_65C02_functional_tests\bin_files\65C02_extended_opcodes_test.bin'
+Write-Output "c64pp returns $LASTEXITCODE"
 
 Pop-Location
 
