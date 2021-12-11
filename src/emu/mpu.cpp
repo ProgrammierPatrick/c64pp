@@ -574,6 +574,43 @@ void storeYLen3(MPU& mpu) {
     mpu.cycle = 0;
     mpu.PC += 3;
 }
+void setEffectiveAddrAbsX(MPU& mpu) {
+    mpu.effectiveAddr = mpu.baseAddr + mpu.X;
+    mpu.cycle++;
+}
+void setEffectiveAddrAbsY(MPU& mpu) {
+    mpu.effectiveAddr = mpu.baseAddr + mpu.Y;
+    mpu.cycle++;
+}
+void storeAZeroPageX(MPU& mpu) {
+    mpu.effectiveAddr = (mpu.baseAddr + mpu.X) & 0x00FF;
+    mpu.mem->write(mpu.effectiveAddr, mpu.A);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+void storeYZeroPageX(MPU& mpu) {
+    mpu.effectiveAddr = (mpu.baseAddr + mpu.X) & 0x00FF;
+    mpu.mem->write(mpu.effectiveAddr, mpu.Y);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+void storeAZeroPageY(MPU& mpu) {
+    mpu.effectiveAddr = (mpu.baseAddr + mpu.Y) & 0x00FF;
+    mpu.mem->write(mpu.effectiveAddr, mpu.A);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+void storeXZeroPageY(MPU& mpu) {
+    mpu.effectiveAddr = (mpu.baseAddr + mpu.Y) & 0x00FF;
+    mpu.mem->write(mpu.effectiveAddr, mpu.X);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+void setEffectiveAddrIndY(MPU& mpu) {
+    mpu.effectiveAddr = (mpu.baseAddr + mpu.Y) & 0x00FF;
+    mpu.effectiveAddr |= mpu.baseAddr & 0xFF00;
+    mpu.cycle++;
+}
 OpCode createSTAZeroPageOpCode() {
     OpCode opcodeData;
     opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, storeALen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
@@ -602,6 +639,46 @@ OpCode createSTXAbsoluteOpCode() {
 OpCode createSTYAbsoluteOpCode() {
     OpCode opcodeData;
     opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeYLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+OpCode createSTAIndirectXOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchIndirectXBase, handlerNop, fetchIndirectXAddrLow, fetchIndirectXAddrHigh, storeALen2, undefinedOpcode };
+    return opcodeData;
+}
+OpCode createSTAAbsoluteXOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteXAddrLow, fetchAbsoluteXAddrHigh, setEffectiveAddrAbsX, storeALen3, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+OpCode createSTAAbsoluteYOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteYAddrLow, fetchAbsoluteYAddrHigh, setEffectiveAddrAbsY, storeALen3, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+OpCode createSTAZeroPageXOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeAZeroPageX, undefinedOpcode, undefinedOpcode, undefinedOpcode  };
+    return opcodeData;
+}
+OpCode createSTYZeroPageXOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeYZeroPageX, undefinedOpcode, undefinedOpcode, undefinedOpcode  };
+    return opcodeData;
+}
+OpCode createSTAZeroPageYOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeAZeroPageY, undefinedOpcode, undefinedOpcode, undefinedOpcode  };
+    return opcodeData;
+}
+OpCode createSTXZeroPageYOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeXZeroPageY, undefinedOpcode, undefinedOpcode, undefinedOpcode  };
+    return opcodeData;
+}
+OpCode createSTAIndirectYOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchIndirectYIndirectAddr, fetchIndirectYAddrLow, fetchIndirectYAddrHigh, setEffectiveAddrIndY, storeALen2, undefinedOpcode };
     return opcodeData;
 }
 
@@ -770,6 +847,13 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x85] = createSTAZeroPageOpCode();
     opcodes[0x86] = createSTXZeroPageOpCode();
     opcodes[0x84] = createSTYZeroPageOpCode();
+    opcodes[0x81] = createSTAIndirectXOpCode();
+    opcodes[0x95] = createSTAZeroPageXOpCode();
+    opcodes[0x94] = createSTYZeroPageXOpCode();
+    opcodes[0x9D] = createSTAAbsoluteXOpCode();
+    opcodes[0x99] = createSTAAbsoluteYOpCode();
+    opcodes[0x96] = createSTXZeroPageYOpCode();
+    opcodes[0x91] = createSTAIndirectYOpCode();
 
     // misc operations
     opcodes[0x00] = createBRKOpCode();
