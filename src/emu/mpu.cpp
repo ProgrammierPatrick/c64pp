@@ -113,7 +113,7 @@ void fetchAbsoluteXAddrLow(MPU& mpu) {
     mpu.cycle++;
 }
 void fetchAbsoluteXAddrHigh(MPU& mpu) {
-    mpu.baseAddr |= mpu.mem->read(mpu.PC + 2);
+    mpu.baseAddr |= mpu.mem->read(mpu.PC + 2) << 8;
     mpu.cycle++;
 }
 void fetchAbsoluteXData(MPU& mpu) {
@@ -145,7 +145,7 @@ void fetchAbsoluteYAddrLow(MPU& mpu) {
     mpu.cycle++;
 }
 void fetchAbsoluteYAddrHigh(MPU& mpu) {
-    mpu.baseAddr |= mpu.mem->read(mpu.PC + 2);
+    mpu.baseAddr |= mpu.mem->read(mpu.PC + 2) << 8;
     mpu.cycle++;
 }
 void fetchAbsoluteYData(MPU& mpu) {
@@ -682,6 +682,110 @@ OpCode createSTAIndirectYOpCode() {
     return opcodeData;
 }
 
+// Bit shift ops (ASL,LSR,ROL,ROR) and Inc/Dec
+void opASLMod(MPU& mpu) {
+    uint8_t oldVal = mpu.modVal;
+    mpu.modVal = mpu.modVal << 1;
+    bool carry = oldVal & 0x80;
+    bool neg = static_cast<int8_t>(mpu.modVal) < 0;
+    bool zero = mpu.modVal == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z | MPU::Flag::C);
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0) | (carry ? MPU::Flag::C : 0);
+    mpu.cycle++;
+}
+void opLSRMod(MPU& mpu) {
+    uint8_t oldVal = mpu.modVal;
+    mpu.modVal = mpu.modVal >> 1;
+    bool carry = 0x01 & oldVal;
+    bool zero = mpu.modVal == 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z | MPU::Flag::C);
+    mpu.P |= (zero ? MPU::Flag::Z : 0) | (carry ? MPU::Flag::C : 0);
+    mpu.cycle++;
+}
+void opROLMod(MPU& mpu) {
+    uint8_t oldVal = mpu.modVal;
+    mpu.modVal = (mpu.modVal << 1) | (mpu.P & MPU::Flag::C);
+    bool carry = 0x80 & oldVal;
+    bool zero = mpu.modVal == 0;
+    bool neg = static_cast<int8_t>(mpu.modVal) < 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z | MPU::Flag::C);
+    mpu.P |= (zero ? MPU::Flag::Z : 0) | (carry ? MPU::Flag::C : 0) | (neg ? MPU::Flag::N : 0);
+    mpu.cycle++;
+}
+void opRORMod(MPU& mpu) {
+    uint8_t oldVal = mpu.modVal;
+    mpu.modVal = (mpu.modVal >> 1) | ((mpu.P & MPU::Flag::C) << 7);
+    bool carry = 0x01 & oldVal;
+    bool zero = mpu.modVal == 0;
+    bool neg = static_cast<int8_t>(mpu.modVal) < 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z | MPU::Flag::C);
+    mpu.P |= (zero ? MPU::Flag::Z : 0) | (carry ? MPU::Flag::C : 0) | (neg ? MPU::Flag::N : 0);
+    mpu.cycle++;
+}
+void opINC(MPU& mpu) {
+    mpu.modVal += 1;
+    bool zero = mpu.modVal == 0;
+    bool neg = static_cast<int8_t>(mpu.modVal) < 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (zero ? MPU::Flag::Z : 0) | (neg ? MPU::Flag::N : 0);
+    mpu.cycle++;
+}
+void opDEC(MPU& mpu) {
+    mpu.modVal -= 1;
+    bool zero = mpu.modVal == 0;
+    bool neg = static_cast<int8_t>(mpu.modVal) < 0;
+    mpu.P &= ~(MPU::Flag::N | MPU::Flag::Z);
+    mpu.P |= (zero ? MPU::Flag::Z : 0) | (neg ? MPU::Flag::N : 0);
+    mpu.cycle++;
+}
+void fetchModValZeroPage(MPU& mpu) {
+    mpu.modVal = mpu.mem->read(mpu.effectiveAddr);
+    mpu.cycle++;
+}
+void storeModValLen2(MPU& mpu) {
+    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+OpCode bitShiftZeroPage(void (*handler)(MPU&)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, fetchModValZeroPage, handler, storeModValLen2, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+void fetchModValAbsolute(MPU& mpu) {
+    mpu.modVal = mpu.mem->read(mpu.effectiveAddr);
+    mpu.cycle++;
+}
+void storeModValLen3(MPU& mpu) {
+    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+    mpu.cycle = 0;
+    mpu.PC += 3;
+}
+OpCode bitShiftAbsolute(void (*handler)(MPU& mpu)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, fetchModValAbsolute, handler, storeModValLen3, undefinedOpcode };
+    return opcodeData;
+}
+void fetchModValZeroPageX(MPU& mpu) {
+    mpu.modVal = mpu.mem->read((mpu.baseAddr + mpu.X) & 0x00FF);
+    mpu.cycle++;
+}
+OpCode bitShiftZeroPageX(void (*handler)(MPU& mpu)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, fetchModValZeroPageX, handler, storeModValLen2, undefinedOpcode };
+    return opcodeData;
+}
+void fetchModValAbsoluteX(MPU& mpu) {
+    mpu.modVal = mpu.mem->read(mpu.baseAddr + mpu.X);
+    mpu.cycle++;
+}
+OpCode bitShiftAbsoluteX(void (*handler)(MPU& mpu)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteXAddrLow, fetchAbsoluteXAddrHigh, handlerNop, fetchModValAbsoluteX, handler, storeModValLen3 };
+    return opcodeData;
+}
+
+
 
 // BRK instruction (called for hardware interrupt)
 void brkPushPCH(MPU& mpu) {
@@ -854,6 +958,33 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x99] = createSTAAbsoluteYOpCode();
     opcodes[0x96] = createSTXZeroPageYOpCode();
     opcodes[0x91] = createSTAIndirectYOpCode();
+
+    // Read - Modify - Write Operations (Bit shifts and Inc/Dec)
+    opcodes[0x0E] = bitShiftAbsolute(opASLMod);
+    opcodes[0x06] = bitShiftZeroPage(opASLMod);
+    opcodes[0x16] = bitShiftZeroPageX(opASLMod);
+    opcodes[0x1E] = bitShiftAbsoluteX(opASLMod);
+    opcodes[0xCE] = bitShiftAbsolute(opDEC);
+    opcodes[0xC6] = bitShiftZeroPage(opDEC);
+    opcodes[0xD6] = bitShiftZeroPageX(opDEC);
+    opcodes[0xDE] = bitShiftAbsoluteX(opDEC);
+    opcodes[0xEE] = bitShiftAbsolute(opINC);
+    opcodes[0xE6] = bitShiftZeroPage(opINC);
+    opcodes[0xF6] = bitShiftZeroPageX(opINC);
+    opcodes[0xFE] = bitShiftAbsoluteX(opINC);
+    opcodes[0x4E] = bitShiftAbsolute(opLSR);
+    opcodes[0x46] = bitShiftZeroPage(opLSR);
+    opcodes[0x56] = bitShiftZeroPageX(opLSR);
+    opcodes[0x5E] = bitShiftAbsoluteX(opLSR);
+    opcodes[0x2E] = bitShiftAbsolute(opROL);
+    opcodes[0x26] = bitShiftZeroPage(opROL);
+    opcodes[0x36] = bitShiftZeroPageX(opROL);
+    opcodes[0x3E] = bitShiftAbsoluteX(opROL);
+    opcodes[0x6E] = bitShiftAbsolute(opROR);
+    opcodes[0x66] = bitShiftZeroPage(opROR);
+    opcodes[0x76] = bitShiftZeroPageX(opROR);
+    opcodes[0x7E] = bitShiftAbsoluteX(opROR);
+
 
     // misc operations
     opcodes[0x00] = createBRKOpCode();
