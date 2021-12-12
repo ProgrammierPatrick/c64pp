@@ -785,7 +785,107 @@ OpCode bitShiftAbsoluteX(void (*handler)(MPU& mpu)) {
     return opcodeData;
 }
 
-
+// Branch Operations
+void opBCC(MPU& mpu) {
+    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    bool carry = MPU::Flag::C & 0x01;
+    if (carry) {
+        mpu.cycle = 0;
+        mpu.PC += 2;
+    } else {
+        mpu.cycle++;
+    }
+}
+void opBCS(MPU& mpu) {
+    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    bool carry = MPU::Flag::C & 0x01;
+    if (!carry) {
+        mpu.cycle = 0;
+        mpu.PC += 2;
+    } else {
+        mpu.cycle++;
+    }
+}
+void opBEO(MPU& mpu) {
+    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    bool zero = MPU::Flag::Z & 0x02;
+    if (!zero) {
+        mpu.cycle = 0;
+        mpu.PC += 2;
+    } else {
+        mpu.cycle++;
+    }
+}
+void opBNE(MPU& mpu) {
+    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    bool zero = MPU::Flag::Z & 0x02;
+    if (zero) {
+        mpu.cycle = 0;
+        mpu.PC += 2;
+    } else {
+        mpu.cycle++;
+    }
+}
+void opBMI(MPU& mpu) {
+    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    bool neg = MPU::Flag::N & 0x80;
+    if (!neg) {
+        mpu.cycle = 0;
+        mpu.PC += 2;
+    } else {
+        mpu.cycle++;
+    }
+}
+void opBPL(MPU& mpu) {
+    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    bool neg = MPU::Flag::N & 0x80;
+    if (neg) {
+        mpu.cycle = 0;
+        mpu.PC += 2;
+    } else {
+        mpu.cycle++;
+    }
+}
+void opBVC(MPU& mpu) {
+    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    bool overflow = MPU::Flag::V & 0x40;
+    if (overflow) {
+        mpu.cycle = 0;
+        mpu.PC += 2;
+    } else {
+        mpu.cycle++;
+    }
+}
+void opBVS(MPU& mpu) {
+    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    bool overflow = MPU::Flag::V & 0x40;
+    if (!overflow) {
+        mpu.cycle = 0;
+        mpu.PC += 2;
+    } else {
+        mpu.cycle++;
+    }
+}
+void readBranchOpCode(MPU& mpu) {
+    bool crossPageBoundary = (mpu.PC & 0x00FF) + 2 + mpu.offset > 0x00FF;
+    if (!crossPageBoundary) {
+        mpu.opcode = mpu.mem->read(mpu.PC + 2 + mpu.offset);
+        mpu.cycle = 0;
+        mpu.PC += 2;
+    } else {
+        mpu.cycle++;
+    }
+}
+void readBranchBoundCrossOpCode(MPU& mpu) {
+    mpu.opcode = mpu.mem->read(mpu.PC + 2 + mpu.offset + 1);
+    mpu.cycle = 0;
+    mpu.PC += 2;
+}
+OpCode branchOps(void (*handler)(MPU& mpu)) {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, handler, readBranchOpCode, readBranchBoundCrossOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
 
 // BRK instruction (called for hardware interrupt)
 void brkPushPCH(MPU& mpu) {
@@ -984,6 +1084,16 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x66] = bitShiftZeroPage(opROR);
     opcodes[0x76] = bitShiftZeroPageX(opROR);
     opcodes[0x7E] = bitShiftAbsoluteX(opROR);
+
+    // Branch Operations
+    opcodes[0x90] = branchOps(opBCC);
+    opcodes[0xB0] = branchOps(opBCS);
+    opcodes[0xF0] = branchOps(opBEO);
+    opcodes[0x30] = branchOps(opBMI);
+    opcodes[0xD0] = branchOps(opBNE);
+    opcodes[0x10] = branchOps(opBPL);
+    opcodes[0x50] = branchOps(opBVC);
+    opcodes[0x70] = branchOps(opBVS);
 
 
     // misc operations

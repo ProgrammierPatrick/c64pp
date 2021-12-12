@@ -46,6 +46,7 @@ public:
     uint8_t indirectAddr;
 
     uint8_t modVal; // temp modify value used for read-modify-write operations
+    uint8_t offset; // offset used for branching
 
     // MNI is edge sensitive. If NMI is already handled, it needs to return to zero before being detected again
     // NMI_valid will be false after NMI has been received, returns to true when NMI=0
