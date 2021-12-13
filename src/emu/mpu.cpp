@@ -890,13 +890,13 @@ OpCode branchOps(void (*handler)(MPU& mpu)) {
 // Push / Pull Instructions
 void opPHA(MPU& mpu) {
     mpu.mem->write(0x0100 | mpu.S, mpu.A);
-    mpu.S++;
+    mpu.S--;
     mpu.cycle = 0;
     mpu.PC += 1;
 }
 void opPHP(MPU& mpu) {
     mpu.mem->write(0x0100 | mpu.S, mpu.P);
-    mpu.S++;
+    mpu.S--;
     mpu.cycle = 0;
     mpu.PC += 1;
 }
@@ -906,13 +906,13 @@ OpCode pushOperation(void (*handler)(MPU& mpu)) {
     return opcodeData;
 }
 void opPLA(MPU& mpu) {
-    mpu.S--;
+    mpu.S++;
     mpu.A = mpu.mem->read(0x0100 | mpu.S);
     mpu.cycle = 0;
     mpu.PC += 1;
 }
 void opPLP(MPU& mpu) {
-    mpu.S--;
+    mpu.S++;
     mpu.P = mpu.mem->read(0x0100 | mpu.S);
     mpu.cycle = 0;
     mpu.PC += 1;
@@ -954,6 +954,45 @@ OpCode createBRKOpCode() {
     return opcodeData;
 }
 
+// Jump & Jump To Subroutine
+void fetchJSRHighAddr(MPU& mpu) {
+    mpu.effectiveAddr |= mpu.mem->read(mpu.PC + 2) << 8;
+    mpu.cycle = 0;
+    mpu.PC = mpu.effectiveAddr;
+}
+OpCode createJSROpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, handlerNop, brkPushPCH, brkPushPCL, fetchJSRHighAddr, undefinedOpcode };
+    return opcodeData;
+}
+OpCode createJMPAbsolute() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchJSRHighAddr, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+void fetchJMPIndirAddrLow(MPU& mpu) {
+    mpu.indirectAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.cycle++;
+}
+void fetchJMPIndirAddrHigh(MPU& mpu) {
+    mpu.indirectAddr |= mpu.mem->read((mpu.PC + 2) & 0x0F) << 4;
+    mpu.cycle++;
+}
+void fetchJMPEffAddrLow(MPU& mpu) {
+    mpu.effectiveAddr = mpu.mem->read(mpu.indirectAddr);
+    mpu.cycle++;
+}
+void fetchJMPEffAddrHigh(MPU& mpu) {
+    mpu.effectiveAddr |= mpu.mem->read(mpu.indirectAddr + 1) << 8;
+    mpu.cycle = 0;
+    mpu.PC = mpu.effectiveAddr;
+}
+OpCode createJMPIndirect() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, fetchJMPIndirAddrLow, fetchJMPIndirAddrHigh, fetchJMPEffAddrLow, fetchJMPEffAddrHigh, undefinedOpcode, undefinedOpcode };
+    return opcodeData;
+}
+
 // RTI instruction (return from interrupt)
 void rtiPullP(MPU& mpu) {
     mpu.S--;
@@ -973,6 +1012,15 @@ void rtiPullPCH(MPU& mpu) {
 OpCode createRTIOpCode() {
     OpCode opcodeData;
     opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullP, rtiPullPCL, rtiPullPCH, undefinedOpcode };
+    return opcodeData;
+}
+void rtsLastCycle(MPU& mpu) {
+    mpu.cycle = 0;
+    mpu.PC += 1;
+}
+OpCode createRTSOpCode() {
+    OpCode opcodeData;
+    opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullPCL, rtiPullPCH, rtsLastCycle, undefinedOpcode };
     return opcodeData;
 }
 
@@ -1137,6 +1185,11 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x68] = pullOperation(opPLA);
     opcodes[0x28] = pullOperation(opPLP);
 
+    // Jump (From Subroutine) & Return from Subroutine
+    opcodes[0x4C] = createJMPAbsolute();
+    opcodes[0x6C] = createJMPIndirect();
+    opcodes[0x20] = createJSROpCode();
+    opcodes[0x60] = createRTSOpCode();
 
     // misc operations
     opcodes[0x00] = createBRKOpCode();
