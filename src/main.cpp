@@ -57,7 +57,8 @@ int functional_test(const char *filepath, const char *successAddrStr) {
         return -1;
     }
 
-    std::copy(std::istream_iterator<char>(file), std::istream_iterator<char>(), mem.data.begin());
+    // program starts at 0x000A
+    std::copy(std::istream_iterator<char>(file), std::istream_iterator<char>(), mem.data.begin() + 0x000A);
     std::cout << fileSize << " bytes loaded." << std::endl;
 
     uint16_t successAddr = fromHexStr16(successAddrStr);

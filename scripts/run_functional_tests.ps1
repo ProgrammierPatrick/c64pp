@@ -19,9 +19,9 @@ Set-Location as65_142
 if (-Not (Test-Path ../functional_test.bin) -or -Not (Test-Path ../interrupt_test.bin)) {
     Write-Output "assemble tests"
     # & '.\as65.exe' '--help'
-    & '.\as65.exe' '-l../functional_test.lst' '-h0' '-w140' '-m' '-o../functional_test.bin' '../6502_65C02_functional_tests/6502_functional_test.a65'
-    & '.\as65.exe' '-l../interrupt_test.lst' '-h0' '-w140' '-m' '-o../interrupt_test.bin' '../6502_65C02_functional_tests/6502_interrupt_test.a65'
-    & '.\as65.exe' '-l../decimal_test.lst' '-h0' '-w140' '-m' '-o../decimal_test.bin' '../6502_65C02_functional_tests/6502_decimal_test.a65'
+    & '.\as65.exe' '-l../functional_test.lst' '-c' '-h0' '-w' '-m' '-o../functional_test.bin' '../6502_65C02_functional_tests/6502_functional_test.a65'
+    & '.\as65.exe' '-l../interrupt_test.lst'  '-c' '-h0' '-w' '-m' '-o../interrupt_test.bin' '../6502_65C02_functional_tests/6502_interrupt_test.a65'
+    & '.\as65.exe' '-l../decimal_test.lst'    '-c' '-h0' '-w' '-m' '-o../decimal_test.bin' '../6502_65C02_functional_tests/6502_decimal_test.a65'
 }
 Pop-Location
 
