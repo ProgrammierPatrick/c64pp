@@ -162,7 +162,7 @@ void MainWindow::updateUI() {
     ss << " X:" << toHexStr(mpu.X);
     ss << " Y:" << toHexStr(mpu.Y);
     ss << " S:" << toHexStr(mpu.S);
-    ss << " P:" << (mpu.P & 0x80 ? 'M' : '-') << (mpu.P & 0x40 ? 'V' : '-');
+    ss << " P:" << (mpu.P & 0x80 ? 'N' : '-') << (mpu.P & 0x40 ? 'V' : '-');
     ss << '-' << (mpu.P & 0x10 ? 'B' : '-') << (mpu.P & 0x08 ? 'D' : '-');
     ss << (mpu.P & 0x04 ? 'I' : '-') << (mpu.P & 0x02 ? 'Z' : '-') << (mpu.P & 0x01 ? 'C' : '-');
     ss << " PC:" << toHexStr(mpu.PC);

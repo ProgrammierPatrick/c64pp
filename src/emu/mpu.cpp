@@ -279,7 +279,7 @@ void opCMP(MPU& mpu, uint8_t value) {
     int8_t diff = mpu.A - value;
     bool neg = diff & 0x80;
     bool zero = diff == 0;
-    bool carry = static_cast<int16_t>(mpu.A) - static_cast<int16_t>(value) < 0;
+    bool carry = static_cast<int16_t>(mpu.A) - static_cast<int16_t>(value) >= 0;
     mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::N);
     mpu.P |= (neg ? MPU::Flag::N : 0) | (carry ? MPU::Flag::C : 0) |(zero ? MPU::Flag::Z : 0);
 }
@@ -288,7 +288,7 @@ void opCPX(MPU& mpu, uint8_t value) {
     int8_t diff = mpu.X - value;
     bool neg = diff & 0x80;
     bool zero = diff == 0;
-    bool carry = static_cast<int16_t>(mpu.X) - static_cast<int16_t>(value) < 0;
+    bool carry = static_cast<int16_t>(mpu.X) - static_cast<int16_t>(value) >= 0;
     mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::N);
     mpu.P |= (neg ? MPU::Flag::N : 0) | (carry ? MPU::Flag::C : 0) |(zero ? MPU::Flag::Z : 0);
 }
@@ -297,7 +297,7 @@ void opCPY(MPU& mpu, uint8_t value) {
     int8_t diff = mpu.Y - value;
     bool neg = diff & 0x80;
     bool zero = diff == 0;
-    bool carry = static_cast<int16_t>(mpu.Y) - static_cast<int16_t>(value) < 0;
+    bool carry = static_cast<int16_t>(mpu.Y) - static_cast<int16_t>(value) >= 0;
     mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::N);
     mpu.P |= (neg ? MPU::Flag::N : 0) | (carry ? MPU::Flag::C : 0) |(zero ? MPU::Flag::Z : 0);
 }
@@ -347,7 +347,7 @@ void opSBC(MPU& mpu, uint8_t value) {
     mpu.A = mpu.A - value - ((mpu.P & MPU::Flag::C) ^ 0x01);
     bool neg = static_cast<int8_t>(mpu.A) < 0;
     bool zero = mpu.A == 0;
-    bool carry = (oldA - static_cast<uint16_t>(value) - (0x01 ^ (mpu.P & MPU::Flag::C))) > 0x00FF;
+    bool carry = static_cast<int16_t>(oldA) - static_cast<int16_t>(value) - (0x01 ^ (mpu.P & MPU::Flag::C)) >= 0;
     bool overflow = (oldA - static_cast<int16_t>(value) - (0x01 ^ (mpu.P & MPU::Flag::C))) != mpu.A;
     mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::V | MPU::Flag::N);
     mpu.P |= (carry ? MPU::Flag::C : 0) | (zero ? MPU::Flag::Z : 0) | (overflow ? MPU::Flag::V : 0) | (neg ? MPU::Flag::N : 0);
@@ -788,7 +788,7 @@ OpCode bitShiftAbsoluteX(void (*handler)(MPU& mpu)) {
 // Branch Operations
 void opBCC(MPU& mpu) {
     mpu.offset = mpu.mem->read(mpu.PC + 1);
-    bool carry = MPU::Flag::C & 0x01;
+    bool carry = mpu.P & MPU::Flag::C;
     if (carry) {
         mpu.cycle = 0;
         mpu.PC += 2;
@@ -798,7 +798,7 @@ void opBCC(MPU& mpu) {
 }
 void opBCS(MPU& mpu) {
     mpu.offset = mpu.mem->read(mpu.PC + 1);
-    bool carry = MPU::Flag::C & 0x01;
+    bool carry = mpu.P & MPU::Flag::C;
     if (!carry) {
         mpu.cycle = 0;
         mpu.PC += 2;
@@ -806,9 +806,9 @@ void opBCS(MPU& mpu) {
         mpu.cycle++;
     }
 }
-void opBEO(MPU& mpu) {
+void opBEQ(MPU& mpu) {
     mpu.offset = mpu.mem->read(mpu.PC + 1);
-    bool zero = MPU::Flag::Z & 0x02;
+    bool zero = mpu.P & MPU::Flag::Z;
     if (!zero) {
         mpu.cycle = 0;
         mpu.PC += 2;
@@ -818,7 +818,7 @@ void opBEO(MPU& mpu) {
 }
 void opBNE(MPU& mpu) {
     mpu.offset = mpu.mem->read(mpu.PC + 1);
-    bool zero = MPU::Flag::Z & 0x02;
+    bool zero = mpu.P & MPU::Flag::Z;
     if (zero) {
         mpu.cycle = 0;
         mpu.PC += 2;
@@ -828,7 +828,7 @@ void opBNE(MPU& mpu) {
 }
 void opBMI(MPU& mpu) {
     mpu.offset = mpu.mem->read(mpu.PC + 1);
-    bool neg = MPU::Flag::N & 0x80;
+    bool neg = mpu.P & MPU::Flag::N;
     if (!neg) {
         mpu.cycle = 0;
         mpu.PC += 2;
@@ -838,7 +838,7 @@ void opBMI(MPU& mpu) {
 }
 void opBPL(MPU& mpu) {
     mpu.offset = mpu.mem->read(mpu.PC + 1);
-    bool neg = MPU::Flag::N & 0x80;
+    bool neg = mpu.P & MPU::Flag::N;
     if (neg) {
         mpu.cycle = 0;
         mpu.PC += 2;
@@ -848,7 +848,7 @@ void opBPL(MPU& mpu) {
 }
 void opBVC(MPU& mpu) {
     mpu.offset = mpu.mem->read(mpu.PC + 1);
-    bool overflow = MPU::Flag::V & 0x40;
+    bool overflow = mpu.P & MPU::Flag::V;
     if (overflow) {
         mpu.cycle = 0;
         mpu.PC += 2;
@@ -858,7 +858,7 @@ void opBVC(MPU& mpu) {
 }
 void opBVS(MPU& mpu) {
     mpu.offset = mpu.mem->read(mpu.PC + 1);
-    bool overflow = MPU::Flag::V & 0x40;
+    bool overflow = mpu.P & MPU::Flag::V;
     if (!overflow) {
         mpu.cycle = 0;
         mpu.PC += 2;
@@ -869,17 +869,15 @@ void opBVS(MPU& mpu) {
 void readBranchOpCode(MPU& mpu) {
     bool crossPageBoundary = (mpu.PC & 0x00FF) + 2 + mpu.offset > 0x00FF;
     if (!crossPageBoundary) {
-        mpu.opcode = mpu.mem->read(mpu.PC + 2 + mpu.offset);
         mpu.cycle = 0;
-        mpu.PC += 2;
+        mpu.PC += 2 + mpu.offset;
     } else {
         mpu.cycle++;
     }
 }
 void readBranchBoundCrossOpCode(MPU& mpu) {
-    mpu.opcode = mpu.mem->read(mpu.PC + 2 + mpu.offset);
     mpu.cycle = 0;
-    mpu.PC += 2;
+    mpu.PC += 2 + mpu.offset;
 }
 OpCode branchOps(void (*handler)(MPU& mpu)) {
     OpCode opcodeData;
@@ -895,7 +893,7 @@ void opPHA(MPU& mpu) {
     mpu.PC += 1;
 }
 void opPHP(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, mpu.P);
+    mpu.mem->write(0x0100 | mpu.S, mpu.P | MPU::Flag::B | 0x20); // B and empty flag are always 1 when read
     mpu.S--;
     mpu.cycle = 0;
     mpu.PC += 1;
@@ -908,12 +906,16 @@ OpCode pushOperation(void (*handler)(MPU& mpu)) {
 void opPLA(MPU& mpu) {
     mpu.S++;
     mpu.A = mpu.mem->read(0x0100 | mpu.S);
+    bool neg = static_cast<int8_t>(mpu.A) < 0;
+    bool zero = mpu.A == 0;
+    mpu.P &= ~MPU::Flag::N & ~MPU::Flag::Z;
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0);
     mpu.cycle = 0;
     mpu.PC += 1;
 }
 void opPLP(MPU& mpu) {
     mpu.S++;
-    mpu.P = mpu.mem->read(0x0100 | mpu.S);
+    mpu.P = mpu.mem->read(0x0100 | mpu.S) & ~MPU::Flag::B & ~0x20;
     mpu.cycle = 0;
     mpu.PC += 1;
 }
@@ -1111,7 +1113,7 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x58] = impliedSingleByte(opCLI);
     opcodes[0xB8] = impliedSingleByte(opCLV);
     opcodes[0xCA] = impliedSingleByte(opDEX);
-    opcodes[0xB8] = impliedSingleByte(opDEY);
+    opcodes[0x88] = impliedSingleByte(opDEY);
     opcodes[0xE8] = impliedSingleByte(opINX);
     opcodes[0xC8] = impliedSingleByte(opINY);
     opcodes[0x4A] = impliedSingleByte(opLSR);
@@ -1172,7 +1174,7 @@ std::array<OpCode, 256> createOpcodes() {
     // Branch Operations
     opcodes[0x90] = branchOps(opBCC);
     opcodes[0xB0] = branchOps(opBCS);
-    opcodes[0xF0] = branchOps(opBEO);
+    opcodes[0xF0] = branchOps(opBEQ);
     opcodes[0x30] = branchOps(opBMI);
     opcodes[0xD0] = branchOps(opBNE);
     opcodes[0x10] = branchOps(opBPL);

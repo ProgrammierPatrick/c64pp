@@ -6,8 +6,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
-#include<algorithm>
+#include <algorithm>
+#include <deque>
+
 
 int functional_test(const char *filepath, const char *successAddrStr);
 int help(const char *appName);
@@ -61,6 +64,15 @@ int functional_test(const char *filepath, const char *successAddrStr) {
     std::copy(std::istream_iterator<char>(file), std::istream_iterator<char>(), mem.data.begin() + 0x000A);
     std::cout << fileSize << " bytes loaded." << std::endl;
 
+    std::deque<std::string> outputLines;
+    std::stringstream ss;
+    auto printOutput = [&]() {
+        outputLines.push_back(ss.str());
+        for(auto& str : outputLines)
+            std::cout << str;
+        std::cout << std::endl;
+    };
+
     uint16_t successAddr = fromHexStr16(successAddrStr);
 
     mpu.PC = 0x400;
@@ -71,32 +83,47 @@ int functional_test(const char *filepath, const char *successAddrStr) {
     for(int i = 0;;i++) {
 
         if (mpu.cycle == 0) {
-            std::cout << "INSTR " << toHexStr(mpu.PC) << ": " << toHexStr(mem.read(mpu.PC)) << " " << toHexStr(mem.read(mpu.PC + 1)) << " " << toHexStr(mem.read(mpu.PC + 2));
-            std::cout << " instruction: " << instr << " cycle: " << i << '\n';
+            ss << "INSTR " << toHexStr(mpu.PC) << ": " << toHexStr(mem.read(mpu.PC)) << " " << toHexStr(mem.read(mpu.PC + 1)) << " " << toHexStr(mem.read(mpu.PC + 2));
+            ss << " instruction: " << instr << " cycle: " << i << '\n';
         }
 
-        std::cout << "PC:" << toHexStr(mpu.PC) << " A:" << toHexStr(mpu.A) << " X:" << toHexStr(mpu.X) << " Y:"<< toHexStr(mpu.Y);
-        std::cout << "  cycle:" << i << '\n';
+        if (i % 10000 == 0) std::cout << "current cycle: " << i << std::endl;
+
+        ss << "  A:" << toHexStr(mpu.A);
+        ss << " X:" << toHexStr(mpu.X);
+        ss << " Y:" << toHexStr(mpu.Y);
+        ss << " S:" << toHexStr(mpu.S);
+        ss << " P:" << (mpu.P & 0x80 ? 'N' : '-') << (mpu.P & 0x40 ? 'V' : '-');
+        ss << '-' << (mpu.P & 0x10 ? 'B' : '-') << (mpu.P & 0x08 ? 'D' : '-');
+        ss << (mpu.P & 0x04 ? 'I' : '-') << (mpu.P & 0x02 ? 'Z' : '-') << (mpu.P & 0x01 ? 'C' : '-');
+        ss << " PC:" << toHexStr(mpu.PC) << '\n';
+        if(outputLines.size() >= 1000)
+            outputLines.pop_front();
+        outputLines.push_back(ss.str());
+        ss.str("");
 
         mpu.tick();
 
         if (mpu.cycle == lastCycle) {
-            std::cout << "MPU got stuck in mpu sub-cycle " << mpu.cycle << " at PC " << toHexStr(mpu.PC) << ": ";
-            std::cout << toHexStr(mem.read(mpu.PC)) << " " << toHexStr(mem.read(mpu.PC + 1)) << " " << toHexStr(mem.read(mpu.PC + 2)) << std::endl;
-            break;
+            ss << "MPU got stuck in mpu sub-cycle " << mpu.cycle << " at PC " << toHexStr(mpu.PC) << ": ";
+            ss << toHexStr(mem.read(mpu.PC)) << " " << toHexStr(mem.read(mpu.PC + 1)) << " " << toHexStr(mem.read(mpu.PC + 2)) << std::endl;
+            printOutput();
+            return 1;
         }
         lastCycle = mpu.cycle;
 
         if (mpu.PC == successAddr) {
-            std::cout << "Test finished successfully, PC " << toHexStr(successAddr) << "has been reached.";
+            ss << "Test finished successfully, PC " << toHexStr(successAddr) << "has been reached.";
+            printOutput();
             return 0;
         }
 
         if (mpu.cycle == 0) {
             if (mpu.PC == lastPC) {
-                std::cout << "trap encountered at PC:" << toHexStr(mpu.PC) << " in cycle " << i <<std::endl;
-                std::cout << toHexStr(mpu.PC) << ": " << toHexStr(mem.read(mpu.PC)) << " " << toHexStr(mem.read(mpu.PC + 1)) << " " << toHexStr(mem.read(mpu.PC + 2)) << std::endl;
-                std::cout << "Instruction before trap: " << toHexStr(lastlastPC) << ": " << toHexStr(mem.read(lastlastPC)) << " " << toHexStr(mem.read(lastlastPC + 1)) << " " << toHexStr(mem.read(lastlastPC + 2)) << std::endl;
+                ss << "trap encountered at PC:" << toHexStr(mpu.PC) << " in cycle " << i <<std::endl;
+                ss << toHexStr(mpu.PC) << ": " << toHexStr(mem.read(mpu.PC)) << " " << toHexStr(mem.read(mpu.PC + 1)) << " " << toHexStr(mem.read(mpu.PC + 2)) << std::endl;
+                ss << "Instruction before trap: " << toHexStr(lastlastPC) << ": " << toHexStr(mem.read(lastlastPC)) << " " << toHexStr(mem.read(lastlastPC + 1)) << " " << toHexStr(mem.read(lastlastPC + 2)) << std::endl;
+                printOutput();
                 return 1;
             } else {
                 lastlastPC = lastPC;
@@ -105,5 +132,6 @@ int functional_test(const char *filepath, const char *successAddrStr) {
             instr++;
         }
     }
+
     return 0; // unreachable
 }
