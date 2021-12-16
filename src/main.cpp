@@ -83,6 +83,44 @@ int functional_test(const char *filepath, const char *successAddrStr) {
     for(int i = 0;;i++) {
 
         if (mpu.cycle == 0) {
+            // DEC, INC, STA, STX, STY
+
+            // INC, DEC Absolute
+            if (mpu.opcode == 0xEE || mpu.opcode == 0xCE) {
+                uint16_t addr = mem.read(lastlastPC + 1) | (mem.read(lastlastPC + 2) << 8);
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "\n";
+            }
+            // INC, DEC zeropage
+            if (mpu.opcode == 0xE6 || mpu.opcode == 0xC6) {
+                uint8_t addr = mem.read(lastlastPC + 1);
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "\n";
+            }
+            // INC, DEC zeropage, x
+            if (mpu.opcode == 0xF6 || mpu.opcode == 0xD6) {
+                ss << "MEMORY [????] = ?? (INC / DEC zeropage, x)\n";
+            }
+            // INC, DEC absolute x
+            if (mpu.opcode == 0xFE || mpu.opcode == 0xDE) {
+                ss << "MEMORY [????] = ?? (INC / DEC absolute x)\n";
+            }
+            // STA, STX, STY Absolute
+            if (mpu.opcode == 0x8C || mpu.opcode == 0x8D || mpu.opcode == 0x8E) {
+                uint16_t addr = mem.read(lastlastPC + 1) | (mem.read(lastlastPC + 2) << 8);
+               ss << "lastLastPC: " << toHexStr(lastlastPC) << '\n';
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "\n";
+            }
+            // STA, STX, STY zeropage
+            if (mpu.opcode == 0x84 || mpu.opcode == 0x85 || mpu.opcode == 0x86) {
+                uint8_t addr = mem.read(lastlastPC + 1);
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "\n";
+            }
+            if (mpu.opcode == 0x81 || mpu.opcode == 0x91 || mpu.opcode == 0x95 || mpu.opcode == 0x9D || mpu.opcode == 0x99) {
+                ss << "MEMORY [????] = ?? (STA ind x, ind y, zeropage x, absolute x, absolute y)\n";
+            }
+            if (mpu.opcode == 0x96 || mpu.opcode == 0x94) {
+                ss << "MEMORY [????] = ?? (zeropage y STX or zeropage x STY)\n";
+            }
+
             ss << "INSTR " << toHexStr(mpu.PC) << ": " << toHexStr(mem.read(mpu.PC)) << " " << toHexStr(mem.read(mpu.PC + 1)) << " " << toHexStr(mem.read(mpu.PC + 2));
             ss << " instruction: " << instr << " cycle: " << i << '\n';
         }
@@ -97,6 +135,7 @@ int functional_test(const char *filepath, const char *successAddrStr) {
         ss << '-' << (mpu.P & 0x10 ? 'B' : '-') << (mpu.P & 0x08 ? 'D' : '-');
         ss << (mpu.P & 0x04 ? 'I' : '-') << (mpu.P & 0x02 ? 'Z' : '-') << (mpu.P & 0x01 ? 'C' : '-');
         ss << " PC:" << toHexStr(mpu.PC) << '\n';
+
         if(outputLines.size() >= 1000)
             outputLines.pop_front();
         outputLines.push_back(ss.str());
