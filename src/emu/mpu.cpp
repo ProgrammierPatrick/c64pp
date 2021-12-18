@@ -977,7 +977,7 @@ void fetchJMPIndirAddrLow(MPU& mpu) {
     mpu.cycle++;
 }
 void fetchJMPIndirAddrHigh(MPU& mpu) {
-    mpu.indirectAddr |= mpu.mem->read((mpu.PC + 2) & 0x0F) << 4;
+    mpu.indirectAddr |= (mpu.mem->read(mpu.PC + 2) << 8);
     mpu.cycle++;
 }
 void fetchJMPEffAddrLow(MPU& mpu) {

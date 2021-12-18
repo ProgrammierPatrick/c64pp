@@ -43,7 +43,7 @@ public:
     // temp values for addresses during opcode processing
     uint16_t effectiveAddr;
     uint16_t baseAddr;
-    uint8_t indirectAddr;
+    uint16_t indirectAddr;
 
     uint8_t modVal; // temp modify value used for read-modify-write operations
     int8_t offset; // offset used for branching, signed 8 bit
