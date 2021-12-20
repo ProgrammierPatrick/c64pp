@@ -633,12 +633,12 @@ OpCode createSTAAbsoluteOpCode() {
 }
 OpCode createSTXAbsoluteOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeXLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeXLen3, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTYAbsoluteOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeYLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeYLen3, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTAIndirectXOpCode() {
@@ -915,7 +915,7 @@ void opPLA(MPU& mpu) {
 }
 void opPLP(MPU& mpu) {
     mpu.S++;
-    mpu.P = mpu.mem->read(0x0100 | mpu.S) & ~MPU::Flag::B & ~0x20;
+    mpu.P = mpu.mem->read(0x0100 | mpu.S) & ~MPU::Flag::B & ~MPU::Flag::EmptyBit;
     mpu.cycle = 0;
     mpu.PC += 1;
 }
@@ -927,17 +927,18 @@ OpCode pullOperation(void (*handler)(MPU& mpu)) {
 
 // BRK instruction (called for hardware interrupt)
 void brkPushPCH(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, mpu.PC & 0xFF);
+    mpu.mem->write(0x0100 | mpu.S, ((mpu.PC + 2) >> 8) & 0xFF);
     mpu.S--;
     mpu.cycle++;
 }
 void brkPushPCL(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, (mpu.PC >> 8) & 0xFF);
+    mpu.mem->write(0x0100 | mpu.S, (mpu.PC + 2) & 0xFF);
     mpu.S--;
     mpu.cycle++;
 }
 void brkPushP(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, mpu.P);
+    mpu.mem->write(0x0100 | mpu.S, mpu.P | MPU::Flag::EmptyBit | (mpu.handlingIRQorNMI ? 0 : MPU::Flag::B));
+    mpu.P |= MPU::Flag::I; // disable IRQ
     mpu.S--;
     mpu.cycle++;
 }
@@ -948,6 +949,7 @@ void brkFetchAddrLow(MPU& mpu) {
 void brkFetchAddrHigh(MPU& mpu) {
     mpu.PC |= mpu.mem->read(mpu.handlingNMI ? 0xFFFB : 0xFFFF) << 8;
     mpu.handlingNMI = false;
+    mpu.handlingIRQorNMI = false;
     mpu.cycle = 0;
 }
 OpCode createBRKOpCode() {
@@ -957,6 +959,16 @@ OpCode createBRKOpCode() {
 }
 
 // Jump & Jump To Subroutine
+void jsrPushPCH(MPU& mpu) {
+    mpu.mem->write(0x0100 | mpu.S, ((mpu.PC + 2) >> 8) & 0xFF);
+    mpu.S--;
+    mpu.cycle++;
+}
+void jsrPushPCL(MPU& mpu) {
+    mpu.mem->write(0x0100 | mpu.S, (mpu.PC + 2) & 0xFF);
+    mpu.S--;
+    mpu.cycle++;
+}
 void fetchJSRHighAddr(MPU& mpu) {
     mpu.effectiveAddr |= mpu.mem->read(mpu.PC + 2) << 8;
     mpu.cycle = 0;
@@ -964,7 +976,7 @@ void fetchJSRHighAddr(MPU& mpu) {
 }
 OpCode createJSROpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, handlerNop, brkPushPCH, brkPushPCL, fetchJSRHighAddr, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, handlerNop, jsrPushPCH, jsrPushPCL, fetchJSRHighAddr, undefinedOpcode };
     return opcodeData;
 }
 OpCode createJMPAbsolute() {
@@ -997,17 +1009,17 @@ OpCode createJMPIndirect() {
 
 // RTI instruction (return from interrupt)
 void rtiPullP(MPU& mpu) {
-    mpu.S--;
+    mpu.S++;
     mpu.P = mpu.mem->read(0x0100 | mpu.S);
     mpu.cycle++;
 }
 void rtiPullPCL(MPU& mpu) {
-    mpu.S--;
+    mpu.S++;
     mpu.PC = mpu.mem->read(0x0100 | mpu.S);
     mpu.cycle++;
 }
 void rtiPullPCH(MPU& mpu) {
-    mpu.S--;
+    mpu.S++;
     mpu.PC |= mpu.mem->read(0x0100 | mpu.S) << 8;
     mpu.cycle = 0;
 }
@@ -1016,13 +1028,18 @@ OpCode createRTIOpCode() {
     opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullP, rtiPullPCL, rtiPullPCH, undefinedOpcode };
     return opcodeData;
 }
+void rtsPullPCH(MPU& mpu) {
+    mpu.S++;
+    mpu.PC |= mpu.mem->read(0x0100 | mpu.S) << 8;
+    mpu.cycle++;
+}
 void rtsLastCycle(MPU& mpu) {
     mpu.cycle = 0;
     mpu.PC += 1;
 }
 OpCode createRTSOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullPCL, rtiPullPCH, rtsLastCycle, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullPCL, rtsPullPCH, rtsLastCycle, undefinedOpcode };
     return opcodeData;
 }
 
@@ -1211,6 +1228,7 @@ void MPU::tick(bool IRQ, bool NMI) {
         if (!(P & Flag::I) && IRQ || handlingNMI) {
             if(handlingNMI) NMI_valid = false;
             opcode = 0x00; // BRK
+            handlingIRQorNMI = true;
         }
     }
 

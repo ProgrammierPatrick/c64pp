@@ -106,7 +106,7 @@ int functional_test(const char *filepath, const char *successAddrStr) {
             // STA, STX, STY Absolute
             if (mpu.opcode == 0x8C || mpu.opcode == 0x8D || mpu.opcode == 0x8E) {
                 uint16_t addr = mem.read(lastlastPC + 1) | (mem.read(lastlastPC + 2) << 8);
-               ss << "lastLastPC: " << toHexStr(lastlastPC) << '\n';
+                ss << "lastLastPC: " << toHexStr(lastlastPC) << '\n';
                 ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "\n";
             }
             // STA, STX, STY zeropage
@@ -114,15 +114,46 @@ int functional_test(const char *filepath, const char *successAddrStr) {
                 uint8_t addr = mem.read(lastlastPC + 1);
                 ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "\n";
             }
-            if (mpu.opcode == 0x81 || mpu.opcode == 0x91 || mpu.opcode == 0x95 || mpu.opcode == 0x9D || mpu.opcode == 0x99) {
-                ss << "MEMORY [????] = ?? (STA ind x, ind y, zeropage x, absolute x, absolute y)\n";
+            // STA (indexed) absolute X
+            if (mpu.opcode == 0x9D) {
+                uint16_t addr = (mem.read(lastlastPC + 1) | (mem.read(lastlastPC + 2) << 8)) + mpu.X;
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "\n";
             }
-            if (mpu.opcode == 0x96 || mpu.opcode == 0x94) {
-                ss << "MEMORY [????] = ?? (zeropage y STX or zeropage x STY)\n";
+            // STA (indexed) absolute Y
+            if (mpu.opcode == 0x99) {
+                uint16_t addr = (mem.read(lastlastPC + 1) | (mem.read(lastlastPC + 2) << 8)) + mpu.Y;
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "\n";
             }
+            // STA indirect Y
+            if (mpu.opcode == 0x91) {
+                auto indirectAddr = mpu.mem->read(lastlastPC + 1);
+                uint16_t addr = (mpu.mem->read(indirectAddr) | (mpu.mem->read(indirectAddr + 1) << 8)) + mpu.Y;
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "    [" << indirectAddr << "] = " << toHexStr(mem.read(indirectAddr)) << "\n";
+            }
+            // STA indirect X
+            if (mpu.opcode == 0x81) {
+                // uint16_t addr = (mpu.mem->read(lastlastPC + 1) | (mpu.mem->read(lastlastPC + 2) << 8)) + mpu.X;
+                uint8_t baseAddr = mem.read(lastlastPC + 1);
+                uint16_t addr = mem.read((baseAddr + mpu.X) & 0x00FF) | (mem.read((baseAddr + mpu.X + 1) & 0x00FF) << 8);
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "    [" << baseAddr << "] = " << mem.read(baseAddr) << "\n";
+            }
+            // STA zeropage X, STY zeropage X
+            if (mpu.opcode == 0x95 || mpu.opcode == 0x94) {
+                uint16_t addr = (mpu.mem->read(lastlastPC + 1) + mpu.X) & 0x00FF;
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "\n";
+            }
+            // STX zeropage Y
+            if (mpu.opcode == 0x96) {
+                uint16_t addr = (mpu.mem->read(lastlastPC + 1) + mpu.Y) & 0x00FF;
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "\n";
+            }
+
+            ss << "Stack: " << "S:" << toHexStr(mpu.S) << "    " << toHexStr(mem.read(0x100 + mpu.S - 3)) << " " << toHexStr(mem.read(0x100 + mpu.S - 2)) << " " << toHexStr(mem.read(0x100 + mpu.S - 1));
+            ss << " [" << toHexStr(mem.read(0x100 + mpu.S)) << "] " << toHexStr(mem.read(0x100 + mpu.S + 1)) << " " << toHexStr(mem.read(0x100 + mpu.S + 2)) << " " << toHexStr(mem.read(0x100 + mpu.S + 3)) << '\n';
 
             ss << "INSTR " << toHexStr(mpu.PC) << ": " << toHexStr(mem.read(mpu.PC)) << " " << toHexStr(mem.read(mpu.PC + 1)) << " " << toHexStr(mem.read(mpu.PC + 2));
             ss << " instruction: " << instr << " cycle: " << i << '\n';
+
         }
 
         if (i % 10000 == 0) std::cout << "current cycle: " << i << std::endl;
@@ -136,7 +167,7 @@ int functional_test(const char *filepath, const char *successAddrStr) {
         ss << (mpu.P & 0x04 ? 'I' : '-') << (mpu.P & 0x02 ? 'Z' : '-') << (mpu.P & 0x01 ? 'C' : '-');
         ss << " PC:" << toHexStr(mpu.PC) << '\n';
 
-        if(outputLines.size() >= 1000)
+        if(outputLines.size() >= 2000)
             outputLines.pop_front();
         outputLines.push_back(ss.str());
         ss.str("");
@@ -163,6 +194,24 @@ int functional_test(const char *filepath, const char *successAddrStr) {
                 ss << toHexStr(mpu.PC) << ": " << toHexStr(mem.read(mpu.PC)) << " " << toHexStr(mem.read(mpu.PC + 1)) << " " << toHexStr(mem.read(mpu.PC + 2)) << std::endl;
                 ss << "Instruction before trap: " << toHexStr(lastlastPC) << ": " << toHexStr(mem.read(lastlastPC)) << " " << toHexStr(mem.read(lastlastPC + 1)) << " " << toHexStr(mem.read(lastlastPC + 2)) << std::endl;
                 printOutput();
+
+                while(1) {
+                    std::cout << "Enter ram addr to examine (or END to end) > " << std::flush;
+                    std::string s;
+                    std::cin >> s;
+                    if (s == "END") return 1;
+                    auto addr = fromHexStr16(s) & 0xFFF0;
+                    for(int y = 0; y < 16; y++) {
+                        std::cout << toHexStr(static_cast<uint16_t>(addr + y * 16)) << ": ";
+                        for (int x = 0; x < 16; x++) {
+                            std::cout << toHexStr(mem.read(addr + y * 16 + x)) << " ";
+                        }
+                        std::cout << "\n";
+                    }
+                    std::cout << std::endl;
+                }
+
+
                 return 1;
             } else {
                 lastlastPC = lastPC;

@@ -33,6 +33,7 @@ public:
         I = 0x04, // IRQ disable
         D = 0x08, // decimal mode
         B = 0x10, // BRK command
+        EmptyBit = 0x20,
         V = 0x40, // overflow
         N = 0x80, // negative
     };
@@ -53,6 +54,7 @@ public:
     bool NMI_valid = true;
 
     // true when NMI is handled currently
+    bool handlingIRQorNMI = false;
     bool handlingNMI = false;
 
     Memory* mem;
