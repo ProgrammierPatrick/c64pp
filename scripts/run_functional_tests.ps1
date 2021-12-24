@@ -25,11 +25,18 @@ if (-Not (Test-Path ../functional_test.bin) -or -Not (Test-Path ../interrupt_tes
 }
 Pop-Location
 
+if ($args.Length -ge 1) {
+    $build_type = $args[0]
+}
+else {
+    $build_type = 'Debug'
+}
+
 Write-Output ""
-Write-Output "!! make sure that the qtCreator Debug build is current !!"
+Write-Output "!! make sure that the qtCreator $build_type build is current !!"
 Write-Output ""
 Push-Location
-Set-Location ..\..\..\build-c64pp-*-Debug
+Set-Location ..\..\..\build-c64pp-*-$build_type
 
 $env:Path += ";C:\Qt\6.2.1\mingw81_64\bin"
 

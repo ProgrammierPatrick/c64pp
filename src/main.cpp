@@ -10,6 +10,7 @@
 #include <vector>
 #include <algorithm>
 #include <deque>
+#include <chrono>
 
 
 int functional_test(const char *filepath, const char *successAddrStr);
@@ -80,7 +81,17 @@ int functional_test(const char *filepath, const char *successAddrStr) {
     auto lastPC = mpu.PC;
     auto lastCycle = mpu.cycle;
     int instr = 0;
-    for(int i = 0;;i++) {
+    int i;
+
+    auto startTime = std::chrono::high_resolution_clock::now();
+    auto printTime = [&]() {
+        auto diff = std::chrono::high_resolution_clock::now() - startTime;
+        auto t = std::chrono::duration_cast<std::chrono::seconds>(diff);
+        float freq = i / static_cast<float>(t.count()) / 1000000;
+        std::cout << "Runtime: " << t.count() << "s, " << freq << "MHz average" << std::endl;
+    };
+
+    for(i = 0;;i++) {
 
         if (mpu.cycle == 0) {
             // DEC, INC, STA, STX, STY
@@ -128,14 +139,13 @@ int functional_test(const char *filepath, const char *successAddrStr) {
             if (mpu.opcode == 0x91) {
                 auto indirectAddr = mpu.mem->read(lastlastPC + 1);
                 uint16_t addr = (mpu.mem->read(indirectAddr) | (mpu.mem->read(indirectAddr + 1) << 8)) + mpu.Y;
-                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "    [" << indirectAddr << "] = " << toHexStr(mem.read(indirectAddr)) << "\n";
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "    [" << toHexStr(indirectAddr) << "] = " << toHexStr(mem.read(indirectAddr)) << "\n";
             }
             // STA indirect X
             if (mpu.opcode == 0x81) {
-                // uint16_t addr = (mpu.mem->read(lastlastPC + 1) | (mpu.mem->read(lastlastPC + 2) << 8)) + mpu.X;
                 uint8_t baseAddr = mem.read(lastlastPC + 1);
                 uint16_t addr = mem.read((baseAddr + mpu.X) & 0x00FF) | (mem.read((baseAddr + mpu.X + 1) & 0x00FF) << 8);
-                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "    [" << baseAddr << "] = " << mem.read(baseAddr) << "\n";
+                ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mem.read(addr)) << "    [" << toHexStr(baseAddr) << "] = " << mem.read(baseAddr) << "\n";
             }
             // STA zeropage X, STY zeropage X
             if (mpu.opcode == 0x95 || mpu.opcode == 0x94) {
@@ -156,7 +166,7 @@ int functional_test(const char *filepath, const char *successAddrStr) {
 
         }
 
-        if (i % 10000 == 0) std::cout << "current cycle: " << i << std::endl;
+        if ((i % 10000 == 0) && (i < 1000000) || (i % 100000 == 0)) std::cout << "current cycle: " << i << std::endl;
 
         ss << "  A:" << toHexStr(mpu.A);
         ss << " X:" << toHexStr(mpu.X);
@@ -185,6 +195,7 @@ int functional_test(const char *filepath, const char *successAddrStr) {
         if (mpu.PC == successAddr) {
             ss << "Test finished successfully, PC " << toHexStr(successAddr) << "has been reached.";
             printOutput();
+            printTime();
             return 0;
         }
 
@@ -194,6 +205,7 @@ int functional_test(const char *filepath, const char *successAddrStr) {
                 ss << toHexStr(mpu.PC) << ": " << toHexStr(mem.read(mpu.PC)) << " " << toHexStr(mem.read(mpu.PC + 1)) << " " << toHexStr(mem.read(mpu.PC + 2)) << std::endl;
                 ss << "Instruction before trap: " << toHexStr(lastlastPC) << ": " << toHexStr(mem.read(lastlastPC)) << " " << toHexStr(mem.read(lastlastPC + 1)) << " " << toHexStr(mem.read(lastlastPC + 2)) << std::endl;
                 printOutput();
+                printTime();
 
                 while(1) {
                     std::cout << "Enter ram addr to examine (or END to end) > " << std::flush;

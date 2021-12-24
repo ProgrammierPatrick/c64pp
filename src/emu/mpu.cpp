@@ -254,7 +254,7 @@ void opADC(MPU& mpu, uint8_t value) {
     bool neg = static_cast<int8_t>(mpu.A) < 0;
     bool zero = mpu.A == 0;
     bool carry = (oldA + static_cast<uint16_t>(value) + (mpu.P & MPU::Flag::C)) > 0x00FF;
-    bool overflow = (oldA + static_cast<int16_t>(value) + (mpu.P & MPU::Flag::C)) != mpu.A;
+    bool overflow = (oldA ^ mpu.A) & (value ^ mpu.A) & 0x80; // https://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
     mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::V | MPU::Flag::N);
     mpu.P |= (carry ? MPU::Flag::C : 0) | (zero ? MPU::Flag::Z : 0) | (overflow ? MPU::Flag::V : 0) | (neg ? MPU::Flag::N : 0);
 }
@@ -348,7 +348,7 @@ void opSBC(MPU& mpu, uint8_t value) {
     bool neg = static_cast<int8_t>(mpu.A) < 0;
     bool zero = mpu.A == 0;
     bool carry = static_cast<int16_t>(oldA) - static_cast<int16_t>(value) - (0x01 ^ (mpu.P & MPU::Flag::C)) >= 0;
-    bool overflow = (oldA - static_cast<int16_t>(value) - (0x01 ^ (mpu.P & MPU::Flag::C))) != mpu.A;
+    bool overflow = (oldA ^ mpu.A) & ~(value ^ mpu.A) & 0x80; // https://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
     mpu.P &= ~(MPU::Flag::C | MPU::Flag::Z | MPU::Flag::V | MPU::Flag::N);
     mpu.P |= (carry ? MPU::Flag::C : 0) | (zero ? MPU::Flag::Z : 0) | (overflow ? MPU::Flag::V : 0) | (neg ? MPU::Flag::N : 0);
 }
@@ -607,8 +607,7 @@ void storeXZeroPageY(MPU& mpu) {
     mpu.PC += 2;
 }
 void setEffectiveAddrIndY(MPU& mpu) {
-    mpu.effectiveAddr = (mpu.baseAddr + mpu.Y) & 0x00FF;
-    mpu.effectiveAddr |= mpu.baseAddr & 0xFF00;
+    mpu.effectiveAddr = mpu.baseAddr + mpu.Y;
     mpu.cycle++;
 }
 OpCode createSTAZeroPageOpCode() {
@@ -997,7 +996,8 @@ void fetchJMPEffAddrLow(MPU& mpu) {
     mpu.cycle++;
 }
 void fetchJMPEffAddrHigh(MPU& mpu) {
-    mpu.effectiveAddr |= mpu.mem->read(mpu.indirectAddr + 1) << 8;
+    // 6502 bug: JMP indirect can't cross page boundary
+    mpu.effectiveAddr |= mpu.mem->read(mpu.indirectAddr & 0xFF00 | (mpu.indirectAddr + 1) & 0x00FF) << 8;
     mpu.cycle = 0;
     mpu.PC = mpu.effectiveAddr;
 }
@@ -1175,18 +1175,18 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0xE6] = bitShiftZeroPage(opINC);
     opcodes[0xF6] = bitShiftZeroPageX(opINC);
     opcodes[0xFE] = bitShiftAbsoluteX(opINC);
-    opcodes[0x4E] = bitShiftAbsolute(opLSR);
-    opcodes[0x46] = bitShiftZeroPage(opLSR);
-    opcodes[0x56] = bitShiftZeroPageX(opLSR);
-    opcodes[0x5E] = bitShiftAbsoluteX(opLSR);
-    opcodes[0x2E] = bitShiftAbsolute(opROL);
-    opcodes[0x26] = bitShiftZeroPage(opROL);
-    opcodes[0x36] = bitShiftZeroPageX(opROL);
-    opcodes[0x3E] = bitShiftAbsoluteX(opROL);
-    opcodes[0x6E] = bitShiftAbsolute(opROR);
-    opcodes[0x66] = bitShiftZeroPage(opROR);
-    opcodes[0x76] = bitShiftZeroPageX(opROR);
-    opcodes[0x7E] = bitShiftAbsoluteX(opROR);
+    opcodes[0x4E] = bitShiftAbsolute(opLSRMod);
+    opcodes[0x46] = bitShiftZeroPage(opLSRMod);
+    opcodes[0x56] = bitShiftZeroPageX(opLSRMod);
+    opcodes[0x5E] = bitShiftAbsoluteX(opLSRMod);
+    opcodes[0x2E] = bitShiftAbsolute(opROLMod);
+    opcodes[0x26] = bitShiftZeroPage(opROLMod);
+    opcodes[0x36] = bitShiftZeroPageX(opROLMod);
+    opcodes[0x3E] = bitShiftAbsoluteX(opROLMod);
+    opcodes[0x6E] = bitShiftAbsolute(opRORMod);
+    opcodes[0x66] = bitShiftZeroPage(opRORMod);
+    opcodes[0x76] = bitShiftZeroPageX(opRORMod);
+    opcodes[0x7E] = bitShiftAbsoluteX(opRORMod);
 
     // Branch Operations
     opcodes[0x90] = branchOps(opBCC);
