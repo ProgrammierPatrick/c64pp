@@ -149,10 +149,10 @@ void MPUViewer::updateC64() {
     setText(*ui->lineEditPC, toHexStr(mpu.PC));
 
     if (ui->checkboxC->isChecked() != (mpu.P & MPU::Flag::C)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::C);
-    if (ui->checkboxZ->isChecked() != (mpu.P & MPU::Flag::Z)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::Z);
-    if (ui->checkboxI->isChecked() != (mpu.P & MPU::Flag::I)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::I);
-    if (ui->checkboxD->isChecked() != (mpu.P & MPU::Flag::D)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::D);
-    if (ui->checkboxB->isChecked() != (mpu.P & MPU::Flag::B)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::B);
-    if (ui->checkboxV->isChecked() != (mpu.P & MPU::Flag::V)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::V);
-    if (ui->checkboxN->isChecked() != (mpu.P & MPU::Flag::N)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::N);
+    if (ui->checkboxZ->isChecked() != (mpu.P & MPU::Flag::Z)) ui->checkboxZ->setChecked(mpu.P & MPU::Flag::Z);
+    if (ui->checkboxI->isChecked() != (mpu.P & MPU::Flag::I)) ui->checkboxI->setChecked(mpu.P & MPU::Flag::I);
+    if (ui->checkboxD->isChecked() != (mpu.P & MPU::Flag::D)) ui->checkboxD->setChecked(mpu.P & MPU::Flag::D);
+    if (ui->checkboxB->isChecked() != (mpu.P & MPU::Flag::B)) ui->checkboxB->setChecked(mpu.P & MPU::Flag::B);
+    if (ui->checkboxV->isChecked() != (mpu.P & MPU::Flag::V)) ui->checkboxV->setChecked(mpu.P & MPU::Flag::V);
+    if (ui->checkboxN->isChecked() != (mpu.P & MPU::Flag::N)) ui->checkboxN->setChecked(mpu.P & MPU::Flag::N);
 }
