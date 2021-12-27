@@ -2,11 +2,13 @@
 
 #include "c64_runner.h"
 #include "mpu_viewer.h"
-#include "keyboard/keyboard_widget.h"
 #include "keyboard/keyboard_window.h"
+#include "video/video_widget.h"
 
 #include <QMainWindow>
 #include <QTimer>
+
+#include <vector>
 
 namespace Ui {
 class MainWindow;
@@ -24,6 +26,7 @@ public:
 
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
@@ -37,10 +40,12 @@ private:
 
     QAction* toolbarPauseAction;
 
-    // TODO: remove if proper keyboard window, only temporary
-    KeyboardWidget *keyboardWidget;
+    std::vector<uint8_t> mainScreenBuffer = std::vector<uint8_t>(40 * 16 * 25 * 16);
+    VideoWidget *mainScreen;
 
     MPUViewer *toolMPUViewer = nullptr;
     KeyboardWindow *toolKeyboardWindow = nullptr;
+
+    QSize mainScreenOffset;
 };
 

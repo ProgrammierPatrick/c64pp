@@ -17,7 +17,6 @@ MainWindow::MainWindow(QWidget *parent) :
         c64Runner.hardReset();
         frame = 0;
         cycle = 0;
-        std::cout << "frame: " << frame << std::endl;
         updateUI();
     };
     auto start = [this]() {
@@ -47,7 +46,6 @@ MainWindow::MainWindow(QWidget *parent) :
         c64Runner.singleStepMPU();
         cycle++;
         if (cycle % 19704 == 0) frame++;
-        std::cout << "frame: " << frame << std::endl;
         updateUI();
     };
     auto stepFrame = [this, stop]() {
@@ -57,7 +55,6 @@ MainWindow::MainWindow(QWidget *parent) :
         c64Runner.stepFrame();
         cycle += 19704;
         frame++;
-        std::cout << "frame: " << frame << std::endl;
         updateUI();
     };
     auto mpuViewer = [this]() {
@@ -98,7 +95,6 @@ MainWindow::MainWindow(QWidget *parent) :
         c64Runner.stepFrame();
         cycle += 19704;
         frame++;
-        std::cout << "frame: " << frame << std::endl;
         updateUI();
     });
 
@@ -122,8 +118,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addAction("MPU..", mpuViewer);
     ui->toolBar->addAction("Keyboard..", virtualKeyboard);
 
-    keyboardWidget = new KeyboardWidget(this, &c64Runner, this);
-    keyboardWidget->move(0, 50);
+    auto tosize = [](const QPoint p) { return QSize { p.x(), p.y() }; };
+    mainScreenOffset = size() - tosize(ui->mainScreenFrame->pos()) - ui->mainScreenFrame->size();
+
+    mainScreen = new VideoWidget(ui->mainScreenFrame, 16 * 40, 16 * 25, &mainScreenBuffer);
+    ui->mainScreenFrame->layout()->addWidget(mainScreen);
+
+    // init checkerboard pattern with 16x16 lines
+    for(int i = 0; i < mainScreenBuffer.size(); i++)
+        mainScreenBuffer[i] = (i % 2) ^ ((i / 16 / 40) % 2);
+    for(int yy = 0; yy < 25; yy++)
+        for(int x = 0; x < 40 * 16; x++) mainScreenBuffer.at(yy * 16 * 16 * 40 + x) = 2;
+    for (int xx = 0; xx < 40; xx++) {
+        for (int y = 0; y < 16 * 25; y++) mainScreenBuffer.at(y * 16 * 40 + xx * 16) = 3;
+    }
 
     updateUI();
 }
@@ -145,13 +153,23 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event) {
 }
 
 
+void MainWindow::resizeEvent(QResizeEvent *event) {
+    auto tosize = [](const QPoint p) { return QSize { p.x(), p.y() }; };
+    ui->mainScreenFrame->resize(event->size() - mainScreenOffset - tosize(ui->mainScreenFrame->pos()));
+
+    QMainWindow::resizeEvent(event);
+}
+
+
 void MainWindow::updateUI() {
     if(toolMPUViewer)
         toolMPUViewer->updateC64();
     if(toolKeyboardWindow)
         toolKeyboardWindow->updateUI();
 
-    keyboardWidget->updateUI();
+    mainScreenBuffer[frame % 4] = mainScreenBuffer[frame % 4] > 0 ? 0 : 1;
+
+    mainScreen->updateUI();
 
     std::stringstream ss;
 
