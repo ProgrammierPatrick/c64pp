@@ -56,6 +56,7 @@
     </property>
     <addaction name="actionPause"/>
     <addaction name="actionStep"/>
+    <addaction name="actionStep_Instruction"/>
     <addaction name="actionStep_Frame"/>
     <addaction name="separator"/>
     <addaction name="actionHard_Reset"/>
@@ -65,6 +66,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionMPU_Viewer"/>
+    <addaction name="actionCIA_Viewer"/>
     <addaction name="actionVirtual_Keyboard"/>
    </widget>
    <addaction name="menuFile"/>
@@ -146,6 +148,19 @@
    </property>
    <property name="shortcut">
     <string>Alt+K</string>
+   </property>
+  </action>
+  <action name="actionStep_Instruction">
+   <property name="text">
+    <string>Step Instruction</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+I</string>
+   </property>
+  </action>
+  <action name="actionCIA_Viewer">
+   <property name="text">
+    <string>CIA Viewer</string>
    </property>
   </action>
  </widget>

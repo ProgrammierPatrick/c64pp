@@ -46,8 +46,8 @@ void CIA::write(uint16_t addr, uint8_t data) {
     if (addr == 0x0006) timerCIA1.setTBLO(data);
     if (addr == 0x0007) timerCIA1.setTBHI(data);
     if (addr == 0x000D) {
-        if (data & 0x80) ICRData1 |= data & 0x7F;
-        else             ICRData1 &= ~data;
+        if (data & 0x80) ICRMask1 |= data & 0x7F;
+        else             ICRMask1 &= ~data;
     }
     if (addr == 0x000E) timerCIA1.writeCRA(data);
     if (addr == 0x000F) timerCIA1.writeCRB(data);
@@ -59,8 +59,8 @@ void CIA::write(uint16_t addr, uint8_t data) {
     if (addr == 0x0106) timerCIA2.setTBLO(data);
     if (addr == 0x0107) timerCIA2.setTBHI(data);
     if (addr == 0x010D) {
-        if (data & 0x80) ICRData2 |= data & 0x7F;
-        else             ICRData2 &= ~data;
+        if (data & 0x80) ICRMask2 |= data & 0x7F;
+        else             ICRMask2 &= ~data;
     }
     if (addr == 0x010E) timerCIA2.writeCRA(data);
     if (addr == 0x010F) timerCIA2.writeCRB(data);

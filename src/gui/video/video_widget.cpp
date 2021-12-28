@@ -32,7 +32,9 @@ void VideoWidget::paintEvent(QPaintEvent *event) {
     float x = (QWidget::width() - scale * width) / 2 / scale;
     float y = (QWidget::height() - scale * height) / 2 / scale;
 
-    // painter.setRenderHint(QPainter::RenderHint::SmoothPixmapTransform, true);
+    // dynamic minification:
+    if (scale < 0.5f)
+        painter.setRenderHint(QPainter::RenderHint::SmoothPixmapTransform, true);
 
     painter.drawImage(x, y, image);
 }

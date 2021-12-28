@@ -48,6 +48,14 @@ MainWindow::MainWindow(QWidget *parent) :
         if (cycle % 19704 == 0) frame++;
         updateUI();
     };
+    auto stepInstruction = [this, stop]() {
+        if (running) {
+            stop();
+        }
+        cycle += c64Runner.stepInstruction();
+        if (cycle % 19704 == 0) frame++;
+        updateUI();
+    };
     auto stepFrame = [this, stop]() {
         if (running) {
             stop();
@@ -68,6 +76,17 @@ MainWindow::MainWindow(QWidget *parent) :
             toolMPUViewer->show();
         }
     };
+    auto ciaViewer = [this]() {
+        if (toolCIAViewer) {
+            delete toolCIAViewer;
+            toolCIAViewer = nullptr;
+        } else {
+            toolCIAViewer = new CIAViewer(this, &c64Runner);
+            QObject::connect(toolCIAViewer, &QObject::destroyed, [this](QObject *o) { toolCIAViewer = nullptr; });
+            toolCIAViewer->setAttribute(Qt::WA_DeleteOnClose, true);
+            toolCIAViewer->show();
+        }
+    };
     auto virtualKeyboard = [this]() {
         if (toolKeyboardWindow) {
             delete toolKeyboardWindow;
@@ -86,9 +105,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionHard_Reset, &QAction::triggered, hardReset);
     QObject::connect(ui->actionPause, &QAction::triggered, pauseUnpause);
     QObject::connect(ui->actionStep, &QAction::triggered, step);
+    QObject::connect(ui->actionStep_Instruction, &QAction::triggered, stepInstruction);
     QObject::connect(ui->actionStep_Frame, &QAction::triggered, stepFrame);
 
     QObject::connect(ui->actionMPU_Viewer, &QAction::triggered, mpuViewer);
+    QObject::connect(ui->actionCIA_Viewer, &QAction::triggered, ciaViewer);
     QObject::connect(ui->actionVirtual_Keyboard, &QAction::triggered, virtualKeyboard);
 
     QObject::connect(&frameTimer, &QTimer::timeout, this, [this]() {
@@ -111,11 +132,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     toolbarPauseAction = ui->toolBar->addAction("Pause", pauseUnpause);
     ui->toolBar->addAction("Step", step);
+    ui->toolBar->addAction("Step Instr", stepInstruction);
     ui->toolBar->addAction("Step Frame", stepFrame);
     ui->toolBar->addSeparator();
     ui->toolBar->addAction("Reset", hardReset);
     ui->toolBar->addSeparator();
     ui->toolBar->addAction("MPU..", mpuViewer);
+    ui->toolBar->addAction("CIA..", ciaViewer);
     ui->toolBar->addAction("Keyboard..", virtualKeyboard);
 
     auto tosize = [](const QPoint p) { return QSize { p.x(), p.y() }; };
@@ -162,9 +185,11 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
 
 
 void MainWindow::updateUI() {
-    if(toolMPUViewer)
+    if (toolMPUViewer)
         toolMPUViewer->updateC64();
-    if(toolKeyboardWindow)
+    if (toolCIAViewer)
+        toolCIAViewer->updateC64();
+    if (toolKeyboardWindow)
         toolKeyboardWindow->updateUI();
 
     mainScreenBuffer[frame % 4] = mainScreenBuffer[frame % 4] > 0 ? 0 : 1;
@@ -186,4 +211,24 @@ void MainWindow::updateUI() {
     ss << " PC:" << toHexStr(mpu.PC);
 
     ui->statusbar->showMessage(QString::fromStdString(ss.str()));
+
+
+
+    // cheap screen
+    std::cout << (char)0x1B << "[H+----------------------------------------+\n";
+    for (int y = 0; y < 25; y++) {
+        std::cout << '|';
+        for (int x = 0; x < 40; x++) {
+            char c = c64Runner.c64->mpuMemoryView.read(0x0400 + y * 40 + x);
+            if (c >= 1 && c <= 26) std::cout << static_cast<char>(c - 1 + 'A');
+            else if (c == 32) std::cout << ' ';
+            else if (c == 40) std::cout << '(';
+            else if (c == 41) std::cout << ')';
+            else if (c == 46) std::cout << '.';
+            else if (c >= 48 && c <= 57) std::cout << static_cast<char>(c - 48 + '0');
+            else std::cout << '?';
+        }
+        std::cout << "|\n";
+    }
+    std::cout << "+----------------------------------------+\n";
 }

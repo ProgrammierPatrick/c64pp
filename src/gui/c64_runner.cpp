@@ -23,11 +23,6 @@ std::string loadResAsStr(const char* name) {
     return std::string(data.begin(), data.end());
 }
 
-class NullKeyboard : public Keyboard {
-public:
-    uint8_t query(uint8_t mask) override { return 0x00; }
-};
-
 void C64Runner::hardReset() {
     auto basic = loadRes(":/roms/basic");
     auto kernal = loadRes(":/roms/kernal");

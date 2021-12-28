@@ -75,7 +75,7 @@ public:
         }
         oneshotB = val & 0x08;
         if (val & 0x10) counterB = latchB;
-        inmodeB = static_cast<Inmode>((val >> 5) & 0x01);
+        inmodeB = static_cast<Inmode>((val >> 5) & 0x03);
     }
 
     uint8_t readCRA() {

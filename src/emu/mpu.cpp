@@ -15,10 +15,11 @@ struct OpCode {
     std::array<void (*)(MPU&), 7> handlers;
     void (*dataHandler)(MPU& mpu, uint8_t data) = dataHandlerNop;
 };
-extern std::array<OpCode, 256> opcodes;
+extern const std::array<OpCode, 256> opcodes;
 
 void undefinedOpcode(MPU& mpu) {
     std::cout << "Undefined OpCode encountered: " << std::hex << (int)mpu.opcode << " at memory location " << (int)mpu.PC << std::endl;
+    while (true) {}
     mpu.cycle = 0;
 }
 
@@ -926,12 +927,12 @@ OpCode pullOperation(void (*handler)(MPU& mpu)) {
 
 // BRK instruction (called for hardware interrupt)
 void brkPushPCH(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, ((mpu.PC + 2) >> 8) & 0xFF);
+    mpu.mem->write(0x0100 | mpu.S, ((mpu.PC + (mpu.handlingIRQorNMI ? 0 : 2)) >> 8) & 0xFF);
     mpu.S--;
     mpu.cycle++;
 }
 void brkPushPCL(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, (mpu.PC + 2) & 0xFF);
+    mpu.mem->write(0x0100 | mpu.S, (mpu.PC + (mpu.handlingIRQorNMI ? 0 : 2)) & 0xFF);
     mpu.S--;
     mpu.cycle++;
 }
@@ -1216,10 +1217,12 @@ std::array<OpCode, 256> createOpcodes() {
 
     return opcodes;
 }
-std::array<OpCode, 256> opcodes = createOpcodes();
+const std::array<OpCode, 256> opcodes = createOpcodes();
 
 void MPU::tick(bool IRQ, bool NMI) {
     if (!NMI) NMI_valid = true;
+
+    // if (cycle == 1) std::cout << std::hex << PC << " " << (int)opcode << '(' << (int)mem->read(PC) << " " << (int)mem->read(PC + 1) << " " << (int)mem->read(PC + 2) << ")\n";
 
     if (cycle == 0) {
         if (NMI_valid && NMI)
@@ -1227,8 +1230,10 @@ void MPU::tick(bool IRQ, bool NMI) {
 
         if (!(P & Flag::I) && IRQ || handlingNMI) {
             if(handlingNMI) NMI_valid = false;
-            opcode = 0x00; // BRK
             handlingIRQorNMI = true;
+            opcode = 0x00; // BRK
+            cycle = 1; // skip over fetchOpcode
+            return; // this cycle is done, next cycle will execute BRK with cycle = 1
         }
     }
 

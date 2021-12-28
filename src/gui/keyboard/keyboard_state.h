@@ -17,12 +17,12 @@ public:
     void loadKeymap(const std::string& viceKeymapText);
 
     uint8_t query(uint8_t mask) override {
-        uint8_t result = 0x00;
-        for (int i = 0; i < 8; i++)
-            if (!(mask & (1 << i)))
-                for (int j = 0; j < 8; j++)
+        uint8_t result = 0xFF;
+        for (int j = 0; j < 8; j++)
+            if (!(mask & (1 << j)))
+                for (int i = 0; i < 8; i++)
                     if (matrixKeyCount[j * 8 + i] > 0)
-                        result |= 1 << j;
+                        result &= ~(1 << i);
         return result;
     }
     bool queryRestore() { return restoreKeyCount > 0; }

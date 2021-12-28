@@ -27,7 +27,7 @@ public:
     //uint8_t TODM; // Minutes Reg
     //uint8_t TODH; // Hours (AM/PM) Reg
     //uint8_t SDR; // Serial Data Reg
-    uint8_t ICR; // Interrupt Control Reg
+    // Interrupt Control Reg
     uint8_t ICRData1 = 0x00;
     uint8_t ICRData2 = 0x00;
     uint8_t ICRMask1;

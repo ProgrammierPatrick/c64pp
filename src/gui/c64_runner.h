@@ -25,6 +25,14 @@ public:
     void singleStepMPU() {
         c64->tick();
     }
+    int stepInstruction() {
+        int numTicks = 0;
+        do {
+            c64->tick();
+            numTicks++;
+        } while (c64->mpu.cycle != 0);
+        return numTicks;
+    }
     void stepFrame() {
         // 0,9852486 MHz / 50Hz ~ 19704 Ticks per frame
         // of couse not quite correct, since VIC controlls the MPU clock
