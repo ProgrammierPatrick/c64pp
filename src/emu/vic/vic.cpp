@@ -1,50 +1,77 @@
 #include "vic.h"
 
 void VIC::tick() {
+    tickBackground();
+    tickBorder();
 
-    // bool inDisplayState = !BA && x >= 8 * 15 && x <= 8 * 54;
+    x += 8;
+    cycleInLine++;
+    if (cycleInLine == 64) {
+        cycleInLine = 1;
+        y++;
+    }
+    if (y > screenHeight) y = 0;
+}
 
+void VIC::tickBackground() {
+    // isDisplayState: true when not in upper/lower border
     if (isBadLine()) inDisplayState = true;
-    if (x == 8 * 58 && RC == 7 && !isBadLine())
+    if (cycleInLine == 58 && RC == 7 && !isBadLine())
         inDisplayState = false;
 
     // new frame
     if (y == 0) {
         VCBASE = 0;
+        displayEnableSetInThisFrame = false;
     }
 
-    // start of line
-    if (x == 8 * 14) {
+    if (y == 0x30 && displayEnable)
+        displayEnableSetInThisFrame = true;
+
+    // start of border
+    if (cycleInLine == 14) {
         VC = VCBASE;
         VMLI = 0;
         if (isBadLine()) RC = 0;
     }
 
     // MPU stunning
-    BA = !(x >= 8 * 12 && x <= 8 * 54 && isBadLine());
+    BA = !(cycleInLine >= 12 && cycleInLine <= 54 && isBadLine());
 
     // to idle state
-    if (x == 8 * 58 && RC == 7) {
+    if (cycleInLine == 58 && RC == 7) {
         VCBASE = VC;
         if (inDisplayState) RC = 0;
         else RC = (RC + 1) & 0x7;
+        inDisplayState = false;
     }
 
     // c-access: "to video matrix"
-    if (!BA && x >= 8 * 15 && x <= 8 * 54) {
+    if (!BA && cycleInLine >= 15 && cycleInLine <= 54) {
         backgroundGraphics.cAccess();
     }
-    backgroundGraphics.gAccess();
 
-    VC = (VC + 1) & 0x3FF;
-    VMLI = (VMLI + 1) & 0x3F;
-
-    x += 8;
-    if (x > lastX) {
-        x = 0;
-        y++;
+    if (cycleInLine >= 16 && cycleInLine <= 55){
+        if (inDisplayState) {
+            backgroundGraphics.gAccess();
+        } else {
+            //TODO: idle-mode g-access
+        }
+        VC = (VC + 1) & 0x3FF;
+        VMLI = (VMLI + 1) & 0x3F;
     }
-    // if (y > lastY) y = 0;
+
+}
+
+void VIC::tickBorder() {
+    if (x == (cSel ? 344 : 335))
+        mainBorderFlipFlop = true;
+    if (y == (rSel ? 51 : 55) && x == 8 * 63)
+        verticalBorderFlipFlop = true;
+
+    if (mainBorderFlipFlop)
+        for(int i = 0; i < 8; i++)
+            screen[y * screenHeight + x + i] = borderColor;
 }
 
 uint8_t VIC::read(uint16_t addr) {

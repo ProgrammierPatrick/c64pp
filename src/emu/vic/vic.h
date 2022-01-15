@@ -14,6 +14,8 @@ struct ColoredVal {
 };
 
 class VIC {
+    // VIC-II (6569)
+
 public:
     VIC() : backgroundGraphics(this), screen(screenWidth * screenHeight) { }
 
@@ -33,17 +35,24 @@ public:
     // ColoredVal accessMemCG(uint16_t addr) { accessMem(addr + charGenMemoryPosition * 0x800); }
 
     bool isBadLine() {
-        return y >= 0x30 && y <= 0xf7 && (y & 0x7) == (yScroll & 0x7) && denSetInThisLine;
+        return y >= 0x30 && y <= 0xf7
+                && (y & 0x7) == (yScroll & 0x7)
+                && displayEnableSetInThisFrame;
     }
 
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t data);
 
+private:
+    void tickBackground();
+    void tickBorder();
+
 public:
     bool BA = true; // Bus Available: when true, MPU may use the bus and is not "stunned"
 
-    uint16_t x; // internal
-    uint16_t y; // internal, same range as rasterCompareLine
+    uint16_t x; // "sprite coordinate system", internal
+    uint16_t y; // "raster line number", internal, same range as rasterCompareLine
+    uint16_t cycleInLine; // counts 8 pixels at a time
     uint16_t rasterCompareLine; // rst8 (1 bit), raster (8 bit)
 
     uint8_t RC; // 3-bit
@@ -51,13 +60,26 @@ public:
     uint16_t VCBASE; // 10-bit
     uint8_t VMLI; // 6-bit video matrix line index
     bool inDisplayState = false;
+    bool displayEnableSetInThisFrame = false;
 
-    // uint16_t MOBDataCounter;     // (MC)
+    bool mainBorderFlipFlop = false;
+    bool verticalBorderFlipFlop = false;
 
-    static const uint16_t firstX = 0x1E0;
-    static const uint16_t maxX = 0x1F7;
-    static const uint16_t lastX = 0x17C;
-    static const uint16_t screenWidth = 403; // maxX - firstX + 1 + lastX + 1;
+    // dimensions: y ranges across all raster lines, including! VBlank
+    // visible lines: screen including border
+    // display window: area inside border
+    static const uint16_t lastY = 311; // including border and vblank
+    static const uint16_t firstVisibleY = 16; // including border
+    static const uint16_t lastVisibleY = 299; // including border
+
+    static const uint16_t firstCycleX = 404; // including border and hblank
+    static const uint16_t firstVisibleX = 480; // including border
+    static const uint16_t lastVisibleX = 380; // including border
+    static const uint16_t maxX = 0x1F7; // =503
+    static const uint16_t firstVisibleCycle = 11;
+    static const uint16_t lastVisibleCycle = 60;
+
+    static const uint16_t screenWidth = 403;
     static const uint16_t screenHeight = 284;
 
     std::vector<uint8_t> screen;
@@ -79,7 +101,6 @@ public:
 
     bool cSel = false;
     bool rSel = false;
-    bool denSetInThisLine = false; // WTF IS THIS
 
     uint8_t xScroll = 0; // 3-bit
     uint8_t yScroll = 3; // 3-bit
