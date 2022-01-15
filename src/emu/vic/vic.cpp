@@ -32,11 +32,9 @@ void VIC::tick() {
 
     // c-access: "to video matrix"
     if (!BA && x >= 8 * 15 && x <= 8 * 54) {
-        videoMatrixLine[VMLI] = accessMemVM(VC);
+        backgroundGraphics.cAccess();
     }
-    uint8_t c = inDisplayState ? videoMatrixLine[VMLI] : 0;
-
-    ColoredVal g = accessMemCG(VC);
+    backgroundGraphics.gAccess();
 
     VC = (VC + 1) & 0x3FF;
     VMLI = (VMLI + 1) & 0x3F;

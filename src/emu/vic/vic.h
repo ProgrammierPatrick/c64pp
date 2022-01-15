@@ -1,5 +1,6 @@
 #pragma once
 
+#include "background_graphics.h"
 #include "../mem/memory.h"
 
 #include <array>
@@ -14,10 +15,10 @@ struct ColoredVal {
 
 class VIC {
 public:
+    VIC() : backgroundGraphics(this), screen(screenWidth * screenHeight) { }
+
     void tick();
 
-
-private:
     ColoredVal accessMem(uint16_t addr) {
         uint8_t val;
         if (((bankSetting & 2) == 0) && addr >= 0x1000 && addr <= 0x1FFF)
@@ -28,8 +29,8 @@ private:
         }
         return ColoredVal(val, colorRAM->read(0x03FF));
     }
-    ColoredVal accessMemVM(uint16_t addr) { accessMem(addr + videoMatrixMemoryPosition * 0x400); }
-    ColoredVal accessMemCG(uint16_t addr) { accessMem(addr + charGenMemoryPosition * 0x800); }
+    // ColoredVal accessMemVM(uint16_t addr) { accessMem(addr + videoMatrixMemoryPosition * 0x400); }
+    // ColoredVal accessMemCG(uint16_t addr) { accessMem(addr + charGenMemoryPosition * 0x800); }
 
     bool isBadLine() {
         return y >= 0x30 && y <= 0xf7 && (y & 0x7) == (yScroll & 0x7) && denSetInThisLine;
@@ -53,13 +54,13 @@ public:
 
     // uint16_t MOBDataCounter;     // (MC)
 
-    const uint16_t firstX = 0x1E0;
-    const uint16_t maxX = 0x1F7;
-    const uint16_t lastX = 0x17C;
-    const uint16_t screenWidth = 403; // maxX - firstX + 1 + lastX + 1;
-    const uint16_t screenHeight = 284;
+    static const uint16_t firstX = 0x1E0;
+    static const uint16_t maxX = 0x1F7;
+    static const uint16_t lastX = 0x17C;
+    static const uint16_t screenWidth = 403; // maxX - firstX + 1 + lastX + 1;
+    static const uint16_t screenHeight = 284;
 
-    std::vector<uint8_t> screen(screenWidth * screenHeight);
+    std::vector<uint8_t> screen;
     std::array<ColoredVal, 40> videoMatrixLine;
 
     uint8_t borderColor; // (EC) 4-bit color
@@ -93,8 +94,9 @@ public:
     uint8_t videoMatrixMemoryPosition; // 4-bit (VM10-VM13)
     uint8_t charGenMemoryPosition; // 3-bit (CB11-CB13)
 
+    BackgroundGraphics backgroundGraphics;
+
     Memory* mainRAM;
     Memory* charROM;
     Memory* colorRAM;
-
 };
