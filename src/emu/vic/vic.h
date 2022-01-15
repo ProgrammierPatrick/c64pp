@@ -3,6 +3,8 @@
 #include "../mem/memory.h"
 
 #include <array>
+#include <iostream>
+#include <vector>
 
 struct ColoredVal {
     uint8_t val;
@@ -16,7 +18,7 @@ public:
 
 
 private:
-    ColoredVal read(uint16_t addr) {
+    ColoredVal accessMem(uint16_t addr) {
         uint8_t val;
         if (((bankSetting & 2) == 0) && addr >= 0x1000 && addr <= 0x1FFF)
             val = charROM->read(addr - 0x1000);
@@ -26,18 +28,22 @@ private:
         }
         return ColoredVal(val, colorRAM->read(0x03FF));
     }
-    ColoredVal readVM(uint16_t addr) { read(addr + videoMatrixMemoryPosition * 0x400); }
-    ColoredVal readCG(uint16_t addr) { read(addr + charGenMemoryPosition * 0x800); }
+    ColoredVal accessMemVM(uint16_t addr) { accessMem(addr + videoMatrixMemoryPosition * 0x400); }
+    ColoredVal accessMemCG(uint16_t addr) { accessMem(addr + charGenMemoryPosition * 0x800); }
 
     bool isBadLine() {
         return y >= 0x30 && y <= 0xf7 && (y & 0x7) == (yScroll & 0x7) && denSetInThisLine;
     }
 
+    uint8_t read(uint16_t addr);
+    void write(uint16_t addr, uint8_t data);
+
 public:
     bool BA = true; // Bus Available: when true, MPU may use the bus and is not "stunned"
 
-    uint16_t x;         // (RC), [RST8, RASTER]
-    uint16_t y;         // (VC)
+    uint16_t x; // internal
+    uint16_t y; // internal, same range as rasterCompareLine
+    uint16_t rasterCompareLine; // rst8 (1 bit), raster (8 bit)
 
     uint8_t RC; // 3-bit
     uint16_t VC;     // 10-bit
@@ -60,6 +66,16 @@ public:
 
     std::array<uint8_t, 4> backgroundColors; // (BxC)
 
+    bool IRQ = false;
+    bool rasterInterrupt                      = false; // (IRST)
+    bool enableRasterInterrupt                = false; // (ERST)
+    bool spriteBitmapCollisionInterrupt       = false; // (IMBC)
+    bool enableSpriteBitmapCollisionInterrupt = false; // (EMBC)
+    bool spriteSpriteCollisionInterrupt       = false; // (IMMC)
+    bool enableSpriteSpriteCollisionInterrupt = false; // (EMMC)
+    bool lightpenInterrupt                    = false; // (ILP)
+    bool enableLightpenInterrupt              = false; // (ELP)
+
     bool cSel = false;
     bool rSel = false;
     bool denSetInThisLine = false; // WTF IS THIS
@@ -67,15 +83,18 @@ public:
     uint8_t xScroll = 0; // 3-bit
     uint8_t yScroll = 3; // 3-bit
 
+    bool displayEnable = true; // (DEN)
+
     bool extendedColorMode = false; // (ECM)
     bool bitmapMode = false;        // (BMM)
     bool multiColorMode = false;    // (MCM)
 
     uint8_t bankSetting;
-    uint8_t videoMatrixMemoryPosition; // 4-bit
-    uint8_t charGenMemoryPosition; // 4-bit
+    uint8_t videoMatrixMemoryPosition; // 4-bit (VM10-VM13)
+    uint8_t charGenMemoryPosition; // 3-bit (CB11-CB13)
 
     Memory* mainRAM;
     Memory* charROM;
     Memory* colorRAM;
+
 };

@@ -32,11 +32,11 @@ void VIC::tick() {
 
     // c-access: "to video matrix"
     if (!BA && x >= 8 * 15 && x <= 8 * 54) {
-        videoMatrixLine[VMLI] = readVM(VC);
+        videoMatrixLine[VMLI] = accessMemVM(VC);
     }
     uint8_t c = inDisplayState ? videoMatrixLine[VMLI] : 0;
 
-    ColoredVal g = readCG(VC);
+    ColoredVal g = accessMemCG(VC);
 
     VC = (VC + 1) & 0x3FF;
     VMLI = (VMLI + 1) & 0x3F;
@@ -47,4 +47,56 @@ void VIC::tick() {
         y++;
     }
     // if (y > lastY) y = 0;
+}
+
+uint8_t VIC::read(uint16_t addr) {
+    uint16_t effAddr = addr % 64;
+    // Control register 1
+    if (effAddr == 0x11) {
+        return yScroll | (rSel << 3) | (displayEnable << 4) | (bitmapMode << 5) | (extendedColorMode << 6) | ((y >> 8) << 7);
+    }
+    // Raster
+    else if (effAddr == 0x12) {
+        return rasterCompareLine & 0x00FF;
+    }
+    // Control register 2
+    else if (effAddr == 0x16) {
+        return xScroll | (cSel << 3) | (multiColorMode << 4) | (1 << 5) | 0xC0;
+    }
+    // Memory pointers
+    else if (effAddr == 0x18) {
+        return 0x1 | ((charGenMemoryPosition & 0x07) << 1) | ((videoMatrixMemoryPosition & 0x0F) << 4);
+    }
+    // Interrupt register
+    else if (effAddr == 0x19) {
+        return rasterInterrupt | (spriteBitmapCollisionInterrupt << 1) | (spriteSpriteCollisionInterrupt << 2) | (lightpenInterrupt << 3) | 0x70 | (IRQ << 7);
+    }
+    // Interrupt enabled
+    else if (effAddr == 0x1a) {
+        return enableRasterInterrupt | (enableSpriteBitmapCollisionInterrupt << 1) | (enableSpriteSpriteCollisionInterrupt << 2) | (enableLightpenInterrupt << 3) | 0xF0;
+    }
+    // Border color
+    else if (effAddr == 0x20) {
+        return borderColor | 0xF0;
+    }
+    // Background color 0
+    else if (effAddr == 0x20) {
+        return backgroundColors[0] | 0xF0;
+    }
+    // Backgorund color 1
+    else if (effAddr == 0x20) {
+        return backgroundColors[1] | 0xF0;
+    }
+    // Backgorund color 2
+    else if (effAddr == 0x20) {
+        return backgroundColors[2] | 0xF0;
+    }
+    // Backgorund color 3
+    else if (effAddr == 0x20) {
+        return backgroundColors[3] | 0xF0;
+    }
+}
+
+void VIC::write(uint16_t addr, uint8_t data) {
+
 }
