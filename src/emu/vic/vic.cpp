@@ -95,6 +95,9 @@ uint8_t VIC::read(uint16_t addr) {
     else if (effAddr == 0x24) {
         return backgroundColors[3] | 0xF0;
     }
+    else {
+        return 0xFF;
+    }
 }
 
 void VIC::write(uint16_t addr, uint8_t data) {
@@ -109,22 +112,22 @@ void VIC::write(uint16_t addr, uint8_t data) {
         rasterCompareLine |= (data >> 7) << 8;
     }
     // Raster counter
-    if (effAddr == 0x12) {
+    else if (effAddr == 0x12) {
         rasterCompareLine = data;
     }
     // Control register 2
-    if (effAddr == 0x16) {
+    else if (effAddr == 0x16) {
         xScroll = data & 0x07;
         cSel = data & 0x08;
         multiColorMode = data & 0x10;
     }
     // Memory pointers
-    if (effAddr == 0x18) {
+    else if (effAddr == 0x18) {
         charGenMemoryPosition = data & 0x0E;
         videoMatrixMemoryPosition = data & 0xF0;
     }
     // Interrupt register
-    if (effAddr == 0x19) {
+    else if (effAddr == 0x19) {
         rasterInterrupt = data & 0x01;
         spriteBitmapCollisionInterrupt = data & 0x02;
         spriteSpriteCollisionInterrupt = data & 0x04;
@@ -132,30 +135,31 @@ void VIC::write(uint16_t addr, uint8_t data) {
         IRQ = data & 0x80;
     }
     // Interrupt enabled
-    if (effAddr == 0x1A) {
+    else if (effAddr == 0x1A) {
         enableRasterInterrupt = data & 0x01;
         enableSpriteBitmapCollisionInterrupt = data & 0x02;
         enableSpriteSpriteCollisionInterrupt = data & 0x04;
         enableLightpenInterrupt = data & 0x08;
     }
     // Border color
-    if (effAddr == 0x20) {
+    else if (effAddr == 0x20) {
         borderColor = data & 0x0F;
     }
     // Background Color 0
-    if (effAddr == 0x21) {
+    else if (effAddr == 0x21) {
         backgroundColors[0] = data & 0x0F;
     }
     // Background Color 1
-    if (effAddr == 0x22) {
+    else if (effAddr == 0x22) {
         backgroundColors[1] = data & 0x0F;
     }
     // Background Color 2
-    if (effAddr == 0x23) {
+    else if (effAddr == 0x23) {
         backgroundColors[2] = data & 0x0F;
     }
     // Background Color 3
-    if (effAddr == 0x24) {
+    else if (effAddr == 0x24) {
         backgroundColors[3] = data & 0x0F;
     }
+    else { }
 }
