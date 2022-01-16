@@ -13,6 +13,20 @@ struct ColoredVal {
     ColoredVal(uint8_t val = 0, uint8_t col = 0) : val(val), col(col) { }
 };
 
+struct Sprite {
+    uint8_t xCoord;
+    uint8_t yCoord;
+    uint8_t spriteColor;
+    bool mostSignificantBit;
+    bool spriteEnabled;
+    bool spriteXExpansion;
+    bool spriteYExpansion;
+    bool spriteSpriteCollision;
+    bool spriteDataCollision;
+    bool spriteDataPriority;
+    bool spriteMulticolor;
+};
+
 class VIC {
 public:
     // VIC-II (6569)
@@ -52,6 +66,10 @@ private:
     void advanceGraphicsPipeline();
 
 public:
+    std::array<Sprite, 8> sprites;
+    uint8_t spriteMulticolor0;
+    uint8_t spriteMulticolor1;
+
     bool BA = true; // Bus Available: when true, MPU may use the bus and is not "stunned"
 
     uint16_t x = 0; // "sprite coordinate system", internal
@@ -106,8 +124,8 @@ public:
     bool lightpenInterrupt                    = false; // (ILP)
     bool enableLightpenInterrupt              = false; // (ELP)
 
-    bool cSel = false;
-    bool rSel = false;
+    bool cSel = true;
+    bool rSel = true;
 
     uint8_t xScroll = 0; // 3-bit
     uint8_t yScroll = 3; // 3-bit
