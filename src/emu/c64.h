@@ -6,6 +6,7 @@
 #include "mem/mpu_memory_view.h"
 #include "io/cia.h"
 #include "vic/vic.h"
+#include "debug/mpu_trace.h"
 
 class C64 {
 public:
@@ -15,7 +16,8 @@ public:
           mpuMemoryView(&mpu, &mainRAM, &colorRAM, &this->basicROM, &this->kernalROM, &this->chargenROM, &cia, &vic),
           basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM),
           cia(keyboard),
-          vic(&mainRAM, &this->chargenROM, &colorRAM) {
+          vic(&mainRAM, &this->chargenROM, &colorRAM),
+          mpuTrace(&mpu) {
         reset();
     }
 
@@ -35,5 +37,6 @@ public:
     MPUMemoryView mpuMemoryView;
     CIA cia;
     VIC vic;
+    MPUTrace mpuTrace;
 };
 

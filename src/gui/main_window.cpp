@@ -52,7 +52,13 @@ MainWindow::MainWindow(QWidget *parent) :
         if (running) {
             stop();
         }
-        cycle += c64Runner.stepInstruction();
+
+        try {
+            cycle += c64Runner.stepInstruction();
+        } catch (std::runtime_error&) {
+            stop();
+        }
+
         if (cycle % 19704 == 0) frame++;
         updateUI();
     };
@@ -60,7 +66,13 @@ MainWindow::MainWindow(QWidget *parent) :
         if (running) {
             stop();
         }
-        c64Runner.stepFrame();
+
+        try {
+            c64Runner.stepFrame();
+        } catch (std::runtime_error& e) {
+            stop();
+        }
+
         cycle += 19704;
         frame++;
         updateUI();
@@ -112,8 +124,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionCIA_Viewer, &QAction::triggered, ciaViewer);
     QObject::connect(ui->actionVirtual_Keyboard, &QAction::triggered, virtualKeyboard);
 
-    QObject::connect(&frameTimer, &QTimer::timeout, this, [this]() {
-        c64Runner.stepFrame();
+    QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop]() {
+        try {
+            c64Runner.stepFrame();
+        } catch (std::runtime_error& e) {
+            stop();
+        }
         cycle += 19704;
         frame++;
         updateUI();

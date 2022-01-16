@@ -39,7 +39,7 @@ public:
     };
 
     uint8_t opcode;
-    int cycle = 0;
+    int T = 0;
 
     // temp values for addresses during opcode processing
     uint16_t effectiveAddr;

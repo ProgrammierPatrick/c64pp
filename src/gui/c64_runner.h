@@ -30,7 +30,7 @@ public:
         do {
             c64->tick();
             numTicks++;
-        } while (c64->mpu.cycle != 0);
+        } while (c64->mpu.T != 0);
         return numTicks;
     }
     void stepFrame() {
