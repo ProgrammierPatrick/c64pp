@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <cstdint>
+
 class VIC;
 
 class BackgroundGraphics {
@@ -7,10 +10,9 @@ public:
     BackgroundGraphics(VIC* vic) : vic(vic) { }
 
     void cAccess();
-    void gAccess();
+    std::array<uint8_t, 8> gAccess();
 
-    void standardTextModeCAccess();
-    void standardTextModeGAccess();
+    std::array<uint8_t, 8> standardTextModeGAccess();
 
 public:
     VIC *vic;

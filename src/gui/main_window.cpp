@@ -144,17 +144,8 @@ MainWindow::MainWindow(QWidget *parent) :
     auto tosize = [](const QPoint p) { return QSize { p.x(), p.y() }; };
     mainScreenOffset = size() - tosize(ui->mainScreenFrame->pos()) - ui->mainScreenFrame->size();
 
-    mainScreen = new VideoWidget(ui->mainScreenFrame, 16 * 40, 16 * 25, &mainScreenBuffer);
+    mainScreen = new VideoWidget(ui->mainScreenFrame, VIC::screenWidth, VIC::screenHeight, &c64Runner.c64->vic.screen);
     ui->mainScreenFrame->layout()->addWidget(mainScreen);
-
-    // init checkerboard pattern with 16x16 lines
-    for(int i = 0; i < mainScreenBuffer.size(); i++)
-        mainScreenBuffer[i] = (i % 2) ^ ((i / 16 / 40) % 2);
-    for(int yy = 0; yy < 25; yy++)
-        for(int x = 0; x < 40 * 16; x++) mainScreenBuffer.at(yy * 16 * 16 * 40 + x) = 2;
-    for (int xx = 0; xx < 40; xx++) {
-        for (int y = 0; y < 16 * 25; y++) mainScreenBuffer.at(y * 16 * 40 + xx * 16) = 3;
-    }
 
     updateUI();
 }
@@ -192,8 +183,7 @@ void MainWindow::updateUI() {
     if (toolKeyboardWindow)
         toolKeyboardWindow->updateUI();
 
-    mainScreenBuffer[frame % 4] = mainScreenBuffer[frame % 4] > 0 ? 0 : 1;
-
+    mainScreen->setVideoBuffer(&c64Runner.c64->vic.screen);
     mainScreen->updateUI();
 
     std::stringstream ss;

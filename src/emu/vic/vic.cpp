@@ -2,10 +2,15 @@
 
 void VIC::tick() {
     tickBackground();
-    tickBorder();
+    // tickBorder();
 
     x += 8;
+    if (x > VIC::maxX) x = 0;
     cycleInLine++;
+    if (cycleInLine == 63) {
+        // TODO: interrupt here
+    }
+
     if (cycleInLine == 64) {
         cycleInLine = 1;
         y++;
@@ -15,9 +20,12 @@ void VIC::tick() {
 
 void VIC::tickBackground() {
     // isDisplayState: true when not in upper/lower border
-    if (isBadLine()) inDisplayState = true;
-    if (cycleInLine == 58 && RC == 7 && !isBadLine())
+    if (cycleInLine == 58 && RC == 7) {
+        VCBASE = VC;
         inDisplayState = false;
+        if (isBadLine()) RC++;
+    }
+    if (isBadLine()) inDisplayState = true;
 
     // new frame
     if (y == 0) {
@@ -46,20 +54,31 @@ void VIC::tickBackground() {
         inDisplayState = false;
     }
 
-    // c-access: "to video matrix"
-    if (!BA && cycleInLine >= 15 && cycleInLine <= 54) {
-        backgroundGraphics.cAccess();
-    }
-
+    // clock low: VIC
+    advanceGraphicsPipeline();
     if (cycleInLine >= 16 && cycleInLine <= 55){
+        ColoredVal c = videoMatrixLine[VMLI];
+        uint8_t g = 0;
+
         if (inDisplayState) {
-            backgroundGraphics.gAccess();
+            graphicsDataPipeline[0] = backgroundGraphics.gAccess();
         } else {
             //TODO: idle-mode g-access
         }
+
         VC = (VC + 1) & 0x3FF;
         VMLI = (VMLI + 1) & 0x3F;
+    } else {
+        // TODO: if no other access is done, idle-access is done
     }
+
+    // high clock: MPU (when not stunned)
+    if (!BA && cycleInLine >= 15 && cycleInLine <= 54) {
+        // c-access: "to video matrix"
+        backgroundGraphics.cAccess();
+    }
+
+
 
 }
 
@@ -71,7 +90,22 @@ void VIC::tickBorder() {
 
     if (mainBorderFlipFlop)
         for(int i = 0; i < 8; i++)
-            screen[y * screenHeight + x + i] = borderColor;
+            screen[y * screenWidth + cycleInLine * 8 + i] = borderColor;
+}
+
+void VIC::advanceGraphicsPipeline() {
+    // graphics are drawn with two cycles delay. for xScroll, one further delayed value is needed
+    if (inDisplayState && cycleInLine - 2 >= firstVisibleCycle && cycleInLine - 2 <= lastVisibleCycle) {
+        for (int i = 0; i < 8; i++) {
+            if (i < xScroll)
+                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - 2) * 8 + i] = graphicsDataPipeline[3][8 - xScroll + i];
+            else
+                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - 2) * 8 + i] = graphicsDataPipeline[2][i];
+        }
+    }
+    graphicsDataPipeline[3] = graphicsDataPipeline[2];
+    graphicsDataPipeline[2] = graphicsDataPipeline[1];
+    graphicsDataPipeline[1] = graphicsDataPipeline[0];
 }
 
 uint8_t VIC::read(uint16_t addr) {

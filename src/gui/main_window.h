@@ -41,7 +41,6 @@ private:
 
     QAction* toolbarPauseAction;
 
-    std::vector<uint8_t> mainScreenBuffer = std::vector<uint8_t>(40 * 16 * 25 * 16);
     VideoWidget *mainScreen;
 
     MPUViewer *toolMPUViewer = nullptr;

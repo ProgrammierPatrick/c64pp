@@ -14,10 +14,14 @@ struct ColoredVal {
 };
 
 class VIC {
+public:
     // VIC-II (6569)
 
-public:
-    VIC() : backgroundGraphics(this), screen(screenWidth * screenHeight) { }
+    VIC(Memory* mainRAM, Memory* charROM, Memory* colorRAM)
+        : mainRAM(mainRAM), charROM(charROM), colorRAM(colorRAM),
+          backgroundGraphics(this) {
+        screen.resize(screenWidth * screenHeight);
+    }
 
     void tick();
 
@@ -31,8 +35,6 @@ public:
         }
         return ColoredVal(val, colorRAM->read(0x03FF));
     }
-    // ColoredVal accessMemVM(uint16_t addr) { accessMem(addr + videoMatrixMemoryPosition * 0x400); }
-    // ColoredVal accessMemCG(uint16_t addr) { accessMem(addr + charGenMemoryPosition * 0x800); }
 
     bool isBadLine() {
         return y >= 0x30 && y <= 0xf7
@@ -47,20 +49,24 @@ private:
     void tickBackground();
     void tickBorder();
 
+    void advanceGraphicsPipeline();
+
 public:
     bool BA = true; // Bus Available: when true, MPU may use the bus and is not "stunned"
 
-    uint16_t x; // "sprite coordinate system", internal
-    uint16_t y; // "raster line number", internal, same range as rasterCompareLine
-    uint16_t cycleInLine; // counts 8 pixels at a time
-    uint16_t rasterCompareLine; // rst8 (1 bit), raster (8 bit)
+    uint16_t x = 0; // "sprite coordinate system", internal
+    uint16_t y = 0; // "raster line number", internal, same range as rasterCompareLine
+    uint16_t cycleInLine = 1; // counts 8 pixels at a time
+    uint16_t rasterCompareLine = 0; // rst8 (1 bit), raster (8 bit)
 
-    uint8_t RC; // 3-bit
-    uint16_t VC;     // 10-bit
-    uint16_t VCBASE; // 10-bit
-    uint8_t VMLI; // 6-bit video matrix line index
+    uint8_t RC = 0; // 3-bit
+    uint16_t VC = 0;     // 10-bit
+    uint16_t VCBASE = 0; // 10-bit
+    uint8_t VMLI = 0; // 6-bit video matrix line index
     bool inDisplayState = false;
     bool displayEnableSetInThisFrame = false;
+
+    std::array<std::array<uint8_t, 8>, 4> graphicsDataPipeline;
 
     bool mainBorderFlipFlop = false;
     bool verticalBorderFlipFlop = false;
@@ -78,8 +84,9 @@ public:
     static const uint16_t maxX = 0x1F7; // =503
     static const uint16_t firstVisibleCycle = 11;
     static const uint16_t lastVisibleCycle = 60;
+    static const uint16_t lastCycle = 63;
 
-    static const uint16_t screenWidth = 403;
+    static const uint16_t screenWidth = 504;
     static const uint16_t screenHeight = 284;
 
     std::vector<uint8_t> screen;
