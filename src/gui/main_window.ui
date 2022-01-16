@@ -66,6 +66,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionMPU_Viewer"/>
+    <addaction name="actionRAM_Viewer"/>
     <addaction name="actionCIA_Viewer"/>
     <addaction name="actionVirtual_Keyboard"/>
    </widget>
@@ -161,6 +162,11 @@
   <action name="actionCIA_Viewer">
    <property name="text">
     <string>CIA Viewer</string>
+   </property>
+  </action>
+  <action name="actionRAM_Viewer">
+   <property name="text">
+    <string>RAM Viewer</string>
    </property>
   </action>
  </widget>

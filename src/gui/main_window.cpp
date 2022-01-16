@@ -99,6 +99,17 @@ MainWindow::MainWindow(QWidget *parent) :
             toolCIAViewer->show();
         }
     };
+    auto ramViewer = [this]() {
+        if (toolRAMViewer) {
+            delete toolRAMViewer;
+            toolRAMViewer = nullptr;
+        } else {
+            toolRAMViewer = new RAMViewer(this, &c64Runner);
+            QObject::connect(toolRAMViewer, &QObject::destroyed, [this](QObject *o) { toolRAMViewer = nullptr; });
+            toolRAMViewer->setAttribute(Qt::WA_DeleteOnClose, true);
+            toolRAMViewer->show();
+        }
+    };
     auto virtualKeyboard = [this]() {
         if (toolKeyboardWindow) {
             delete toolKeyboardWindow;
@@ -121,6 +132,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionStep_Frame, &QAction::triggered, stepFrame);
 
     QObject::connect(ui->actionMPU_Viewer, &QAction::triggered, mpuViewer);
+    QObject::connect(ui->actionRAM_Viewer, &QAction::triggered, ramViewer);
     QObject::connect(ui->actionCIA_Viewer, &QAction::triggered, ciaViewer);
     QObject::connect(ui->actionVirtual_Keyboard, &QAction::triggered, virtualKeyboard);
 
@@ -154,6 +166,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addAction("Reset", hardReset);
     ui->toolBar->addSeparator();
     ui->toolBar->addAction("MPU..", mpuViewer);
+    ui->toolBar->addAction("RAM..", ramViewer);
     ui->toolBar->addAction("CIA..", ciaViewer);
     ui->toolBar->addAction("Keyboard..", virtualKeyboard);
 
@@ -194,6 +207,8 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
 void MainWindow::updateUI() {
     if (toolMPUViewer)
         toolMPUViewer->updateC64();
+    if (toolRAMViewer)
+        toolRAMViewer->updateC64();
     if (toolCIAViewer)
         toolCIAViewer->updateC64();
     if (toolKeyboardWindow)

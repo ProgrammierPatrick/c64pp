@@ -3,6 +3,7 @@
 #include "c64_runner.h"
 #include "mpu_viewer.h"
 #include "cia_viewer.h"
+#include "ram_viewer.h"
 #include "keyboard/keyboard_window.h"
 #include "video/video_widget.h"
 
@@ -44,6 +45,7 @@ private:
     VideoWidget *mainScreen;
 
     MPUViewer *toolMPUViewer = nullptr;
+    RAMViewer *toolRAMViewer = nullptr;
     CIAViewer *toolCIAViewer = nullptr;
     KeyboardWindow *toolKeyboardWindow = nullptr;
 
