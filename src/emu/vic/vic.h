@@ -14,10 +14,9 @@ struct ColoredVal {
 };
 
 struct Sprite {
-    uint8_t xCoord;
-    uint8_t yCoord;
+    uint16_t xCoord;
+    uint16_t yCoord;
     uint8_t spriteColor;
-    bool mostSignificantBit;
     bool spriteEnabled;
     bool spriteXExpansion;
     bool spriteYExpansion;

@@ -113,57 +113,57 @@ uint8_t VIC::read(uint16_t addr) {
     switch (effAddr) {
         // X coordinate sprite 0
         case 0x00:
-            return sprites[0].xCoord;
+            return sprites[0].xCoord & 0x00FF;
         // Y coordinate sprite 0
         case 0x01:
-            return sprites[0].yCoord;
+            return sprites[0].yCoord & 0x00FF;
         // X coordinate sprite 1
         case 0x02:
-            return sprites[1].xCoord;
+            return sprites[1].xCoord & 0x00FF;
         // Y coordinate sprite 1
         case 0x03:
-            return sprites[1].yCoord;
+            return sprites[1].yCoord & 0x00FF;
         // X coordinate sprite 2
         case 0x04:
-            return sprites[2].xCoord;
+            return sprites[2].xCoord & 0x00FF;
         // Y coordinate sprite 2
         case 0x05:
-            return sprites[2].yCoord;
+            return sprites[2].yCoord & 0x00FF;
         // X coordinate sprite 3
         case 0x06:
-            return sprites[3].xCoord;
+            return sprites[3].xCoord & 0x00FF;
         // Y coordinate sprite 3
         case 0x07:
-            return sprites[3].yCoord;
+            return sprites[3].yCoord & 0x00FF;
         // X coordinate sprite 4
         case 0x08:
-            return sprites[4].xCoord;
+            return sprites[4].xCoord & 0x00FF;
         // Y coordinate sprite 4
         case 0x09:
-            return sprites[4].yCoord;
+            return sprites[4].yCoord & 0x00FF;
         // X coordinate sprite 5
         case 0x0A:
-            return sprites[5].xCoord;
+            return sprites[5].xCoord & 0x00FF;
         // Y coordinate sprite 5
         case 0x0B:
-            return sprites[5].yCoord;
+            return sprites[5].yCoord & 0x00FF;
         // X coordinate sprite 6
         case 0x0C:
-            return sprites[6].xCoord;
+            return sprites[6].xCoord & 0x00FF;
         // Y coordinate sprite 6
         case 0x0D:
-            return sprites[6].yCoord;
+            return sprites[6].yCoord & 0x00FF;
         // X coordinate sprite 7
         case 0x0E:
-            return sprites[7].xCoord;
+            return sprites[7].xCoord & 0x00FF;
         // Y coordinate sprite 7
         case 0x0F:
-            return sprites[7].yCoord;
+            return sprites[7].yCoord & 0x00FF;
         // MSBs of X coordinates
         case 0x10:
             uint8_t msbs;
             for (int i = 0; i < 8; i++) {
-                msbs |= sprites[i].mostSignificantBit << i;
+                msbs |= ((sprites[i].xCoord >> 8) & 0x01) << i;
             }
             return msbs;
         // Control register 1
@@ -289,71 +289,71 @@ void VIC::write(uint16_t addr, uint8_t data) {
     switch (effAddr) {
         // X coordinate sprite 0
         case 0x00:
-            sprites[0].xCoord = data;
+            sprites[0].xCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // Y coordinate sprite 0
         case 0x01:
-            sprites[0].yCoord = data;
+            sprites[0].yCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // X coordinate sprite 1
         case 0x02:
-            sprites[1].xCoord = data;
+            sprites[1].xCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // Y coordinate sprite 1
         case 0x03:
-            sprites[1].yCoord = data;
+            sprites[1].yCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // X coordinate sprite 2
         case 0x04:
-            sprites[2].xCoord = data;
+            sprites[2].xCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // Y coordinate sprite 2
         case 0x05:
-            sprites[2].yCoord = data;
+            sprites[2].yCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // X coordinate sprite 3
         case 0x06:
-            sprites[3].xCoord = data;
+            sprites[3].xCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // Y coordinate sprite 3
         case 0x07:
-            sprites[3].yCoord = data;
+            sprites[3].yCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // X coordinate sprite 4
         case 0x08:
-            sprites[4].xCoord = data;
+            sprites[4].xCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // Y coordinate sprite 4
         case 0x09:
-            sprites[4].yCoord = data;
+            sprites[4].yCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // X coordinate sprite 5
         case 0x0A:
-            sprites[5].xCoord = data;
+            sprites[5].xCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // Y coordinate sprite 5
         case 0x0B:
-            sprites[5].yCoord = data;
+            sprites[5].yCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // X coordinate sprite 6
         case 0x0C:
-            sprites[6].xCoord = data;
+            sprites[6].xCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // Y coordinate sprite 6
         case 0x0D:
-            sprites[6].yCoord = data;
+            sprites[6].yCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // X coordinate sprite 7
         case 0x0E:
-            sprites[7].xCoord = data;
+            sprites[7].xCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         // Y coordinate sprite 7
         case 0x0F:
-            sprites[7].yCoord = data;
+            sprites[7].yCoord = data | (sprites[0].xCoord & 0x0100);
             break;
         case 0x10:
             for (int i = 0; i < 8; i++) {
-                sprites[i].mostSignificantBit = (data >> i) & 0x01;
+                sprites[i].xCoord = (sprites[i].xCoord & 0x00FF) | (((data >> i) & 0x01) << 8);
             }
             break;
         // Control register 1
