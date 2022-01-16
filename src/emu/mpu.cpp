@@ -19,7 +19,8 @@ extern const std::array<OpCode, 256> opcodes;
 
 void undefinedOpcode(MPU& mpu) {
     std::cout << "Undefined OpCode encountered: " << std::hex << (int)mpu.opcode << " at memory location " << (int)mpu.PC << std::endl;
-    while (true) {}
+    std::cout << "Terminate program now!" << std::endl;
+    exit(0);
     mpu.cycle = 0;
 }
 
