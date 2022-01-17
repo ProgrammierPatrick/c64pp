@@ -39,7 +39,7 @@ void EnterHexDialog::accept() {
     bool first = true;
     std::string byteText = "00";
     for (char c : ui->plainTextEdit->toPlainText().toStdString()) {
-        if (c == ' ' || c == '\t' || c == '\n')
+        if (c == ' ' || c == '\t' || c == '\n' || c == ';')
             continue;
         if (first) {
             byteText[0] = c;

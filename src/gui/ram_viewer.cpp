@@ -65,8 +65,11 @@ Qt::ItemFlags RAMViewerModel::flags(const QModelIndex &index) const {
 
 bool RAMViewerModel::setData(const QModelIndex &index, const QVariant &value, int role) {
     if (index.isValid() && role == Qt::EditRole) {
-        std::cout << "write: " << index.row() << "," << index.column() << ": " << value.toString().toStdString() << std::endl;
-        // TODO: notify MainWindow
+        std::cout << "write: " << index.row() << "," << index.column() << ": " << value.toString().toStdString() << "\n";
+        uint16_t addr = index.row() * 16 + index.column();
+        uint8_t data = fromHexStr8(value.toString().toStdString());
+        c64Runner->c64->mainRAM.write(addr, data);
+        std::cout << "now at " << toHexStr(addr) << ": " << toHexStr(c64Runner->c64->mainRAM.read(addr)) << std::endl;
         return true;
     }
     return false;

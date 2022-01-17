@@ -4,6 +4,7 @@
 #include <QDebug>
 
 #include <array>
+#include <iostream>
 
 extern const QList<QRgb> colorPalette;
 

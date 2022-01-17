@@ -14,16 +14,21 @@ void VIC::tick() {
     if (cycleInLine == 64) {
         cycleInLine = 1;
         y++;
+        if (y >= screenHeight) {
+            y = 0;
+            // for(int i = 0; i < screenWidth * screenHeight; i++) screen[i] = 0;
+        }
     }
-    if (y > screenHeight) y = 0;
 }
 
 void VIC::tickBackground() {
     // isDisplayState: true when not in upper/lower border
-    if (cycleInLine == 58 && RC == 7) {
-        VCBASE = VC;
-        inDisplayState = false;
-        if (isBadLine()) RC++;
+    if (cycleInLine == 58) {
+        if (RC == 7) {
+            if (!isBadLine()) inDisplayState = false;
+            VCBASE = VC;
+        }
+        if (inDisplayState) RC++;
     }
     if (isBadLine()) inDisplayState = true;
 
@@ -45,14 +50,6 @@ void VIC::tickBackground() {
 
     // MPU stunning
     BA = !(cycleInLine >= 12 && cycleInLine <= 54 && isBadLine());
-
-    // to idle state
-    if (cycleInLine == 58 && RC == 7) {
-        VCBASE = VC;
-        if (inDisplayState) RC = 0;
-        else RC = (RC + 1) & 0x7;
-        inDisplayState = false;
-    }
 
     // clock low: VIC
     advanceGraphicsPipeline();
@@ -94,14 +91,24 @@ void VIC::tickBorder() {
 }
 
 void VIC::advanceGraphicsPipeline() {
+    int delay = 2;
     // graphics are drawn with two cycles delay. for xScroll, one further delayed value is needed
-    if (inDisplayState && cycleInLine - 2 >= firstVisibleCycle && cycleInLine - 2 <= lastVisibleCycle) {
+    if (inDisplayState && (cycleInLine - delay) >= firstBackgroundGraphicsCycle && (cycleInLine - delay) <= lastBackgroundGraphicsCycle
+            && y >= firstVisibleY && y <= lastVisibleY) {
+
+        auto c = videoMatrixLine[VMLI];
+        auto g = accessMem(0x1000 | (c.val << 3) | RC).val;
+
         for (int i = 0; i < 8; i++) {
             if (i < xScroll)
-                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - 2) * 8 + i] = graphicsDataPipeline[3][8 - xScroll + i];
+                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[3][i - xScroll + 8];
             else
-                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - 2) * 8 + i] = graphicsDataPipeline[2][i];
+                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[2][i - xScroll];
+            //screen[(y - firstVisibleY) * screenWidth + (cycleInLine - delay - firstVisibleCycle) * 8 + i]
+                    // = videoMatrixLine[cycleInLine - delay - firstBackgroundGraphicsCycle].val % 16;
+            //        = (g & (1 << (7 - i))) ? 2 : 0;
         }
+        // std::cout << "x: " << (cycleInLine - 2 - firstVisibleCycle) * 8 << " y: " << y - firstVisibleY << " VC: " << VC << std::endl;
     }
     graphicsDataPipeline[3] = graphicsDataPipeline[2];
     graphicsDataPipeline[2] = graphicsDataPipeline[1];
@@ -388,8 +395,8 @@ void VIC::write(uint16_t addr, uint8_t data) {
             break;
         // Memory pointers
        case 0x18:
-            charGenMemoryPosition = data & 0x0E;
-            videoMatrixMemoryPosition = data & 0xF0;
+            charGenMemoryPosition = (data & 0x0E) >> 1;
+            videoMatrixMemoryPosition = (data & 0xF0) >> 4;
             break;
         // Interrupt register
         case 0x19:

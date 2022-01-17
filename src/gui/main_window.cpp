@@ -233,10 +233,8 @@ void MainWindow::updateUI() {
 
     ui->statusbar->showMessage(QString::fromStdString(ss.str()));
 
-
-
     // cheap screen
-    /*
+
     std::cout << (char)0x1B << "[H+----------------------------------------+\n";
     for (int y = 0; y < 25; y++) {
         std::cout << '|';
@@ -253,5 +251,5 @@ void MainWindow::updateUI() {
         std::cout << "|\n";
     }
     std::cout << "+----------------------------------------+\n";
-    */
+
 }

@@ -41,12 +41,12 @@ public:
     ColoredVal accessMem(uint16_t addr) {
         uint8_t val;
         if (((bankSetting & 2) == 0) && addr >= 0x1000 && addr <= 0x1FFF)
-            val = charROM->read(addr - 0x1000);
+            val = charROM->read(addr & 0x0FFF);
         else {
             auto absAddr = addr + bankSetting * 0x4000;
             val = mainRAM->read(absAddr);
         }
-        return ColoredVal(val, colorRAM->read(0x03FF));
+        return ColoredVal(val, colorRAM->read(addr & 0x3F));
     }
 
     bool isBadLine() {
@@ -71,7 +71,7 @@ public:
 
     bool BA = true; // Bus Available: when true, MPU may use the bus and is not "stunned"
 
-    uint16_t x = 0; // "sprite coordinate system", internal
+    uint16_t x = firstCycleX; // "sprite coordinate system", internal
     uint16_t y = 0; // "raster line number", internal, same range as rasterCompareLine
     uint16_t cycleInLine = 1; // counts 8 pixels at a time
     uint16_t rasterCompareLine = 0; // rst8 (1 bit), raster (8 bit)
@@ -100,11 +100,13 @@ public:
     static const uint16_t lastVisibleX = 380; // including border
     static const uint16_t maxX = 0x1F7; // =503
     static const uint16_t firstVisibleCycle = 11;
+    static const uint16_t firstBackgroundGraphicsCycle = 17;
+    static const uint16_t lastBackgroundGraphicsCycle = 56;
     static const uint16_t lastVisibleCycle = 60;
     static const uint16_t lastCycle = 63;
 
-    static const uint16_t screenWidth = 504;
-    static const uint16_t screenHeight = 284;
+    static const uint16_t screenWidth = 404; // actually 403, but Qt requires 32-bit aligned lines, firstVisibleX -> maxX, 0 -> lastVisibleX
+    static const uint16_t screenHeight = 284; // = lastVisibleY - firstVisibleY + 1
 
     std::vector<uint8_t> screen;
     std::array<ColoredVal, 40> videoMatrixLine;
@@ -135,9 +137,9 @@ public:
     bool bitmapMode = false;        // (BMM)
     bool multiColorMode = false;    // (MCM)
 
-    uint8_t bankSetting;
-    uint8_t videoMatrixMemoryPosition; // 4-bit (VM10-VM13)
-    uint8_t charGenMemoryPosition; // 3-bit (CB11-CB13)
+    uint8_t bankSetting = 0;
+    uint8_t videoMatrixMemoryPosition = 1; // 4-bit (VM10-VM13)
+    uint8_t charGenMemoryPosition = 2; // 3-bit (CB11-CB13)
 
     BackgroundGraphics backgroundGraphics;
 
