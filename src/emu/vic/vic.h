@@ -100,8 +100,8 @@ public:
     static const uint16_t lastVisibleX = 380; // including border
     static const uint16_t maxX = 0x1F7; // =503
     static const uint16_t firstVisibleCycle = 11;
-    static const uint16_t firstBackgroundGraphicsCycle = 17;
-    static const uint16_t lastBackgroundGraphicsCycle = 56;
+    static const uint16_t firstBackgroundGraphicsCycle = 16;
+    static const uint16_t lastBackgroundGraphicsCycle = 55;
     static const uint16_t lastVisibleCycle = 60;
     static const uint16_t lastCycle = 63;
 

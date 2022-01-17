@@ -22,61 +22,50 @@ void VIC::tick() {
 }
 
 void VIC::tickBackground() {
-    // isDisplayState: true when not in upper/lower border
-    if (cycleInLine == 58) {
-        if (RC == 7) {
-            if (!isBadLine()) inDisplayState = false;
-            VCBASE = VC;
-        }
-        if (inDisplayState) RC++;
-    }
-    if (isBadLine()) inDisplayState = true;
+    // std::cout << "y:" << (int)y << " x:" << (int)cycleInLine << " state:" << (inDisplayState ? "display" : "idle") << " RC:" << (int)RC
+    //     << " VMLI:" << (int)VMLI << " VCBASE:" << (int)VCBASE << " VC:" << (int)VC << std::endl;
 
-    // new frame
-    if (y == 0) {
+
+    if (cycleInLine == 9) {
+        VMLI = 0;
+    }
+    if (cycleInLine == 11) {
+        VC = VCBASE;
+    }
+    if (cycleInLine == 14 && inDisplayState && isBadLine()) {
+        RC = 0;
+    }
+    if (cycleInLine >= 16 && cycleInLine <= 55 && inDisplayState) {
+        auto gPixels = backgroundGraphics.gAccess();
+        graphicsDataPipeline[0] = gPixels;
+        advanceGraphicsPipeline();
+        if (RC == 0) for (int i = 0; i < 8; i++)
+            screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle) * 8 + i] = (VMLI % 2) ? 1 : 2;
+        VC++;
+        VMLI++;
+    }
+    if (cycleInLine >= 15 && cycleInLine <= 54 && inDisplayState && isBadLine()) {
+        backgroundGraphics.cAccess();
+    }
+    if (cycleInLine == 58 && (!inDisplayState || RC == 7)) {
+        VCBASE = VC;
+    }
+    if (cycleInLine == 58 && RC == 7) {
+        inDisplayState = false;
+    }
+    if (cycleInLine == 58 && (RC < 7 || isBadLine())) {
+        RC++;
+    }
+
+    if (y >= 0 && y <= 0x2F) {
         VCBASE = 0;
-        displayEnableSetInThisFrame = false;
     }
-
+    if (y == 0x30 && !displayEnable && cycleInLine == 1)
+        displayEnableSetInThisFrame = false;
     if (y == 0x30 && displayEnable)
         displayEnableSetInThisFrame = true;
 
-    // start of border
-    if (cycleInLine == 14) {
-        VC = VCBASE;
-        VMLI = 0;
-        if (isBadLine()) RC = 0;
-    }
-
-    // MPU stunning
-    BA = !(cycleInLine >= 12 && cycleInLine <= 54 && isBadLine());
-
-    // clock low: VIC
-    advanceGraphicsPipeline();
-    if (cycleInLine >= 16 && cycleInLine <= 55){
-        ColoredVal c = videoMatrixLine[VMLI];
-        uint8_t g = 0;
-
-        if (inDisplayState) {
-            graphicsDataPipeline[0] = backgroundGraphics.gAccess();
-        } else {
-            //TODO: idle-mode g-access
-        }
-
-        VC = (VC + 1) & 0x3FF;
-        VMLI = (VMLI + 1) & 0x3F;
-    } else {
-        // TODO: if no other access is done, idle-access is done
-    }
-
-    // high clock: MPU (when not stunned)
-    if (!BA && cycleInLine >= 15 && cycleInLine <= 54) {
-        // c-access: "to video matrix"
-        backgroundGraphics.cAccess();
-    }
-
-
-
+    if (isBadLine()) inDisplayState = true;
 }
 
 void VIC::tickBorder() {
@@ -91,19 +80,16 @@ void VIC::tickBorder() {
 }
 
 void VIC::advanceGraphicsPipeline() {
-    int delay = 2;
+    int delay = 0; // 2
     // graphics are drawn with two cycles delay. for xScroll, one further delayed value is needed
     if (inDisplayState && (cycleInLine - delay) >= firstBackgroundGraphicsCycle && (cycleInLine - delay) <= lastBackgroundGraphicsCycle
             && y >= firstVisibleY && y <= lastVisibleY) {
 
-        auto c = videoMatrixLine[VMLI];
-        auto g = accessMem(0x1000 | (c.val << 3) | RC).val;
-
         for (int i = 0; i < 8; i++) {
             if (i < xScroll)
-                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[3][i - xScroll + 8];
+                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[0][i - xScroll + 8];
             else
-                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[2][i - xScroll];
+                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[0][i - xScroll];
             //screen[(y - firstVisibleY) * screenWidth + (cycleInLine - delay - firstVisibleCycle) * 8 + i]
                     // = videoMatrixLine[cycleInLine - delay - firstBackgroundGraphicsCycle].val % 16;
             //        = (g & (1 << (7 - i))) ? 2 : 0;
