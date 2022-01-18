@@ -1,10 +1,14 @@
 #include "c64.h"
 
 const bool traceMPU = true;
+const bool traceKernal = true;
 
 void C64::tick() {
     if constexpr (traceMPU) {
         mpuTrace.tick();
+    }
+    if constexpr (traceKernal) {
+        kernalTrace.tick();
     }
 
     try {

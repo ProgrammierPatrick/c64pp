@@ -7,6 +7,7 @@
 #include "io/cia.h"
 #include "vic/vic.h"
 #include "debug/mpu_trace.h"
+#include "debug/kernal_trace.h"
 
 class C64 {
 public:
@@ -17,7 +18,7 @@ public:
           basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM),
           cia(keyboard),
           vic(&mainRAM, &this->chargenROM, &colorRAM),
-          mpuTrace(&mpu) {
+          mpuTrace(&mpu), kernalTrace(&mpu) {
         reset();
     }
 
@@ -38,5 +39,6 @@ public:
     CIA cia;
     VIC vic;
     MPUTrace mpuTrace;
+    KernalTrace kernalTrace;
 };
 
