@@ -7,6 +7,9 @@
 
 // src: http://www.ffd2.com/fridge/docs/c64-diss.html
 std::unordered_map<uint16_t, std::string> kernelAddrNames = {
+    // (B): internal basic functions
+    { 0xE394, "(B) RESET routine" },
+
     // (PK): functions called by KERNAL vectors
     // (K): internal kernel functions
     { 0xE500, "(PK) read base address of I/O devices" },

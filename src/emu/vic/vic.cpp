@@ -39,8 +39,11 @@ void VIC::tickBackground() {
         auto gPixels = backgroundGraphics.gAccess();
         graphicsDataPipeline[0] = gPixels;
         advanceGraphicsPipeline();
-        if (RC == 0) for (int i = 0; i < 8; i++)
-            screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle) * 8 + i] = (VMLI % 2) ? 1 : 2;
+
+        // draw character bad line in alternating colors
+        // if (RC == 0) for (int i = 0; i < 8; i++)
+        //     screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle) * 8 + i] = (VMLI % 2) ? 1 : 2;
+
         VC++;
         VMLI++;
     }
