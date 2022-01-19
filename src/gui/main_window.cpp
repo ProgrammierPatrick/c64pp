@@ -219,8 +219,8 @@ void MainWindow::updateUI() {
 
     std::stringstream ss;
 
-    ss << "cycle:" << cycle << " frame:" << frame;
     auto& mpu = c64Runner.c64->mpu;
+    ss << "cycle:" << cycle << " frame:" << frame << " T:" << mpu.T;
 
     ss << " A:" << toHexStr(mpu.A);
     ss << " X:" << toHexStr(mpu.X);

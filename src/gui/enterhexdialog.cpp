@@ -65,6 +65,7 @@ void EnterHexDialog::accept() {
 
     if (ui->setPCCheckBox) {
         c64Runner->c64->mpu.PC = offset;
+        c64Runner->c64->mpu.T = 0;
     }
 
     QDialog::accept();

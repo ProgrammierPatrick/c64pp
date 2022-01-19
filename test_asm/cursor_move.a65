@@ -1,0 +1,25 @@
+
+; https://masswerk.at/6502/assembler.html
+; 20 81 FF 18 A2 01 A0 01
+; 20 F0 FF 4C 0B 02
+
+
+
+
+
+* = $0200
+
+; initalise screen and keyboard
+JSR $FF81
+
+; read/set XY cursor position
+;    cleared carry: set position, set carry: get position
+;    X: row
+;    Y: col
+
+CLC
+LDX #1
+LDY #1
+JSR $FFF0
+
+end: JMP end
