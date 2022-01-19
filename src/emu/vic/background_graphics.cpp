@@ -46,10 +46,8 @@ std::array<uint8_t, 8> BackgroundGraphics::multicolorTextModeGAccess() {
     }
     else {
         for (int i = 0; i < 4; i++) {
-            if (((g >> (6 - 2 * i)) & 0x3) == 0x0) pixels[2*i] = pixels[2*i+1] = vic->backgroundColors[0];
-            if (((g >> (6 - 2 * i)) & 0x3) == 0x1) pixels[2*i] = pixels[2*i+1] = vic->backgroundColors[1];
-            if (((g >> (6 - 2 * i)) & 0x3) == 0x2) pixels[2*i] = pixels[2*i+1] = vic->backgroundColors[2];
             if (((g >> (6 - 2 * i)) & 0x3) == 0x3) pixels[2*i] = pixels[2*i+1] = c.col & 0x7;
+            else pixels[2*i] = pixels[2*i+1] = vic->backgroundColors[(g >> (6 - 2 * i) & 0x3)];
         }
     }
     return pixels;
