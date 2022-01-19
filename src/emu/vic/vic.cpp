@@ -156,35 +156,38 @@ uint8_t VIC::read(uint16_t addr) {
         case 0x0F:
             return sprites[7].yCoord & 0x00FF;
         // MSBs of X coordinates
-        case 0x10:
-            uint8_t msbs;
+        case 0x10: {
+            uint8_t msbs = 0;
             for (int i = 0; i < 8; i++) {
                 msbs |= ((sprites[i].xCoord >> 8) & 0x01) << i;
             }
             return msbs;
+        }
         // Control register 1
         case 0x11:
-            return yScroll | (rSel << 3) | (displayEnable << 4) | (bitmapMode << 5) | (extendedColorMode << 6) | ((rasterCompareLine >> 8) << 7);
+            return yScroll | (rSel << 3) | (displayEnable << 4) | (bitmapMode << 5) | (extendedColorMode << 6) | ((y >> 8) << 7);
         // Raster
         case 0x12:
-            return rasterCompareLine & 0x00FF;
+            return y & 0x00FF;
         // Sprite enabled
-        case 0x15:
-            uint8_t enabled;
+        case 0x15: {
+            uint8_t enabled = 0;
             for (int i = 0; i < 8; i++) {
                 enabled |= sprites[i].spriteEnabled << i;
             }
             return enabled;
+        }
         // Control register 2
         case 0x16:
             return xScroll | (cSel << 3) | (multiColorMode << 4) | 0xC0;
         // Sprite Y expansion
-        case 0x17:
-            uint8_t yExp;
+        case 0x17: {
+            uint8_t yExp = 0;
             for (int i = 0; i < 8; i++) {
                 yExp |= sprites[i].spriteYExpansion << i;
             }
             return yExp;
+        }
         // Memory pointers
         case 0x18:
             return 0x1 | ((charGenMemoryPosition & 0x07) << 1) | ((videoMatrixMemoryPosition & 0x0F) << 4);
@@ -195,41 +198,47 @@ uint8_t VIC::read(uint16_t addr) {
         case 0x1A:
             return enableRasterInterrupt | (enableSpriteBitmapCollisionInterrupt << 1) | (enableSpriteSpriteCollisionInterrupt << 2) | (enableLightpenInterrupt << 3) | 0xF0;
         // Sprite data priority
-        case 0x1B:
-            uint8_t dataPrio;
+        case 0x1B: {
+            uint8_t dataPrio = 0;
             for (int i = 0; i < 8; i++) {
                 dataPrio |= sprites[i].spriteDataPriority << i;
             }
             return dataPrio;
+        }
         // Sprite multicolor
-        case 0x1C:
-            uint8_t spriteMC;
+        case 0x1C: {
+            uint8_t spriteMC = 0;
             for (int i = 0; i < 8; i++) {
                 spriteMC |= sprites[i].spriteMulticolor << i;
             }
             return spriteMC;
+        }
         // Sprite X expansion
-        case 0x1D:
-            uint8_t xExp;
+        case 0x1D: {
+            uint8_t xExp = 0;
             for (int i = 0; i < 8; i++) {
                 xExp |= sprites[i].spriteXExpansion << i;
             }
             return xExp;
+        }
         // Sprite-sprite collision
-        case 0x1E:
-            uint8_t spriteSpriteColl;
+        case 0x1E: {
+            uint8_t spriteSpriteColl = 0;
             for (int i = 0; i < 8; i++) {
                 spriteSpriteColl |= sprites[i].spriteSpriteCollision << i;
                 sprites[i].spriteSpriteCollision = 0;
             }
             return spriteSpriteColl;
-        case 0x1F:
-            uint8_t spriteDataColl;
+        }
+        // Sprite-data collision
+        case 0x1F: {
+            uint8_t spriteDataColl = 0;
             for (int i = 0; i < 8; i++) {
                 spriteDataColl |= sprites[i].spriteDataCollision << i;
                 sprites[i].spriteDataCollision = 0;
             }
             return spriteDataColl;
+        }
         // Border color
         case 0x20:
             return borderColor | 0xF0;
