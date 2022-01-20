@@ -239,7 +239,7 @@ void MainWindow::updateUI() {
     for (int y = 0; y < 25; y++) {
         std::cout << '|';
         for (int x = 0; x < 40; x++) {
-            char c = c64Runner.c64->mpuMemoryView.read(0x0400 + y * 40 + x);
+            char c = c64Runner.c64->mpuMemoryView.read(0x0400 + y * 40 + x, true);
             if (c >= 1 && c <= 26) std::cout << static_cast<char>(c - 1 + 'A');
             else if (c == 32) std::cout << ' ';
             else if (c == 40) std::cout << '(';

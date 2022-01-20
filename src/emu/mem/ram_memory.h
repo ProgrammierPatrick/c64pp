@@ -8,7 +8,7 @@ class RAMMemory : public Memory {
 public:
     RAMMemory(int size) : data(size) { }
 
-    uint8_t read(uint16_t addr) override {
+    uint8_t read(uint16_t addr, bool nonDestructive = false) override {
         if (addr < data.size())
             return data[addr];
         else
