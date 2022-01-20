@@ -5,17 +5,27 @@
 
 #include "../../gui/text_utils.h"
 
+const bool includeSpammyNames = false;
+
 // src: http://www.ffd2.com/fridge/docs/c64-diss.html
 std::unordered_map<uint16_t, std::string> kernelAddrNames = {
     // (B): internal basic functions
     { 0xE394, "(B) RESET routine" },
+    { 0xA408, "(B) array area overflow check" },
+    { 0xAB1E, "(B) print string from AY" },
+    { 0xBDCD, "(B) print number from AX" },
+    { 0xE3BF, "(B) intialisation of basic" },
+    { 0xE422, "(B) print BASIC start up messages" },
+    { 0xE453, "(B) initialise vectors" },
+    { 0xBDDF, "(B) convert number in float accu to string (entry after LDY)" },
+
 
     // (PK): functions called by KERNAL vectors
     // (K): internal kernel functions
     { 0xE500, "(PK) read base address of I/O devices" },
     { 0xE505, "(PK) read organisation of screen into XY" },
     { 0xE50A, "(PK) read/set XY cursor position" },
-    { 0xEA87, "(PK) scan keyboard" },
+    // spammy: { 0xEA87, "(PK) scan keyboard" },
     { 0xED09, "(PK) send talk on serial bus" },
     { 0xED0C, "(PK) send listen on serial bus" },
     { 0xEDB9, "(PK) read secondary address after listen" },
@@ -25,8 +35,8 @@ std::unordered_map<uint16_t, std::string> kernelAddrNames = {
     { 0xEDFE, "(PK) send unlisten on serial bus" },
     { 0xEE13, "(PK) input on serial bus" },
     { 0xF13E, "(PK) get a character" },
-    { 0xF157, "(PK) input char on current device" },
-    { 0xF1CA, "(PK) output char on current device" },
+    // spammy: { 0xF157, "(PK) input char on current device" },
+    // spammy: { 0xF1CA, "(PK) output char on current device" },
     { 0xF20E, "(PK) set input device" },
     { 0xF250, "(PK) set output device" },
     { 0xF291, "(PK) close a file" },
@@ -35,7 +45,7 @@ std::unordered_map<uint16_t, std::string> kernelAddrNames = {
     { 0xF34A, "(PK) open a file" },
     { 0xF49E, "(PK) load ram from device" },
     { 0xF5DD, "(PK) save ram to device" },
-    { 0xF69B, "(PK) increment real time clock" },
+    // spammy: { 0xF69B, "(PK) increment real time clock" },
     { 0xF6DD, "(PK) read real time clock" },
     { 0xF6ED, "(PK) check stop key" },
     { 0xF6E4, "(PK) set real time clock" },
@@ -81,8 +91,8 @@ std::unordered_map<uint16_t, std::string> kernelAddrNames = {
     { 0xFFC6, "vector for 'set input device'" },
     { 0xFFC9, "vector for 'set output device'" },
     { 0xFFCC, "vector for 'restore I/O devices to default'" },
-    { 0xFFCF, "vector for 'input char on current device'" },
-    { 0xFFD2, "vector for 'output char on current device'" },
+    // spammy: { 0xFFCF, "vector for 'input char on current device'" },
+    // spammy: { 0xFFD2, "vector for 'output char on current device'" },
     { 0xFFD5, "vector for 'load ram from device'" },
     { 0xFFD8, "vector for 'save ram to device'" },
     { 0xFFDB, "vector for 'set real time clock'" },
@@ -90,16 +100,74 @@ std::unordered_map<uint16_t, std::string> kernelAddrNames = {
     { 0xFFE1, "vector for 'check stop key'" },
     { 0xFFE4, "vector for 'get a character'" },
     { 0xFFE7, "vector for 'close all channels and files'" },
-    { 0xFFEA, "vector for 'increment real time clock'" },
+    // spammy: { 0xFFEA, "vector for 'increment real time clock'" },
     { 0xFFED, "vector for 'read organisation of screen into XY'" },
     { 0xFFF0, "vector for 'read/set XY cursor position'" },
     { 0xFFF3, "vector for 'read base address of I/O devices'" },
 };
 
+std::unordered_map<uint16_t, std::string> spammyKernelAddrNames = {
+    { 0xEA87, "(PK) scan keyboard" },
+    { 0xF157, "(PK) input char on current device" },
+    { 0xF1CA, "(PK) output char on current device" },
+    { 0xF69B, "(PK) increment real time clock" },
+    { 0xFFCF, "vector for 'input char on current device'" },
+    { 0xFFD2, "vector for 'output char on current device'" },
+    { 0xFFEA, "vector for 'increment real time clock'" },
+};
+
 void KernalTrace::tick() {
     if (mpu->T == 0) {
+        std::string name = "";
+        std::string arg = "";
+        bool found = false;
+
         auto it = kernelAddrNames.find(mpu->PC);
-        if (it != kernelAddrNames.end())
-            std::cout << "PC:" << toHexStr(it->first) << " " << it->second << std::endl;
+        if (it != kernelAddrNames.end()) {
+            found = true;
+            name = it->second;
+        }
+
+        if constexpr (includeSpammyNames) {
+            auto it2 = kernelAddrNames.find(mpu->PC);
+            if (it2 != kernelAddrNames.end()) {
+                found = true;
+                name = it2->second;
+            }
+        }
+
+        if (found) {
+
+            // extract arguments
+            switch(mpu->PC) {
+            case 0xAB1E: { // print string from AY
+                uint16_t strPtr = mpu->A | (mpu->Y << 8);
+                arg = "'";
+                for(int i = 0; i < 256; i++) {
+                    uint8_t c = mpu->mem->read(strPtr + i);
+                    if (c == 0) break;
+                    arg += fromPETSCII(c);
+                }
+                arg += "'";
+                break;
+            }
+            case 0xBDCD: { // print number from AX
+                uint16_t num = mpu->A | (mpu->X << 8);
+                arg = std::to_string(mpu->mem->read(num) | (mpu->mem->read(num + 1) << 8));
+                break;
+            }
+            case 0xBDDF: { // convert number in float accu to string (entry after LDY)
+                std::array<uint8_t,6> data;
+                for (int i = 0; i < 6; i++) data[i] = mpu->mem->read(/*FAC*/ 0x61 + i);
+                arg = basicFloatToStr(data);
+                break;
+            } }
+
+            // output to cout
+            if (arg != "")
+                std::cout << "PC:" << toHexStr(mpu->PC) << " " << name << " (" << arg << ")" << std::endl;
+            else
+                std::cout << "PC:" << toHexStr(mpu->PC) << " " << name << std::endl;
+        }
     }
 }
