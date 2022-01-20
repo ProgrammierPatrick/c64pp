@@ -104,7 +104,7 @@ void VIC::advanceGraphicsPipeline() {
     graphicsDataPipeline[1] = graphicsDataPipeline[0];
 }
 
-uint8_t VIC::read(uint16_t addr) {
+uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
     uint16_t effAddr = addr % 64;
     switch (effAddr) {
         // X coordinate sprite 0

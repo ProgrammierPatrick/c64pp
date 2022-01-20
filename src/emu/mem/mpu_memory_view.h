@@ -10,7 +10,7 @@ public:
     MPUMemoryView(MPU* mpu, Memory* mainRAM, Memory* colorRAM, Memory* basicROM, Memory* kernalROM, Memory* chargenROM, CIA* cia, VIC* vic)
         : mpu(mpu), mainRAM(mainRAM), colorRAM(colorRAM), basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM), cia(cia), vic(vic) { }
 
-    uint8_t read(uint16_t addr) override;
+    uint8_t read(uint16_t addr, bool nonDestructive = false) override;
     void write(uint16_t addr, uint8_t data) override;
 
     void reset() { bankSetting = 0x07; }

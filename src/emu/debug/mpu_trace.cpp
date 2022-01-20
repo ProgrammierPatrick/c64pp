@@ -19,13 +19,13 @@ void MPUTrace::tick() {
 
         // INC, DEC Absolute
         if (mpu->opcode == 0xEE || mpu->opcode == 0xCE) {
-            uint16_t addr = mpu->mem->read(lastLastPC + 1) | (mpu->mem->read(lastLastPC + 2) << 8);
-            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr)) << "\n";
+            uint16_t addr = mpu->mem->read(lastLastPC + 1, true) | (mpu->mem->read(lastLastPC + 2, true) << 8);
+            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "\n";
         }
         // INC, DEC zeropage
         if (mpu->opcode == 0xE6 || mpu->opcode == 0xC6) {
-            uint8_t addr = mpu->mem->read(lastLastPC + 1);
-            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr)) << "\n";
+            uint8_t addr = mpu->mem->read(lastLastPC + 1, true);
+            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "\n";
         }
         // INC, DEC zeropage, x
         if (mpu->opcode == 0xF6 || mpu->opcode == 0xD6) {
@@ -37,52 +37,52 @@ void MPUTrace::tick() {
         }
         // STA, STX, STY Absolute
         if (mpu->opcode == 0x8C || mpu->opcode == 0x8D || mpu->opcode == 0x8E) {
-            uint16_t addr = mpu->mem->read(lastLastPC + 1) | (mpu->mem->read(lastLastPC + 2) << 8);
+            uint16_t addr = mpu->mem->read(lastLastPC + 1, true) | (mpu->mem->read(lastLastPC + 2, true) << 8);
             ss << "lastLastPC: " << toHexStr(lastLastPC) << '\n';
-            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr)) << "\n";
+            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "\n";
         }
         // STA, STX, STY zeropage
         if (mpu->opcode == 0x84 || mpu->opcode == 0x85 || mpu->opcode == 0x86) {
-            uint8_t addr = mpu->mem->read(lastLastPC + 1);
-            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr)) << "\n";
+            uint8_t addr = mpu->mem->read(lastLastPC + 1, true);
+            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "\n";
         }
         // STA (indexed) absolute X
         if (mpu->opcode == 0x9D) {
-            uint16_t addr = (mpu->mem->read(lastLastPC + 1) | (mpu->mem->read(lastLastPC + 2) << 8)) + mpu->X;
-            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr)) << "\n";
+            uint16_t addr = (mpu->mem->read(lastLastPC + 1, true) | (mpu->mem->read(lastLastPC + 2, true) << 8)) + mpu->X;
+            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "\n";
         }
         // STA (indexed) absolute Y
         if (mpu->opcode == 0x99) {
-            uint16_t addr = (mpu->mem->read(lastLastPC + 1) | (mpu->mem->read(lastLastPC + 2) << 8)) + mpu->Y;
-            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr)) << "\n";
+            uint16_t addr = (mpu->mem->read(lastLastPC + 1, true) | (mpu->mem->read(lastLastPC + 2, true) << 8)) + mpu->Y;
+            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "\n";
         }
         // STA indirect Y
         if (mpu->opcode == 0x91) {
-            auto indirectAddr = mpu->mem->read(lastLastPC + 1);
-            uint16_t addr = (mpu->mem->read(indirectAddr) | (mpu->mem->read(indirectAddr + 1) << 8)) + mpu->Y;
-            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr)) << "    [" << toHexStr(indirectAddr) << "] = " << toHexStr(mpu->mem->read(indirectAddr)) << "\n";
+            auto indirectAddr = mpu->mem->read(lastLastPC + 1, true);
+            uint16_t addr = (mpu->mem->read(indirectAddr, true) | (mpu->mem->read(indirectAddr + 1, true) << 8)) + mpu->Y;
+            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "    [" << toHexStr(indirectAddr) << "] = " << toHexStr(mpu->mem->read(indirectAddr, true)) << "\n";
         }
         // STA indirect X
         if (mpu->opcode == 0x81) {
-            uint8_t baseAddr = mpu->mem->read(lastLastPC + 1);
-            uint16_t addr = mpu->mem->read((baseAddr + mpu->X) & 0x00FF) | (mpu->mem->read((baseAddr + mpu->X + 1) & 0x00FF) << 8);
-            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr)) << "    [" << toHexStr(baseAddr) << "] = " << mpu->mem->read(baseAddr) << "\n";
+            uint8_t baseAddr = mpu->mem->read(lastLastPC + 1, true);
+            uint16_t addr = mpu->mem->read((baseAddr + mpu->X) & 0x00FF, true) | (mpu->mem->read((baseAddr + mpu->X + 1, true) & 0x00FF) << 8);
+            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "    [" << toHexStr(baseAddr) << "] = " << mpu->mem->read(baseAddr, true) << "\n";
         }
         // STA zeropage X, STY zeropage X
         if (mpu->opcode == 0x95 || mpu->opcode == 0x94) {
-            uint16_t addr = (mpu->mem->read(lastLastPC + 1) + mpu->X) & 0x00FF;
-            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr)) << "\n";
+            uint16_t addr = (mpu->mem->read(lastLastPC + 1, true) + mpu->X) & 0x00FF;
+            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "\n";
         }
         // STX zeropage Y
         if (mpu->opcode == 0x96) {
-            uint16_t addr = (mpu->mem->read(lastLastPC + 1) + mpu->Y) & 0x00FF;
-            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr)) << "\n";
+            uint16_t addr = (mpu->mem->read(lastLastPC + 1, true) + mpu->Y) & 0x00FF;
+            ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "\n";
         }
 
-        ss << "Stack: " << "S:" << toHexStr(mpu->S) << "    " << toHexStr(mpu->mem->read(0x100 + mpu->S - 3)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S - 2)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S - 1));
-        ss << " [" << toHexStr(mpu->mem->read(0x100 + mpu->S)) << "] " << toHexStr(mpu->mem->read(0x100 + mpu->S + 1)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S + 2)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S + 3)) << '\n';
+        ss << "Stack: " << "S:" << toHexStr(mpu->S) << "    " << toHexStr(mpu->mem->read(0x100 + mpu->S - 3, true)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S - 2, true)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S - 1, true));
+        ss << " [" << toHexStr(mpu->mem->read(0x100 + mpu->S, true)) << "] " << toHexStr(mpu->mem->read(0x100 + mpu->S + 1, true)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S + 2, true)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S + 3, true)) << '\n';
 
-        ss << "INSTR " << toHexStr(mpu->PC) << ": " << toHexStr(mpu->mem->read(mpu->PC)) << " " << toHexStr(mpu->mem->read(mpu->PC + 1)) << " " << toHexStr(mpu->mem->read(mpu->PC + 2));
+        ss << "INSTR " << toHexStr(mpu->PC) << ": " << toHexStr(mpu->mem->read(mpu->PC, true)) << " " << toHexStr(mpu->mem->read(mpu->PC + 1, true)) << " " << toHexStr(mpu->mem->read(mpu->PC + 2, true));
 
     }
 
@@ -124,10 +124,10 @@ void MPUTrace::printStateToConsole() {
     ss << (mpu->P & 0x04 ? 'I' : '-') << (mpu->P & 0x02 ? 'Z' : '-') << (mpu->P & 0x01 ? 'C' : '-');
     ss << " PC:" << toHexStr(mpu->PC) << '\n';
 
-    ss << "Stack: " << "S:" << toHexStr(mpu->S) << "    " << toHexStr(mpu->mem->read(0x100 + mpu->S - 3)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S - 2)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S - 1));
-    ss << " [" << toHexStr(mpu->mem->read(0x100 + mpu->S)) << "] " << toHexStr(mpu->mem->read(0x100 + mpu->S + 1)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S + 2)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S + 3)) << '\n';
+    ss << "Stack: " << "S:" << toHexStr(mpu->S) << "    " << toHexStr(mpu->mem->read(0x100 + mpu->S - 3, true)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S - 2, true)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S - 1, true));
+    ss << " [" << toHexStr(mpu->mem->read(0x100 + mpu->S, true)) << "] " << toHexStr(mpu->mem->read(0x100 + mpu->S + 1, true)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S + 2, true)) << " " << toHexStr(mpu->mem->read(0x100 + mpu->S + 3, true)) << '\n';
 
-    ss << "INSTR " << toHexStr(mpu->PC) << ": " << toHexStr(mpu->mem->read(mpu->PC)) << " " << toHexStr(mpu->mem->read(mpu->PC + 1)) << " " << toHexStr(mpu->mem->read(mpu->PC + 2));
+    ss << "INSTR " << toHexStr(mpu->PC) << ": " << toHexStr(mpu->mem->read(mpu->PC, true)) << " " << toHexStr(mpu->mem->read(mpu->PC + 1, true)) << " " << toHexStr(mpu->mem->read(mpu->PC + 2, true));
 
     std::cout << ss.str() << std::flush;
 }

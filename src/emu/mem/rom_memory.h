@@ -10,7 +10,7 @@ public:
     ROMMemory(const std::vector<uint8_t>& data) : data(data) { }
     ROMMemory(const std::string& filename);
 
-    uint8_t read(uint16_t addr) override {
+    uint8_t read(uint16_t addr, bool nonDestructive = false) override {
         if (addr < data.size())
             return data[addr];
         else

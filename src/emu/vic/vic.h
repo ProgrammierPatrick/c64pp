@@ -55,7 +55,7 @@ public:
                 && displayEnableSetInThisFrame;
     }
 
-    uint8_t read(uint16_t addr);
+    uint8_t read(uint16_t addr, bool nonDestructive = false);
     void write(uint16_t addr, uint8_t data);
 
 private:

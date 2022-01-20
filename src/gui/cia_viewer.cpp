@@ -172,8 +172,8 @@ void CIAViewer::updateC64() {
         }
     };
 
-    setText(ui->CIA1PRA, toHexStr(cia.read(0x0000)));
-    setText(ui->CIA1PRB, toHexStr(cia.read(0x0001)));
+    setText(ui->CIA1PRA, toHexStr(cia.read(0x0000, true)));
+    setText(ui->CIA1PRB, toHexStr(cia.read(0x0001, true)));
     setText(ui->CIA1TAread, toHexStr(cia.timerCIA1.counterA));
     setText(ui->CIA1TAwrite, toHexStr(cia.timerCIA1.latchA));
     setText(ui->CIA1TBread, toHexStr(cia.timerCIA1.counterB));

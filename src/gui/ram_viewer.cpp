@@ -35,7 +35,7 @@ void RAMViewer::updateC64() {
 // https://doc.qt.io/qt-6.2/model-view-programming.html#creating-new-models
 QVariant RAMViewerModel::data(const QModelIndex& index, int role) const {
     if (role == Qt::DisplayRole || role == Qt::EditRole)
-        return QString::fromStdString(toHexStr(c64Runner->c64->mainRAM.read(index.row() * 16 + index.column())));
+        return QString::fromStdString(toHexStr(c64Runner->c64->mainRAM.read(index.row() * 16 + index.column(), true)));
     else
         return QVariant();
 }
@@ -69,7 +69,7 @@ bool RAMViewerModel::setData(const QModelIndex &index, const QVariant &value, in
         uint16_t addr = index.row() * 16 + index.column();
         uint8_t data = fromHexStr8(value.toString().toStdString());
         c64Runner->c64->mainRAM.write(addr, data);
-        std::cout << "now at " << toHexStr(addr) << ": " << toHexStr(c64Runner->c64->mainRAM.read(addr)) << std::endl;
+        std::cout << "now at " << toHexStr(addr) << ": " << toHexStr(c64Runner->c64->mainRAM.read(addr, true)) << std::endl;
         return true;
     }
     return false;
