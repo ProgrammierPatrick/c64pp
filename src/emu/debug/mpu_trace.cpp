@@ -65,7 +65,7 @@ void MPUTrace::tick() {
         // STA indirect X
         if (mpu->opcode == 0x81) {
             uint8_t baseAddr = mpu->mem->read(lastLastPC + 1, true);
-            uint16_t addr = mpu->mem->read((baseAddr + mpu->X) & 0x00FF, true) | (mpu->mem->read((baseAddr + mpu->X + 1, true) & 0x00FF) << 8);
+            uint16_t addr = mpu->mem->read((baseAddr + mpu->X) & 0x00FF, true) | (mpu->mem->read((baseAddr + mpu->X + 1) & 0x00FF, true) << 8);
             ss << "MEMORY [" << toHexStr(addr) << "] = " << toHexStr(mpu->mem->read(addr, true)) << "    [" << toHexStr(baseAddr) << "] = " << mpu->mem->read(baseAddr, true) << "\n";
         }
         // STA zeropage X, STY zeropage X

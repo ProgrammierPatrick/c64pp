@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
         try {
             c64Runner.stepFrame();
-        } catch (std::runtime_error& e) {
+        } catch (std::runtime_error&) {
             stop();
         }
 
@@ -139,7 +139,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop]() {
         try {
             c64Runner.stepFrame();
-        } catch (std::runtime_error& e) {
+        } catch (std::runtime_error&) {
             stop();
         }
         cycle += 19704;
