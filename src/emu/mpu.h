@@ -19,12 +19,12 @@ private:
 
 public:
     // registers
-    uint8_t A;   // accumulator
-    uint8_t X;   // index
-    uint8_t Y;   // index
-    uint8_t P;   // status
-    uint8_t S;   // stack pointer
-    uint16_t PC; // program counter
+    uint8_t A = 0;   // accumulator
+    uint8_t X = 0;   // index
+    uint8_t Y = 0;   // index
+    uint8_t P = 0;   // status
+    uint8_t S = 0;   // stack pointer
+    uint16_t PC = 0; // program counter
 
     // status flags
     enum Flag : uint8_t {
@@ -38,16 +38,16 @@ public:
         N = 0x80, // negative
     };
 
-    uint8_t opcode;
+    uint8_t opcode = 0;
     int T = 0;
 
     // temp values for addresses during opcode processing
-    uint16_t effectiveAddr;
-    uint16_t baseAddr;
-    uint16_t indirectAddr;
+    uint16_t effectiveAddr = 0;
+    uint16_t baseAddr = 0;
+    uint16_t indirectAddr = 0;
 
-    uint8_t modVal; // temp modify value used for read-modify-write operations
-    int8_t offset; // offset used for branching, signed 8 bit
+    uint8_t modVal = 0; // temp modify value used for read-modify-write operations
+    int8_t offset = 0; // offset used for branching, signed 8 bit
 
     // MNI is edge sensitive. If NMI is already handled, it needs to return to zero before being detected again
     // NMI_valid will be false after NMI has been received, returns to true when NMI=0
@@ -57,7 +57,7 @@ public:
     bool handlingIRQorNMI = false;
     bool handlingNMI = false;
 
-    Memory* mem;
+    Memory* mem = nullptr;
 
 private:
 

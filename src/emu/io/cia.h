@@ -19,7 +19,7 @@ public:
     Timer timerCIA2;
 
     //registers
-    uint8_t PRA; // Peripheral Data Reg A
+    uint8_t PRA = 0xFF; // Peripheral Data Reg A
     const uint8_t DDRA = 0xFF; // Data Direction Reg A
     const uint8_t DDRB = 0x00; // Data Direction Reg B
     //uint8_t TODTNTH; // 10ths Of Second Reg
@@ -30,8 +30,8 @@ public:
     // Interrupt Control Reg
     uint8_t ICRData1 = 0x00;
     uint8_t ICRData2 = 0x00;
-    uint8_t ICRMask1;
-    uint8_t ICRMask2;
+    uint8_t ICRMask1 = 0x00;
+    uint8_t ICRMask2 = 0x00;
 
     // interrupt outputs
     bool IRQ = false;

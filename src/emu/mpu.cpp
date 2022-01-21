@@ -1,6 +1,7 @@
 #include "mpu.h"
 
 #include <array>
+#include <stdexcept>
 /**
  * (Moritz)
  *

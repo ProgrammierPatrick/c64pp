@@ -14,9 +14,9 @@ public:
     void printStateToConsole();
 
 public:
-    uint16_t lastPC;
-    uint16_t lastLastPC;
-    uint8_t lastT;
+    uint16_t lastPC = 0;
+    uint16_t lastLastPC = 0;
+    uint8_t lastT = 0;
 
 private:
     std::deque<std::string> outputLines;

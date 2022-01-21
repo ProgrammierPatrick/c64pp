@@ -14,16 +14,16 @@ struct ColoredVal {
 };
 
 struct Sprite {
-    uint16_t xCoord;
-    uint16_t yCoord;
-    uint8_t spriteColor;
-    bool spriteEnabled;
-    bool spriteXExpansion;
-    bool spriteYExpansion;
-    bool spriteSpriteCollision;
-    bool spriteDataCollision;
-    bool spriteDataPriority;
-    bool spriteMulticolor;
+    uint16_t xCoord = 0;
+    uint16_t yCoord = 0;
+    uint8_t spriteColor = 0;
+    bool spriteEnabled = false;
+    bool spriteXExpansion = false;
+    bool spriteYExpansion = false;
+    bool spriteSpriteCollision = false;
+    bool spriteDataCollision = false;
+    bool spriteDataPriority = false;
+    bool spriteMulticolor = false;
 };
 
 class VIC {
@@ -66,8 +66,8 @@ private:
 
 public:
     std::array<Sprite, 8> sprites;
-    uint8_t spriteMulticolor0;
-    uint8_t spriteMulticolor1;
+    uint8_t spriteMulticolor0 = 0;
+    uint8_t spriteMulticolor1 = 0;
 
     bool BA = true; // Bus Available: when true, MPU may use the bus and is not "stunned"
 
@@ -111,9 +111,9 @@ public:
     std::vector<uint8_t> screen;
     std::array<ColoredVal, 40> videoMatrixLine;
 
-    uint8_t borderColor; // (EC) 4-bit color
+    uint8_t borderColor = 0; // (EC) 4-bit color
 
-    std::array<uint8_t, 4> backgroundColors; // (BxC)
+    std::array<uint8_t, 4> backgroundColors = { 0 }; // (BxC)
 
     bool IRQ = false;
     bool rasterInterrupt                      = false; // (IRST)
