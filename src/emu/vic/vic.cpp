@@ -193,10 +193,10 @@ uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
             return 0x1 | ((charGenMemoryPosition & 0x07) << 1) | ((videoMatrixMemoryPosition & 0x0F) << 4);
         // Interrupt register
         case 0x19:
-            return rasterInterrupt | (spriteBitmapCollisionInterrupt << 1) | (spriteSpriteCollisionInterrupt << 2) | (lightpenInterrupt << 3) | 0x70 | (IRQ << 7);
+            return (rasterInterrupt ? 0x01 : 0) | (spriteBitmapCollisionInterrupt ? 0x02 : 0) | (spriteSpriteCollisionInterrupt ? 0x04 : 0) | (lightpenInterrupt ? 0x08 : 0) | 0x70 | (IRQ ? 0x80 : 0);
         // Interrupt enabled
         case 0x1A:
-            return enableRasterInterrupt | (enableSpriteBitmapCollisionInterrupt << 1) | (enableSpriteSpriteCollisionInterrupt << 2) | (enableLightpenInterrupt << 3) | 0xF0;
+            return (enableRasterInterrupt ? 0x01 : 0) | (enableSpriteBitmapCollisionInterrupt ? 0x02 : 0) | (enableSpriteSpriteCollisionInterrupt ? 0x04 : 0) | (enableLightpenInterrupt ? 0x08 : 0) | 0xF0;
         // Sprite data priority
         case 0x1B: {
             uint8_t dataPrio = 0;

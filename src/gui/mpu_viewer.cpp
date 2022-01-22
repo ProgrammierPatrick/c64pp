@@ -9,8 +9,8 @@
 MPUViewer::MPUViewer(MainWindow *parent, C64Runner *c64Runner) :
     QMainWindow(parent),
     ui(new Ui::MPUViewer),
-    mainWindow(parent),
-    c64Runner(c64Runner)
+    c64Runner(c64Runner),
+    mainWindow(parent)
 {
     ui->setupUi(this);
 
@@ -148,11 +148,11 @@ void MPUViewer::updateC64() {
     setText(*ui->lineEditS, toHexStr(mpu.S));
     setText(*ui->lineEditPC, toHexStr(mpu.PC));
 
-    if (ui->checkboxC->isChecked() != (mpu.P & MPU::Flag::C)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::C);
-    if (ui->checkboxZ->isChecked() != (mpu.P & MPU::Flag::Z)) ui->checkboxZ->setChecked(mpu.P & MPU::Flag::Z);
-    if (ui->checkboxI->isChecked() != (mpu.P & MPU::Flag::I)) ui->checkboxI->setChecked(mpu.P & MPU::Flag::I);
-    if (ui->checkboxD->isChecked() != (mpu.P & MPU::Flag::D)) ui->checkboxD->setChecked(mpu.P & MPU::Flag::D);
-    if (ui->checkboxB->isChecked() != (mpu.P & MPU::Flag::B)) ui->checkboxB->setChecked(mpu.P & MPU::Flag::B);
-    if (ui->checkboxV->isChecked() != (mpu.P & MPU::Flag::V)) ui->checkboxV->setChecked(mpu.P & MPU::Flag::V);
-    if (ui->checkboxN->isChecked() != (mpu.P & MPU::Flag::N)) ui->checkboxN->setChecked(mpu.P & MPU::Flag::N);
+    if (ui->checkboxC->isChecked() != static_cast<bool>(mpu.P & MPU::Flag::C)) ui->checkboxC->setChecked(mpu.P & MPU::Flag::C);
+    if (ui->checkboxZ->isChecked() != static_cast<bool>(mpu.P & MPU::Flag::Z)) ui->checkboxZ->setChecked(mpu.P & MPU::Flag::Z);
+    if (ui->checkboxI->isChecked() != static_cast<bool>(mpu.P & MPU::Flag::I)) ui->checkboxI->setChecked(mpu.P & MPU::Flag::I);
+    if (ui->checkboxD->isChecked() != static_cast<bool>(mpu.P & MPU::Flag::D)) ui->checkboxD->setChecked(mpu.P & MPU::Flag::D);
+    if (ui->checkboxB->isChecked() != static_cast<bool>(mpu.P & MPU::Flag::B)) ui->checkboxB->setChecked(mpu.P & MPU::Flag::B);
+    if (ui->checkboxV->isChecked() != static_cast<bool>(mpu.P & MPU::Flag::V)) ui->checkboxV->setChecked(mpu.P & MPU::Flag::V);
+    if (ui->checkboxN->isChecked() != static_cast<bool>(mpu.P & MPU::Flag::N)) ui->checkboxN->setChecked(mpu.P & MPU::Flag::N);
 }
