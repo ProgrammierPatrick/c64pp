@@ -3,6 +3,7 @@
 
 #include "text_utils.h"
 #include "enterhexdialog.h"
+#include "prg_loader.h"
 
 #include <iostream>
 #include <sstream>
@@ -150,7 +151,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionEnter_Hex_Data, &QAction::triggered, [this]() {
         EnterHexDialog diag(this, &c64Runner);
         diag.exec();
-        diag.accept();
+        updateUI();
+    });
+
+    QObject::connect(ui->actionOpen_PRG, &QAction::triggered, [this]() {
+        PRGLoader::openPRGFile(this, &c64Runner);
         updateUI();
     });
 

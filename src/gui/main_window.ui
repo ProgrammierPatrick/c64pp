@@ -41,13 +41,14 @@
      <x>0</x>
      <y>0</y>
      <width>873</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionOpen_PRG"/>
     <addaction name="actionEnter_Hex_Data"/>
    </widget>
    <widget class="QMenu" name="menuEmulation">
@@ -167,6 +168,17 @@
   <action name="actionRAM_Viewer">
    <property name="text">
     <string>RAM Viewer</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+R</string>
+   </property>
+  </action>
+  <action name="actionOpen_PRG">
+   <property name="text">
+    <string>Open PRG...</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+O</string>
    </property>
   </action>
  </widget>
