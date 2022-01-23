@@ -63,7 +63,7 @@ void EnterHexDialog::accept() {
 
     std::cout << data.size() << " Bytes written to memory at offset " << toHexStr(offset) << std::endl;
 
-    if (ui->setPCCheckBox) {
+    if (ui->setPCCheckBox->checkState()) {
         c64Runner->c64->mpu.PC = offset;
         c64Runner->c64->mpu.T = 0;
     }
