@@ -64,6 +64,7 @@ private:
 
     void advanceGraphicsPipeline();
 
+    void checkIRQ();
 public:
     std::array<Sprite, 8> sprites;
     uint8_t spriteMulticolor0 = 0;
