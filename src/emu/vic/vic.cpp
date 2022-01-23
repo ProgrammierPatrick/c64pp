@@ -4,6 +4,11 @@ void VIC::tick() {
     tickBackground();
     // tickBorder();
 
+    // compare y with rasterCompareLine
+    if (y == 0 && cycleInLine == 1 || y != 0 && cycleInLine == 1) {
+        if (y == rasterCompareLine) rasterInterrupt = true; // raster interrupt (RST)
+    }
+
     x += 8;
     if (x > VIC::maxX) x = 0;
     cycleInLine++;
@@ -19,6 +24,8 @@ void VIC::tick() {
             // for(int i = 0; i < screenWidth * screenHeight; i++) screen[i] = 0;
         }
     }
+
+    checkIRQ();
 }
 
 void VIC::tickBackground() {
@@ -491,4 +498,13 @@ void VIC::write(uint16_t addr, uint8_t data) {
         default:
             break;
     }
+}
+
+// Checks if interrupt enable register and interrupt latch are both set for any interrupt
+// If so, IRQ is set to true
+void VIC::checkIRQ() {
+    if (enableRasterInterrupt & rasterInterrupt) IRQ = true; // RST
+    if (enableSpriteBitmapCollisionInterrupt & spriteBitmapCollisionInterrupt) IRQ = true; // MBC
+    if (enableSpriteSpriteCollisionInterrupt & spriteSpriteCollisionInterrupt) IRQ = true; // MMC
+    if (enableLightpenInterrupt & lightpenInterrupt) IRQ = true; // LP
 }
