@@ -23,4 +23,5 @@ public:
 private:
     std::vector<uint8_t> *videoBuffer;
     int width, height;
+    QList<QRgb> colorPalette;
 };

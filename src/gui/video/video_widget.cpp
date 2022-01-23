@@ -10,9 +10,28 @@ extern const QList<QRgb> colorPalette;
 
 VideoWidget::VideoWidget(QWidget *parent, int width, int height, std::vector<uint8_t> *videoBuffer)
     : QWidget(parent),
-      width(width), height(height),
-      videoBuffer(videoBuffer) {
+      videoBuffer(videoBuffer),
+      width(width), height(height) {
 
+    for(int i = 0; i < 16; i++) {
+        // https://www.c64-wiki.com/wiki/Color
+        colorPalette.push_back(qRgb(0x00, 0x00, 0x00));
+        colorPalette.push_back(qRgb(0xFF, 0xFF, 0xFF));
+        colorPalette.push_back(qRgb(0x88, 0x00, 0x00));
+        colorPalette.push_back(qRgb(0xAA, 0xFF, 0xEE));
+        colorPalette.push_back(qRgb(0xCC, 0x44, 0xCC));
+        colorPalette.push_back(qRgb(0x00, 0xCC, 0x55));
+        colorPalette.push_back(qRgb(0x00, 0x00, 0xAA));
+        colorPalette.push_back(qRgb(0xEE, 0xEE, 0x77));
+        colorPalette.push_back(qRgb(0xDD, 0x88, 0x55));
+        colorPalette.push_back(qRgb(0x66, 0x44, 0x00));
+        colorPalette.push_back(qRgb(0xFF, 0x77, 0x77));
+        colorPalette.push_back(qRgb(0x33, 0x33, 0x33));
+        colorPalette.push_back(qRgb(0x77, 0x77, 0x77));
+        colorPalette.push_back(qRgb(0xAA, 0xFF, 0x66));
+        colorPalette.push_back(qRgb(0x00, 0x88, 0xFF));
+        colorPalette.push_back(qRgb(0xBB, 0xBB, 0xBB));
+    }
 }
 
 VideoWidget::~VideoWidget() {
@@ -39,23 +58,3 @@ void VideoWidget::paintEvent(QPaintEvent *event) {
 
     painter.drawImage(x, y, image);
 }
-
-const QList<QRgb> colorPalette {
-    // https://www.c64-wiki.com/wiki/Color
-    qRgb(0x00, 0x00, 0x00),
-    qRgb(0xFF, 0xFF, 0xFF),
-    qRgb(0x88, 0x00, 0x00),
-    qRgb(0xAA, 0xFF, 0xEE),
-    qRgb(0xCC, 0x44, 0xCC),
-    qRgb(0x00, 0xCC, 0x55),
-    qRgb(0x00, 0x00, 0xAA),
-    qRgb(0xEE, 0xEE, 0x77),
-    qRgb(0xDD, 0x88, 0x55),
-    qRgb(0x66, 0x44, 0x00),
-    qRgb(0xFF, 0x77, 0x77),
-    qRgb(0x33, 0x33, 0x33),
-    qRgb(0x77, 0x77, 0x77),
-    qRgb(0xAA, 0xFF, 0x66),
-    qRgb(0x00, 0x88, 0xFF),
-    qRgb(0xBB, 0xBB, 0xBB),
-};

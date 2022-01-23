@@ -9,7 +9,9 @@
  *  - BCD Variants
  */
 
-void dataHandlerNop(MPU& mpu, uint8_t data) { }
+void dataHandlerNop(MPU& mpu, uint8_t data) {
+    throw std::runtime_error("[MPU] DataHandlerNop() called!");
+}
 
 struct OpCode {
     // int numBytes; // length of istruction including opcode
@@ -271,7 +273,7 @@ void opAND(MPU& mpu, uint8_t value) {
 void opBIT(MPU& mpu, uint8_t value) {
     bool neg = 0x80 & value;
     bool overflow = 0x40 & value;
-    bool zero = (0x3F & mpu.A & value) == 0;
+    bool zero = (mpu.A & value) == 0;
     mpu.P &= ~(MPU::Flag::N | MPU::Flag::V | MPU::Flag::Z);
     mpu.P |= (neg ? MPU::Flag::N : 0) | (overflow ? MPU::Flag::V : 0) |(zero ? MPU::Flag::Z : 0);
 }
@@ -998,7 +1000,7 @@ void fetchJMPEffAddrLow(MPU& mpu) {
 }
 void fetchJMPEffAddrHigh(MPU& mpu) {
     // 6502 bug: JMP indirect can't cross page boundary
-    mpu.effectiveAddr |= mpu.mem->read(mpu.indirectAddr & 0xFF00 | (mpu.indirectAddr + 1) & 0x00FF) << 8;
+    mpu.effectiveAddr |= mpu.mem->read((mpu.indirectAddr & 0xFF00) | ((mpu.indirectAddr + 1) & 0x00FF)) << 8;
     mpu.T = 0;
     mpu.PC = mpu.effectiveAddr;
 }
@@ -1011,7 +1013,7 @@ OpCode createJMPIndirect() {
 // RTI instruction (return from interrupt)
 void rtiPullP(MPU& mpu) {
     mpu.S++;
-    mpu.P = mpu.mem->read(0x0100 | mpu.S);
+    mpu.P = mpu.mem->read(0x0100 | mpu.S) & ~MPU::Flag::B & ~MPU::Flag::EmptyBit;
     mpu.T++;
 }
 void rtiPullPCL(MPU& mpu) {
@@ -1228,7 +1230,7 @@ void MPU::tick(bool IRQ, bool NMI) {
         if (NMI_valid && NMI)
             handlingNMI = true;
 
-        if (!(P & Flag::I) && IRQ || handlingNMI) {
+        if ((!(P & Flag::I) && IRQ) || handlingNMI) {
             if(handlingNMI) NMI_valid = false;
             handlingIRQorNMI = true;
             opcode = 0x00; // BRK

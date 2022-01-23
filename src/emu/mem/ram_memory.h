@@ -6,13 +6,13 @@
 
 class RAMMemory : public Memory {
 public:
-    RAMMemory(int size) : data(size) { }
+    RAMMemory(int size) : data(size) { for(size_t i = 0; i < size; i++) data[i] = 0xFF; }
 
     uint8_t read(uint16_t addr, bool nonDestructive = false) override {
         if (addr < data.size())
             return data[addr];
         else
-            return 0x00;
+            return 0xFF;
     }
 
     void write(uint16_t addr, uint8_t data) override {
