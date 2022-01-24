@@ -6,7 +6,7 @@ void VIC::tick() {
 
     // compare y with rasterCompareLine
     if (y == 0 && cycleInLine == 2 || y != 0 && cycleInLine == 1) {
-        if (y == rasterCompareLine) rasterInterrupt = true; // raster interrupt (RST)
+        if (y == rasterCompareLine && enableRasterInterrupt) rasterInterrupt = true; // raster interrupt (RST)
     }
 
     x += 8;
