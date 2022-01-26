@@ -4,6 +4,7 @@
 #include "mpu_viewer.h"
 #include "cia_viewer.h"
 #include "ram_viewer.h"
+#include "breakpoint_editor.h"
 #include "keyboard/keyboard_window.h"
 #include "video/video_widget.h"
 
@@ -48,6 +49,7 @@ private:
     RAMViewer *toolRAMViewer = nullptr;
     CIAViewer *toolCIAViewer = nullptr;
     KeyboardWindow *toolKeyboardWindow = nullptr;
+    BreakpointEditor *toolBreakpointEditor = nullptr;
 
     QSize mainScreenOffset;
 };

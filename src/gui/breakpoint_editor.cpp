@@ -1,9 +1,10 @@
 #include "breakpoint_editor.h"
 #include "ui_breakpoint_editor.h"
 
-BreakpointEditor::BreakpointEditor(QWidget *parent) :
+BreakpointEditor::BreakpointEditor(QWidget *parent, C64Runner* c64Runner) :
     QMainWindow(parent),
-    ui(new Ui::BreakpointEditor)
+    ui(new Ui::BreakpointEditor),
+    c64Runner(c64Runner)
 {
     ui->setupUi(this);
     updateC64();
