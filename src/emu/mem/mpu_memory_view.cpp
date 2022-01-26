@@ -12,7 +12,10 @@ uint8_t MPUMemoryView::read(uint16_t addr, bool nonDestructive) {
         if (bankSetting & 0x4) {
             if (addr >= 0xD000 && addr <= 0xD3FF)
                 return vic->read(addr - 0xD000, nonDestructive);
-            // missing: SID
+
+            if (addr >= 0xD400 && addr <= 0xD7FF)
+                std::cout << "Unssuported SID read" << std::endl;
+
             else if (addr >= 0xD800 && addr <= 0xDBE7)
                 return colorRAM->read(addr - 0xD800, nonDestructive) & 0x0F;
             else if (addr >= 0xDC00 && addr <= 0xDDFF)
@@ -39,7 +42,10 @@ void MPUMemoryView::write(uint16_t addr, uint8_t data) {
     else if (addr >= 0xD000 && addr <= 0xDFFF && (bankSetting & 0x3) != 0x0 && (bankSetting & 0x4)) {
         if (addr >= 0xD000 && addr <= 0xD3FF)
             vic->write(addr - 0xD000, data);
-        // missing: SID
+
+        if (addr >= 0xD400 && addr <= 0xD7FF)
+            std::cout << "Unsupported SID write" << std::endl;
+
         if (addr >= 0xD800 && addr<= 0xDBE7)
             colorRAM->write(addr - 0xD800, data);
         if (addr >= 0xDC00 && addr <= 0xDDFF)

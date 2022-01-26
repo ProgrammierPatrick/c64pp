@@ -19,7 +19,7 @@ void C64::tick() {
 
     try {
         vic.tick();
-        mpu.tick(cia.IRQ, cia.NMI);
+        mpu.tick(cia.IRQ || vic.IRQ , cia.NMI);
         cia.tick();
     }
     catch (std::runtime_error& e) {
