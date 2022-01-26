@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>585</width>
+    <width>500</width>
     <height>600</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>20</x>
       <y>50</y>
-      <width>541</width>
+      <width>461</width>
       <height>531</height>
      </rect>
     </property>
@@ -53,7 +53,7 @@
    </widget>
    <widget class="QComboBox" name="whichMemoryComboBox">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -106,7 +106,7 @@
    </widget>
    <widget class="QCheckBox" name="relAddrCheckBox">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -118,6 +118,22 @@
     </property>
     <property name="text">
      <string>relative Addresses</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="decimalAddrCheckBox">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>20</y>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>decimal Addr</string>
     </property>
    </widget>
   </widget>

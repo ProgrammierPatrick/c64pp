@@ -21,6 +21,7 @@ public:
     RAMViewerModel(RAMViewer* viewer, C64Runner *c64Runner)
         : viewer(viewer), c64Runner(c64Runner) { }
 
+    void updateC64();
 
     int columnCount(const QModelIndex& index = QModelIndex()) const override;
     int rowCount(const QModelIndex& index = QModelIndex()) const override;
@@ -31,6 +32,10 @@ public:
 
     RAMViewer* viewer;
     C64Runner* c64Runner;
+
+    int ramSelection = 0;
+    bool relativeOffset = false;
+    bool showDecimalAddr = false;
 };
 
 class RAMViewerItemDelegate : public QStyledItemDelegate {
