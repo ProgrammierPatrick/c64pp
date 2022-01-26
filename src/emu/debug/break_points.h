@@ -8,7 +8,7 @@
 class BreakPointException : std::exception {
 public:
     BreakPointException() { }
-    const char* what() { return "break point hit"; }
+    const char* what() const override { return "break point hit"; }
 };
 
 class BreakPoints {
@@ -25,7 +25,8 @@ public:
 
     void resetBreakpoints() { breakPointHit = false; }
 
-    bool breakPointHit = false;
     std::vector<uint16_t> instructionBreakpoints;
+
+    bool breakPointHit = false;
     bool enable = true;
 };

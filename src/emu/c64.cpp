@@ -11,11 +11,6 @@ void C64::tick() {
     if constexpr (traceKernal) {
         kernalTrace.tick();
     }
-    if constexpr (enableBreakPoints) {
-        if (mpu.T == 0) {
-            breakPoints.checkInstr(mpu.PC);
-        }
-    }
 
     try {
         vic.tick();
@@ -31,5 +26,11 @@ void C64::tick() {
         mpuTrace.printHistoryToConsole();
         std::cout << "exception encountered: " << e.what() << std::endl;
         throw;
+    }
+
+    if constexpr (enableBreakPoints) {
+        if (mpu.T == 0) {
+            breakPoints.checkInstr(mpu.PC);
+        }
     }
 }
