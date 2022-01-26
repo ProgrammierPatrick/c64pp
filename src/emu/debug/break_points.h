@@ -3,10 +3,12 @@
 #include <vector>
 #include <cstdint>
 #include <stdexcept>
+#include <algorithm>
 
 class BreakPointException : std::exception {
 public:
-    BreakPointException() : std::exception("break point hit") { }
+    BreakPointException() { }
+    const char* what() { return "break point hit"; }
 };
 
 class BreakPoints {

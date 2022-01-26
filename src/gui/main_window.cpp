@@ -122,6 +122,17 @@ MainWindow::MainWindow(QWidget *parent) :
             toolRAMViewer->show();
         }
     };
+    auto breakpointEditor = [this]() {
+        if (toolBreakpointEditor) {
+            delete toolBreakpointEditor;
+            toolBreakpointEditor = nullptr;
+        } else {
+            toolBreakpointEditor = new BreakpointEditor(this, &c64Runner);
+            QObject::connect(toolBreakpointEditor, &QObject::destroyed, [this](QObject*) { toolBreakpointEditor = nullptr; });
+            toolBreakpointEditor->setAttribute(Qt::WA_DeleteOnClose, true);
+            toolBreakpointEditor->show();
+        }
+    };
     auto virtualKeyboard = [this]() {
         if (toolKeyboardWindow) {
             delete toolKeyboardWindow;
@@ -147,6 +158,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionRAM_Viewer, &QAction::triggered, ramViewer);
     QObject::connect(ui->actionCIA_Viewer, &QAction::triggered, ciaViewer);
     QObject::connect(ui->actionVirtual_Keyboard, &QAction::triggered, virtualKeyboard);
+    QObject::connect(ui->actionBreakpoint_Editor, &QAction::triggered, breakpointEditor);
 
     QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop]() {
         try {
@@ -186,6 +198,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addAction("RAM..", ramViewer);
     ui->toolBar->addAction("CIA..", ciaViewer);
     ui->toolBar->addAction("Keyboard..", virtualKeyboard);
+    ui->toolBar->addAction("Breaks..", breakpointEditor);
 
     auto tosize = [](const QPoint p) { return QSize { p.x(), p.y() }; };
     mainScreenOffset = size() - tosize(ui->mainScreenFrame->pos()) - ui->mainScreenFrame->size();
@@ -230,6 +243,8 @@ void MainWindow::updateUI() {
         toolCIAViewer->updateC64();
     if (toolKeyboardWindow)
         toolKeyboardWindow->updateUI();
+    if (toolBreakpointEditor)
+        toolBreakpointEditor->updateC64();
 
     mainScreen->setVideoBuffer(&c64Runner.c64->vic.screen);
     mainScreen->updateUI();

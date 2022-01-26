@@ -45,6 +45,21 @@
     <property name="horizontalScrollBarPolicy">
      <enum>Qt::ScrollBarAlwaysOff</enum>
     </property>
+    <item>
+     <property name="text">
+      <string>Neues Element</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2F35</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Neues Element</string>
+     </property>
+    </item>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -53,7 +68,7 @@
      <x>0</x>
      <y>0</y>
      <width>667</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>

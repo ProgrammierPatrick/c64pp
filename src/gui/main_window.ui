@@ -41,7 +41,7 @@
      <x>0</x>
      <y>0</y>
      <width>873</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -69,7 +69,10 @@
     <addaction name="actionMPU_Viewer"/>
     <addaction name="actionRAM_Viewer"/>
     <addaction name="actionCIA_Viewer"/>
+    <addaction name="separator"/>
     <addaction name="actionVirtual_Keyboard"/>
+    <addaction name="separator"/>
+    <addaction name="actionBreakpoint_Editor"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEmulation"/>
@@ -179,6 +182,14 @@
    </property>
    <property name="shortcut">
     <string>Alt+O</string>
+   </property>
+  </action>
+  <action name="actionBreakpoint_Editor">
+   <property name="text">
+    <string>Breakpoint Editor</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+B</string>
    </property>
   </action>
  </widget>
