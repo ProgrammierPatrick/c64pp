@@ -14,6 +14,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    auto tickFPS = [this]() {
+        auto t = std::chrono::system_clock::now();
+        currentFPS = 1.f / std::chrono::duration<float>(t - lastFrameTime).count();
+        lastFrameTime = t;
+    };
+
     auto hardReset = [this]() {
         c64Runner.hardReset();
         frame = 0;
@@ -52,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
         catch (std::runtime_error&) { }
         catch (BreakPointException&) { }
         cycle++;
-        if (cycle % 19704 == 0) frame++;
+        if (c64Runner.c64->vic.y == 0 && c64Runner.c64->vic.cycleInLine == 1) frame++;
         updateUI();
     };
     auto stepInstruction = [this, stop]() {
@@ -60,15 +66,19 @@ MainWindow::MainWindow(QWidget *parent) :
             stop();
         }
 
+        int usedCycles = 0;
+
         try {
-            cycle += c64Runner.stepInstruction();
+            usedCycles = c64Runner.stepInstruction();
         } catch (std::runtime_error&) {
             stop();
         } catch (BreakPointException&) {
             stop();
         }
 
-        if (cycle % 19704 == 0) frame++;
+        cycle += usedCycles;
+        if (c64Runner.c64->vic.y == 0 && c64Runner.c64->vic.cycleInLine < usedCycles) frame++;
+
         updateUI();
     };
     auto stepFrame = [this, stop]() {
@@ -78,15 +88,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
         try {
             c64Runner.c64->breakPoints.resetBreakpoints();
-            c64Runner.stepFrame();
+            cycle += c64Runner.stepFrame();
+            frame++;
         } catch (std::runtime_error&) {
             stop();
         } catch (BreakPointException&) {
             stop();
         }
 
-        cycle += 19704;
-        frame++;
         updateUI();
     };
     auto mpuViewer = [this]() {
@@ -160,9 +169,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionVirtual_Keyboard, &QAction::triggered, virtualKeyboard);
     QObject::connect(ui->actionBreakpoint_Editor, &QAction::triggered, breakpointEditor);
 
-    QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop]() {
+    QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop, tickFPS]() {
         try {
             cycle += c64Runner.stepFrame();
+            tickFPS();
         } catch (std::runtime_error&) {
             stop();
         } catch (BreakPointException&) {
@@ -252,7 +262,7 @@ void MainWindow::updateUI() {
     std::stringstream ss;
 
     auto& mpu = c64Runner.c64->mpu;
-    ss << "cycle:" << cycle << " frame:" << frame << " T:" << mpu.T;
+    ss << "FPS:" << static_cast<int>(currentFPS) << " cycle:" << cycle << " frame:" << frame << " T:" << mpu.T;
 
     ss << " A:" << toHexStr(mpu.A);
     ss << " X:" << toHexStr(mpu.X);

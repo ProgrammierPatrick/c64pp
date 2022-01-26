@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>873</width>
-    <height>580</height>
+    <width>830</width>
+    <height>656</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,12 +19,12 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>851</width>
-      <height>501</height>
+      <width>808</width>
+      <height>568</height>
      </rect>
     </property>
     <property name="frameShape">
-     <enum>QFrame::Box</enum>
+     <enum>QFrame::NoFrame</enum>
     </property>
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
@@ -32,7 +32,23 @@
     <property name="lineWidth">
      <number>1</number>
     </property>
-    <layout class="QGridLayout" name="gridLayout"/>
+    <layout class="QGridLayout" name="gridLayout">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <property name="spacing">
+      <number>0</number>
+     </property>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -40,7 +56,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>873</width>
+     <width>830</width>
      <height>26</height>
     </rect>
    </property>

@@ -12,6 +12,7 @@
 #include <QTimer>
 
 #include <vector>
+#include <chrono>
 
 namespace Ui {
 class MainWindow;
@@ -40,6 +41,8 @@ private:
 
     float running = true;
     QTimer frameTimer;
+    std::chrono::time_point<std::chrono::system_clock> lastFrameTime;
+    float currentFPS = 0;
 
     QAction* toolbarPauseAction;
 
