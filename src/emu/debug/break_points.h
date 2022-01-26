@@ -8,7 +8,7 @@
 class BreakPointException : std::exception {
 public:
     BreakPointException() { }
-    const char* what() const override { return "break point hit"; }
+    const char* what() const noexcept override { return "break point hit"; }
 };
 
 class BreakPoints {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>667</width>
-    <height>333</height>
+    <width>295</width>
+    <height>361</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <widget class="QCheckBox" name="enabled">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>40</x>
       <y>20</y>
       <width>70</width>
       <height>17</height>
@@ -36,30 +36,59 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>40</x>
       <y>40</y>
-      <width>181</width>
+      <width>191</width>
       <height>211</height>
      </rect>
     </property>
     <property name="horizontalScrollBarPolicy">
      <enum>Qt::ScrollBarAlwaysOff</enum>
     </property>
-    <item>
-     <property name="text">
-      <string>Neues Element</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>2F35</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Neues Element</string>
-     </property>
-    </item>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>260</y>
+      <width>161</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLineEdit" name="inputLine"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="add">
+         <property name="text">
+          <string>Add</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QPushButton" name="remove">
+         <property name="text">
+          <string>Remove</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="removeAll">
+         <property name="text">
+          <string>Remove All</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -67,8 +96,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>667</width>
-     <height>26</height>
+     <width>295</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>

@@ -3,10 +3,7 @@
 #include <string>
 #include <array>
 
-std::string padZeros(std::string str, int len) {
-    while(str.size() < len) str = "0" + str;
-    return str;
-}
+std::string padZeros(std::string str, int len);
 
 std::string toHexStr(uint8_t number);
 std::string toHexStr(uint16_t number);
