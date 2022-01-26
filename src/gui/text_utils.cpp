@@ -53,6 +53,11 @@ uint16_t fromHexStr16(const std::string& str) {
     return fromHexChar(str[0]) << 12 | fromHexChar(str[1]) << 8 | fromHexChar(str[2]) << 4  | fromHexChar(str[3]);
 }
 
+std::string padZeros(std::string str, int len) {
+   while(str.size() < len) str = "0" + str;
+   return str;
+}
+
 const std::array<char, 256> petsciiToChar = {
     /* 00 */ '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',
     /* 10 */ '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?',
