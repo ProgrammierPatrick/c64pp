@@ -1,7 +1,8 @@
 #include "c64.h"
 
-const bool traceMPU = true;
+const bool traceMPU = false;
 const bool traceKernal = true;
+const bool enableBreakPoints = true;
 
 void C64::tick() {
     if constexpr (traceMPU) {
@@ -9,6 +10,11 @@ void C64::tick() {
     }
     if constexpr (traceKernal) {
         kernalTrace.tick();
+    }
+    if constexpr (enableBreakPoints) {
+        if (mpu.T == 0) {
+            breakPoints.checkInstr(mpu.PC);
+        }
     }
 
     try {

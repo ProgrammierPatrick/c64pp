@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     };
     auto start = [this]() {
         running = true;
+        c64Runner.c64->breakPoints.resetBreakpoints();
         frameTimer.start();
         ui->actionPause->setText("Pause");
         toolbarPauseAction->setText("Pause");
@@ -44,7 +45,12 @@ MainWindow::MainWindow(QWidget *parent) :
         if (running) {
             stop();
         }
-        c64Runner.singleStepMPU();
+        c64Runner.c64->breakPoints.resetBreakpoints();
+        try {
+            c64Runner.singleStepMPU();
+        }
+        catch (std::runtime_error&) { }
+        catch (BreakPointException&) { }
         cycle++;
         if (cycle % 19704 == 0) frame++;
         updateUI();
@@ -58,6 +64,8 @@ MainWindow::MainWindow(QWidget *parent) :
             cycle += c64Runner.stepInstruction();
         } catch (std::runtime_error&) {
             stop();
+        } catch (BreakPointException&) {
+            stop();
         }
 
         if (cycle % 19704 == 0) frame++;
@@ -69,8 +77,11 @@ MainWindow::MainWindow(QWidget *parent) :
         }
 
         try {
+            c64Runner.c64->breakPoints.resetBreakpoints();
             c64Runner.stepFrame();
         } catch (std::runtime_error&) {
+            stop();
+        } catch (BreakPointException&) {
             stop();
         }
 
@@ -139,11 +150,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop]() {
         try {
-            c64Runner.stepFrame();
+            cycle += c64Runner.stepFrame();
         } catch (std::runtime_error&) {
             stop();
+        } catch (BreakPointException&) {
+            stop();
         }
-        cycle += 19704;
         frame++;
         updateUI();
     });

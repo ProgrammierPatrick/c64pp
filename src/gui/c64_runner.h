@@ -33,12 +33,13 @@ public:
         } while (c64->mpu.T != 0);
         return numTicks;
     }
-    void stepFrame() {
-        // 0,9852486 MHz / 50Hz ~ 19704 Ticks per frame
-        // of couse not quite correct, since VIC controlls the MPU clock
-        for(int i = 0; i < 19704; i++) {
+    int stepFrame() {
+        int numTicks = 0;
+        do {
             c64->tick();
-        }
+            numTicks++;
+        } while(c64->vic.y != 0 || c64->vic.cycleInLine != 1);
+        return numTicks;
     }
 
     std::unique_ptr<C64> c64;

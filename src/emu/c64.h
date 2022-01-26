@@ -8,6 +8,7 @@
 #include "vic/vic.h"
 #include "debug/mpu_trace.h"
 #include "debug/kernal_trace.h"
+#include "debug/break_points.h"
 
 class C64 {
 public:
@@ -40,5 +41,6 @@ public:
     VIC vic;
     MPUTrace mpuTrace;
     KernalTrace kernalTrace;
+    BreakPoints breakPoints;
 };
 
