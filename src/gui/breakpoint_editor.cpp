@@ -17,6 +17,7 @@ BreakpointEditor::BreakpointEditor(MainWindow *parent, C64Runner *c64Runner) :
     setFixedSize(size());
     ui->inputLine->setFocus();
     ui->inputLine->setMaxLength(4);
+    bool enabledOld = false;
 
     QObject::connect(ui->inputLine, &QLineEdit::returnPressed, ui->add, &QPushButton::click);
 
@@ -55,6 +56,13 @@ BreakpointEditor::BreakpointEditor(MainWindow *parent, C64Runner *c64Runner) :
         updateC64();
     });
 
+    QObject::connect(ui->enabled, &QCheckBox::stateChanged, [this](bool b) {
+        this->c64Runner->c64->breakPoints.enable = ui->enabled->isChecked();
+        ui->inputLine->clear();
+        ui->inputLine->setFocus();
+        updateC64();
+    });
+
 }
 
 BreakpointEditor::~BreakpointEditor()
@@ -65,6 +73,10 @@ BreakpointEditor::~BreakpointEditor()
 void BreakpointEditor::updateC64() {
     ui->list->sortItems(Qt::AscendingOrder);
     auto& vec = this->c64Runner->c64->breakPoints.instructionBreakpoints;
+
+    if (ui->enabled->isChecked() != this->c64Runner->c64->breakPoints.enable) {
+        ui->enabled->setChecked(this->c64Runner->c64->breakPoints.enable);
+    }
 
     bool refresh = false;
     for (int i = 0; i < vec.size(); i++) {
