@@ -53,7 +53,7 @@ int ramSize(int index) {
     case 2: return 1024;    // Color RAM
     case 3: return 0x2000;  // BASIC ROM
     case 4: return 0x1000;  // chargen ROM
-    case 5: return 0x1000;  // KERNAL ROM
+    case 5: return 0x2000;  // KERNAL ROM
     case 6: return 0x40;    // VIC-II
     case 7: return 16;      // CIA 1+2
     default: throw std::runtime_error("RamViewer: illegal memory type selected");

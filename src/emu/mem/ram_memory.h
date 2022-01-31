@@ -6,7 +6,7 @@
 
 class RAMMemory : public Memory {
 public:
-    RAMMemory(int size) : data(size) { for(size_t i = 0; i < size; i++) data[i] = 0xFF; }
+    RAMMemory(int size) : data(size) { for(std::size_t i = 0; i < size; i++) data[i] = 0xFF; }
 
     uint8_t read(uint16_t addr, bool nonDestructive = false) override {
         if (addr < data.size())

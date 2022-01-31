@@ -7,6 +7,8 @@
 #include <iostream>
 #include <vector>
 
+class CIA;
+
 struct ColoredVal {
     uint8_t val;
     uint8_t col;
@@ -30,24 +32,15 @@ class VIC {
 public:
     // VIC-II (6569)
 
-    VIC(Memory* mainRAM, Memory* charROM, Memory* colorRAM)
-        : mainRAM(mainRAM), charROM(charROM), colorRAM(colorRAM),
+    VIC(Memory* mainRAM, Memory* charROM, Memory* colorRAM, CIA* cia)
+        : mainRAM(mainRAM), charROM(charROM), colorRAM(colorRAM), cia(cia),
           backgroundGraphics(this) {
         screen.resize(screenWidth * screenHeight);
     }
 
     void tick();
 
-    ColoredVal accessMem(uint16_t addr) {
-        uint8_t val;
-        if (((bankSetting & 2) == 0) && addr >= 0x1000 && addr <= 0x1FFF)
-            val = charROM->read(addr & 0x0FFF);
-        else {
-            auto absAddr = addr + bankSetting * 0x4000;
-            val = mainRAM->read(absAddr);
-        }
-        return ColoredVal(val, colorRAM->read(addr & 0x3F));
-    }
+    ColoredVal accessMem(uint16_t addr);
 
     bool isBadLine() {
         return y >= 0x30 && y <= 0xf7
@@ -147,4 +140,5 @@ public:
     Memory* mainRAM;
     Memory* charROM;
     Memory* colorRAM;
+    CIA* cia;
 };

@@ -1,5 +1,7 @@
 #include "vic.h"
 
+#include "../io/cia.h"
+
 void VIC::tick() {
     tickBackground();
     // tickBorder();
@@ -109,6 +111,19 @@ void VIC::advanceGraphicsPipeline() {
     graphicsDataPipeline[3] = graphicsDataPipeline[2];
     graphicsDataPipeline[2] = graphicsDataPipeline[1];
     graphicsDataPipeline[1] = graphicsDataPipeline[0];
+}
+
+
+ColoredVal VIC::accessMem(uint16_t addr) {
+    uint8_t val;
+    if (((bankSetting & 2) == 0) && addr >= 0x1000 && addr <= 0x1FFF)
+        val = charROM->read(addr & 0x0FFF);
+    else {
+        uint16_t ciaBank = (~cia->PRA2 & 0x03) << 14;
+        uint16_t absAddr = ciaBank | (addr + bankSetting * 0x4000);
+        val = mainRAM->read(absAddr);
+    }
+    return ColoredVal(val, colorRAM->read(addr & 0x3F));
 }
 
 uint8_t VIC::read(uint16_t addr, bool nonDestructive) {

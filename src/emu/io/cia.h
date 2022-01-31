@@ -19,7 +19,8 @@ public:
     Timer timerCIA2;
 
     //registers
-    uint8_t PRA = 0xFF; // Peripheral Data Reg A
+    uint8_t PRA1 = 0xFF; // Peripheral Data Reg A (CIA 1)
+    uint8_t PRA2 = 0xFF; // Peripheral Data Reg A (CIA 2)
     const uint8_t DDRA = 0xFF; // Data Direction Reg A
     const uint8_t DDRB = 0x00; // Data Direction Reg B
     //uint8_t TODTNTH; // 10ths Of Second Reg

@@ -23,6 +23,7 @@ CIAViewer::CIAViewer(MainWindow *parent, C64Runner *c64Runner) :
     auto setupLineEdit16 = [](QLineEdit* edit) { edit->setMaxLength(4); edit->setInputMask("HHHH"); };
     setupLineEdit8(ui->CIA1PRA);
     setupLineEdit8(ui->CIA1PRB);
+    setupLineEdit8(ui->CIA2PRA);
     setupLineEdit16(ui->CIA1TAread);
     setupLineEdit16(ui->CIA1TAwrite);
     setupLineEdit16(ui->CIA1TBread);
@@ -88,6 +89,7 @@ CIAViewer::CIAViewer(MainWindow *parent, C64Runner *c64Runner) :
         });
     };
     connect8(ui->CIA1PRA, [](CIA& cia, uint8_t val) { cia.write(0x0000, val); });
+    connect8(ui->CIA2PRA, [](CIA& cia, uint8_t val) { cia.write(0x0100, val); });
     connect16(ui->CIA1TAread , [](CIA& cia, uint16_t val) { cia.timerCIA1.counterA = val; });
     connect16(ui->CIA1TAwrite, [](CIA& cia, uint16_t val) { cia.timerCIA1.latchA = val; });
     connect16(ui->CIA1TBread , [](CIA& cia, uint16_t val) { cia.timerCIA1.counterB = val; });
@@ -174,6 +176,7 @@ void CIAViewer::updateC64() {
 
     setText(ui->CIA1PRA, toHexStr(cia.read(0x0000, true)));
     setText(ui->CIA1PRB, toHexStr(cia.read(0x0001, true)));
+    setText(ui->CIA2PRA, toHexStr(cia.read(0x0100, true)));
     setText(ui->CIA1TAread, toHexStr(cia.timerCIA1.counterA));
     setText(ui->CIA1TAwrite, toHexStr(cia.timerCIA1.latchA));
     setText(ui->CIA1TBread, toHexStr(cia.timerCIA1.counterB));

@@ -13,8 +13,8 @@ uint8_t MPUMemoryView::read(uint16_t addr, bool nonDestructive) {
             if (addr >= 0xD000 && addr <= 0xD3FF)
                 return vic->read(addr - 0xD000, nonDestructive);
 
-            if (addr >= 0xD400 && addr <= 0xD7FF)
-                std::cout << "Unssuported SID read" << std::endl;
+            if (addr >= 0xD400 && addr <= 0xD7FF && !nonDestructive)
+                std::cout << "Unsupported SID read" << std::endl;
 
             else if (addr >= 0xD800 && addr <= 0xDBE7)
                 return colorRAM->read(addr - 0xD800, nonDestructive) & 0x0F;

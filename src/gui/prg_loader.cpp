@@ -11,8 +11,8 @@
 
 PRGLoader::PRGLoader(QWidget *parent, C64Runner* c64Runner, const std::string& fileName) :
     QDialog(parent),
-    c64Runner(c64Runner),
-    ui(new Ui::PRGLoader)
+    ui(new Ui::PRGLoader),
+    c64Runner(c64Runner)
 {
     ui->setupUi(this);
 
@@ -87,14 +87,14 @@ PRGLoader::PRGLoader(QWidget *parent, C64Runner* c64Runner, const std::string& f
     }
 
     QObject::connect(open, &QAbstractButton::clicked, [dataPtr, this](bool b){
-        for (int i = 2; i < dataPtr->size() - 1; i++) {
+        for (int i = 2; i < dataPtr->size(); i++) {
             this->c64Runner->c64->mpu.mem->write(fromHexStr16(ui->offset->text().toStdString()) + i - 2, (*dataPtr)[i]);
         }
     });
 
 
     QObject::connect(openAndRun, &QAbstractButton::clicked, [dataPtr, this](bool b){
-        for (int i = 2; i < dataPtr->size() - 1; i++) {
+        for (int i = 2; i < dataPtr->size(); i++) {
             this->c64Runner->c64->mpu.mem->write(fromHexStr16(ui->offset->text().toStdString()) + i - 2, (*dataPtr)[i]);
         }
         this->c64Runner->c64->mpu.PC = fromHexStr16(ui->targetNumber->text().toStdString());

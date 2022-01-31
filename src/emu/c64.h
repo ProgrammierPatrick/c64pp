@@ -18,7 +18,7 @@ public:
           mpuMemoryView(&mpu, &mainRAM, &colorRAM, &this->basicROM, &this->kernalROM, &this->chargenROM, &cia, &vic),
           basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM),
           cia(keyboard),
-          vic(&mainRAM, &this->chargenROM, &colorRAM),
+          vic(&mainRAM, &this->chargenROM, &colorRAM, &cia),
           mpuTrace(&mpu), kernalTrace(&mpu) {
         reset();
     }
