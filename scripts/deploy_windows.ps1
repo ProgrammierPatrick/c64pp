@@ -1,11 +1,21 @@
-$env:Path += ";C:\Qt\6.2.1\mingw81_64\bin"  # qt directory
-$env:Path += ";C:\Qt\Tools\mingw810_64\bin" # mingw directory
+# qt directory
+$env:Path += ";C:\Qt\6.2.2\mingw_64\bin;C:\Qt\6.2.1\mingw81_64\bin"
 
-if (Test-Path release_windows) {
-    Remove-Item release_windows -r
+# mingw directory
+$env:Path += ";C:\Qt\Tools\mingw900_64\bin;C:\Qt\Tools\mingw810_64\bin"
+
+if ($args.Length -ge 1) {
+    $build_type = $args[0]
+}
+else {
+    $build_type = 'Release'
 }
 
-mkdir release_windows
-Copy-Item ..\..\build-c64pp-*-Release\c64pp.exe release_windows
+if (Test-Path release_win_$build_type) {
+    Remove-Item release_win_$build_type -r
+}
 
-& 'windeployqt' 'release_windows\c64pp.exe' '--no-translations'
+mkdir release_win_$build_type
+Copy-Item ..\..\build-c64pp-*-$build_type\c64pp.exe release_win_$build_type
+
+& 'windeployqt' "release_win_$build_type\c64pp.exe" '--no-translations'
