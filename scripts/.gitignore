@@ -1,2 +1,5 @@
-functional_tests
-release_windows
+functional_tests/
+release_windows/
+release_win_*/
+monitor_*.log
+trace_cmd.txt
