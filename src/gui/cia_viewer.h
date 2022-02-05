@@ -3,6 +3,7 @@
 #include "c64_runner.h"
 
 #include <QMainWindow>
+#include <vector>
 
 namespace Ui {
 class CIAViewer;
@@ -25,5 +26,7 @@ private:
 
     C64Runner *c64Runner;
     MainWindow *mainWindow;
+
+    std::vector<uint8_t> charsetScreen;
 };
 

@@ -120,6 +120,17 @@ MainWindow::MainWindow(QWidget *parent) :
             toolCIAViewer->show();
         }
     };
+    auto vicViewer = [this]() {
+        if (toolVICViewer) {
+            delete toolVICViewer;
+            toolVICViewer = nullptr;
+        } else {
+            toolVICViewer = new VICViewer(this, &c64Runner);
+            QObject::connect(toolVICViewer, &QObject::destroyed, [this](QObject *o) { toolVICViewer = nullptr; });
+            toolVICViewer->setAttribute(Qt::WA_DeleteOnClose, true);
+            toolVICViewer->show();
+        }
+    };
     auto ramViewer = [this]() {
         if (toolRAMViewer) {
             delete toolRAMViewer;
@@ -166,6 +177,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionMPU_Viewer, &QAction::triggered, mpuViewer);
     QObject::connect(ui->actionRAM_Viewer, &QAction::triggered, ramViewer);
     QObject::connect(ui->actionCIA_Viewer, &QAction::triggered, ciaViewer);
+    QObject::connect(ui->actionVIC_Viewer, &QAction::triggered, vicViewer);
     QObject::connect(ui->actionVirtual_Keyboard, &QAction::triggered, virtualKeyboard);
     QObject::connect(ui->actionBreakpoint_Editor, &QAction::triggered, breakpointEditor);
 
@@ -207,6 +219,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addAction("MPU..", mpuViewer);
     ui->toolBar->addAction("RAM..", ramViewer);
     ui->toolBar->addAction("CIA..", ciaViewer);
+    ui->toolBar->addAction("VIC..", vicViewer);
     ui->toolBar->addAction("Keyboard..", virtualKeyboard);
     ui->toolBar->addAction("Breaks..", breakpointEditor);
 
@@ -251,6 +264,8 @@ void MainWindow::updateUI() {
         toolRAMViewer->updateC64();
     if (toolCIAViewer)
         toolCIAViewer->updateC64();
+    if (toolVICViewer)
+        toolVICViewer->updateC64();
     if (toolKeyboardWindow)
         toolKeyboardWindow->updateUI();
     if (toolBreakpointEditor)

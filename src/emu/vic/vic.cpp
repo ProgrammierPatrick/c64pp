@@ -45,7 +45,7 @@ void VIC::tickBackground() {
         RC = 0;
     }
     if (cycleInLine >= 16 && cycleInLine <= 55 && inDisplayState) {
-        auto gPixels = backgroundGraphics.gAccess();
+        auto gPixels = backgroundGraphics.gAccess(videoMatrixLine[VMLI], VC, RC);
         graphicsDataPipeline[0] = gPixels;
         advanceGraphicsPipeline();
 
@@ -115,12 +115,13 @@ void VIC::advanceGraphicsPipeline() {
 
 
 ColoredVal VIC::accessMem(uint16_t addr) {
+    uint8_t bankSetting = ~cia->PRA2 & 0x03;
+
     uint8_t val;
     if (((bankSetting & 2) == 0) && addr >= 0x1000 && addr <= 0x1FFF)
         val = charROM->read(addr & 0x0FFF);
     else {
-        uint16_t ciaBank = (~cia->PRA2 & 0x03) << 14;
-        uint16_t absAddr = ciaBank | (addr + bankSetting * 0x4000);
+        uint16_t absAddr = (bankSetting << 14) | addr;
         val = mainRAM->read(absAddr);
     }
     return ColoredVal(val, colorRAM->read(addr & 0x3F));

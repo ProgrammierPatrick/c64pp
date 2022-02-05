@@ -85,6 +85,7 @@
     <addaction name="actionMPU_Viewer"/>
     <addaction name="actionRAM_Viewer"/>
     <addaction name="actionCIA_Viewer"/>
+    <addaction name="actionVIC_Viewer"/>
     <addaction name="separator"/>
     <addaction name="actionVirtual_Keyboard"/>
     <addaction name="separator"/>
@@ -206,6 +207,14 @@
    </property>
    <property name="shortcut">
     <string>Alt+B</string>
+   </property>
+  </action>
+  <action name="actionVIC_Viewer">
+   <property name="text">
+    <string>VIC Viewer</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+V</string>
    </property>
   </action>
  </widget>

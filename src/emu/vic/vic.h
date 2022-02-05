@@ -1,5 +1,6 @@
 #pragma once
 
+#include "colored_val.h"
 #include "background_graphics.h"
 #include "../mem/memory.h"
 
@@ -8,12 +9,6 @@
 #include <vector>
 
 class CIA;
-
-struct ColoredVal {
-    uint8_t val;
-    uint8_t col;
-    ColoredVal(uint8_t val = 0, uint8_t col = 0) : val(val), col(col) { }
-};
 
 struct Sprite {
     uint16_t xCoord = 0;
@@ -131,7 +126,6 @@ public:
     bool bitmapMode = false;        // (BMM)
     bool multiColorMode = false;    // (MCM)
 
-    uint8_t bankSetting = 0;
     uint8_t videoMatrixMemoryPosition = 1; // 4-bit (VM10-VM13)
     uint8_t charGenMemoryPosition = 2; // 3-bit (CB11-CB13)
 

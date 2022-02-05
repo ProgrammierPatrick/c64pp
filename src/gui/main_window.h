@@ -7,6 +7,7 @@
 #include "breakpoint_editor.h"
 #include "keyboard/keyboard_window.h"
 #include "video/video_widget.h"
+#include "video/vic_viewer.h"
 
 #include <QMainWindow>
 #include <QTimer>
@@ -51,6 +52,7 @@ private:
     MPUViewer *toolMPUViewer = nullptr;
     RAMViewer *toolRAMViewer = nullptr;
     CIAViewer *toolCIAViewer = nullptr;
+    VICViewer *toolVICViewer = nullptr;
     KeyboardWindow *toolKeyboardWindow = nullptr;
     BreakpointEditor *toolBreakpointEditor = nullptr;
 

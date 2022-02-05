@@ -3,7 +3,6 @@
 #include "vic.h"
 
 #include <iostream>
-#include "../../gui/text_utils.h"
 
 void BackgroundGraphics::cAccess() {
     vic->videoMatrixLine[vic->VMLI] = vic->accessMem(((vic->videoMatrixMemoryPosition & 0xF) << 10) | vic->VC);
@@ -13,29 +12,29 @@ void BackgroundGraphics::cAccess() {
     // }
 }
 
-std::array<uint8_t, 8> BackgroundGraphics::gAccess() {
+std::array<uint8_t, 8> BackgroundGraphics::gAccess(ColoredVal c, uint16_t VC, uint8_t RC) {
+    // auto c = vic->videoMatrixLine[vic->VMLI];
     if (!vic->extendedColorMode && !vic->bitmapMode && !vic->multiColorMode)
-        return standardTextModeGAccess();
+        return standardTextModeGAccess(c, VC, RC);
     if (!vic->extendedColorMode && !vic->bitmapMode &&  vic->multiColorMode)
-        return multicolorTextModeGAccess();
+        return multicolorTextModeGAccess(c, VC, RC);
     if (!vic->extendedColorMode &&  vic->bitmapMode && !vic->multiColorMode)
-        return standardBitMapModeGAccess();
+        return standardBitMapModeGAccess(c, VC, RC);
     if (!vic->extendedColorMode &&  vic->bitmapMode &&  vic->multiColorMode)
-        return multicolorBitMapModeGAccess();
+        return multicolorBitMapModeGAccess(c, VC, RC);
     if ( vic->extendedColorMode && !vic->bitmapMode && !vic->multiColorMode)
-        return ECMTextModeGAccess();
+        return ECMTextModeGAccess(c, VC, RC);
     if ( vic->extendedColorMode && !vic->bitmapMode &&  vic->multiColorMode)
-        return invalidTextModeGAccess();
+        return invalidTextModeGAccess(c, VC, RC);
     if ( vic->extendedColorMode &&  vic->bitmapMode && !vic->multiColorMode)
-        return invalidBitMapMode1GAccess();
+        return invalidBitMapMode1GAccess(c, VC, RC);
     if ( vic->extendedColorMode &&  vic->bitmapMode &&  vic->multiColorMode)
-        return invalidBitMapMode2GAccess();
+        return invalidBitMapMode2GAccess(c, VC, RC);
     return {0, 0, 0, 0, 0, 0, 0, 0}; // cannot reach
 }
 
-std::array<uint8_t, 8> BackgroundGraphics::standardTextModeGAccess() {
-    auto c = vic->videoMatrixLine[vic->VMLI];
-    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x7) << 11) | 0x1000 | (c.val << 3) | vic->RC).val;
+std::array<uint8_t, 8> BackgroundGraphics::standardTextModeGAccess(ColoredVal c, uint16_t VC, uint8_t RC) {
+    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x7) << 11) | (c.val << 3) | RC).val;
 
     std::array<uint8_t, 8> pixels = { 0 };
     for (int i = 0; i < 8; i++) {
@@ -44,9 +43,8 @@ std::array<uint8_t, 8> BackgroundGraphics::standardTextModeGAccess() {
     return pixels;
 }
 
-std::array<uint8_t, 8> BackgroundGraphics::multicolorTextModeGAccess() {
-    auto c = vic->videoMatrixLine[vic->VMLI];
-    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x7) << 11) | 0x1000 | (c.val << 3) | vic->RC).val;
+std::array<uint8_t, 8> BackgroundGraphics::multicolorTextModeGAccess(ColoredVal c, uint16_t VC, uint8_t RC) {
+    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x7) << 11) | (c.val << 3) | RC).val;
 
     std::array<uint8_t, 8> pixels = { 0 };
     if ((c.col & 0x8) == 0) {
@@ -63,9 +61,8 @@ std::array<uint8_t, 8> BackgroundGraphics::multicolorTextModeGAccess() {
     return pixels;
 }
 
-std::array<uint8_t, 8> BackgroundGraphics::standardBitMapModeGAccess() {
-    auto c = vic->videoMatrixLine[vic->VMLI];
-    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x4) << 11) | 0x1000 | ((vic->VC & 0x3FF) << 3) | vic->RC).val;
+std::array<uint8_t, 8> BackgroundGraphics::standardBitMapModeGAccess(ColoredVal c, uint16_t VC, uint8_t RC) {
+    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x4) << 11) | ((VC & 0x3FF) << 3) | RC).val;
 
     std::array<uint8_t, 8> pixels = { 0 };
     for (int i = 0; i < 8; i++) {
@@ -74,9 +71,8 @@ std::array<uint8_t, 8> BackgroundGraphics::standardBitMapModeGAccess() {
     return pixels;
 }
 
-std::array<uint8_t, 8> BackgroundGraphics::multicolorBitMapModeGAccess() {
-    auto c = vic->videoMatrixLine[vic->VMLI];
-    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x4) << 11) | 0x1000 | ((vic->VC & 0x3FF) << 3) | vic->RC).val;
+std::array<uint8_t, 8> BackgroundGraphics::multicolorBitMapModeGAccess(ColoredVal c, uint16_t VC, uint8_t RC) {
+    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x4) << 11) | ((VC & 0x3FF) << 3) | RC).val;
 
     std::array<uint8_t, 8> pixels = { 0 };
     for (int i = 0; i < 4; i++) {
@@ -88,9 +84,8 @@ std::array<uint8_t, 8> BackgroundGraphics::multicolorBitMapModeGAccess() {
     return pixels;
 }
 
-std::array<uint8_t, 8> BackgroundGraphics::ECMTextModeGAccess() {
-    auto c = vic->videoMatrixLine[vic->VMLI];
-    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x7) << 11) | 0x1000 | (c.val & 0x3F) << 3 | vic->RC).val;
+std::array<uint8_t, 8> BackgroundGraphics::ECMTextModeGAccess(ColoredVal c, uint16_t VC, uint8_t RC) {
+    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x7) << 11) | (c.val & 0x3F) << 3 | RC).val;
 
     std::array<uint8_t, 8> pixels = { 0 };
     for (int i = 0; i < 8; i++) {
@@ -104,9 +99,8 @@ std::array<uint8_t, 8> BackgroundGraphics::ECMTextModeGAccess() {
     return pixels;
 }
 
-std::array<uint8_t, 8> BackgroundGraphics::invalidTextModeGAccess() {
-    auto c = vic->videoMatrixLine[vic->VMLI];
-    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x7) << 11) | 0x1000 | (c.val & 0x3F) << 3 | vic->RC).val;
+std::array<uint8_t, 8> BackgroundGraphics::invalidTextModeGAccess(ColoredVal c, uint16_t VC, uint8_t RC) {
+    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x7) << 11) | (c.val & 0x3F) << 3 | RC).val;
 
     std::array<uint8_t, 8> pixels = { 0 };
     if ((c.col & 0x8) == 0) {
@@ -123,9 +117,8 @@ std::array<uint8_t, 8> BackgroundGraphics::invalidTextModeGAccess() {
     return pixels;
 }
 
-std::array<uint8_t, 8> BackgroundGraphics::invalidBitMapMode1GAccess() {
-    auto c = vic->videoMatrixLine[vic->VMLI];
-    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x4) << 11) | 0x1000 | (vic->VC & 0x33F) << 3 | vic->RC).val;
+std::array<uint8_t, 8> BackgroundGraphics::invalidBitMapMode1GAccess(ColoredVal c, uint16_t VC, uint8_t RC) {
+    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x4) << 11) | (VC & 0x33F) << 3 | RC).val;
 
     std::array<uint8_t, 8> pixels = { 0 };
     for (int i = 0; i < 8; i++) {
@@ -134,9 +127,8 @@ std::array<uint8_t, 8> BackgroundGraphics::invalidBitMapMode1GAccess() {
     return pixels;
 }
 
-std::array<uint8_t, 8> BackgroundGraphics::invalidBitMapMode2GAccess() {
-    auto c = vic->videoMatrixLine[vic->VMLI];
-    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x4) << 11) | 0x1000 | (vic->VC & 0x33F) << 3 | vic->RC).val;
+std::array<uint8_t, 8> BackgroundGraphics::invalidBitMapMode2GAccess(ColoredVal c, uint16_t VC, uint8_t RC) {
+    auto g = vic->accessMem(((vic->charGenMemoryPosition & 0x4) << 11) | (VC & 0x33F) << 3 | RC).val;
 
     std::array<uint8_t, 8> pixels = { 0 };
     for (int i = 0; i < 4; i++) {
