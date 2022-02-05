@@ -181,7 +181,7 @@ int trace(const char *filepath, const char *startAddrText) {
     mpu.T = 0;
     std::cout << "set PC to start addr " << toHexStr(mpu.PC) << std::endl;
 
-    for(int i = 0; i < 10000000; i++) {
+    for(int i = 0; i < 100000000; i++) {
         c64Runner.stepInstruction();
         std::cout << ".C:" << toHexStr(mpu.PC) << "  "
                   << toHexStr(mpu.mem->read(mpu.PC, true)) << " "

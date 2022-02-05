@@ -20,22 +20,4 @@ echo "run c64++"
 release_win_Release/c64pp.exe trace "$PRG" "$ADDR" | grep "\.C:" | tr -d '\r' > monitor_c64pp.log
 
 echo "compare results"
-paste monitor_c64pp.log monitor_vice.log | while IFS=$'\t' read c v; do
-    cc="${c:3:4}"
-    vv="${v:3:4}"
-    if [ "$cc" != "$vv" ]; then
-        echo "! c64++ $c"
-        echo "! vice  $v"
-
-        if [ -z "$c" ]; then
-            exit
-        fi
-        if [ -z "$v" ]; then
-            exit
-        fi
-    else
-        echo "  c64++ $c | vice $v"
-    fi
-# done | grep -C 30 '!' | tee monitor_diff.log
-done | tee monitor_diff.log
-
+python3 diff_trace.py monitor_c64pp.log monitor_vice.log | tee monitor_diff.log
