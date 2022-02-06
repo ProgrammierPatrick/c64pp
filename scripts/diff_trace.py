@@ -5,11 +5,18 @@ if len(argv) != 3:
     quit()
 
 print(f"load {argv[1]}")
+emu_trace = []
+vice_trace = []
 with open(argv[1]) as f:
-    emu_trace = f.read().splitlines()
+    for line in f:
+        emu_trace.append(line.strip())
 print(f"load {argv[2]}")
 with open(argv[2]) as f:
-    vice_trace = f.read().splitlines()
+    i = 0
+    for line in f:
+        if i > len(emu_trace): break
+        vice_trace.append(line.strip())
+        i += 1
 print(f"compare..")
 
 emu_pc = list(map(lambda s: s[3:7], emu_trace))
@@ -33,9 +40,10 @@ def print_buffer(start_emu, start_vice):
         for i in range(len(vice_buffer) - num_both):
             print(f"!                                                                           | vice {vice_trace[start_vice + num_both + i]}")
     emu_buffer = []
-    vice_buffer = []  
+    vice_buffer = []
 
 while(True):
+
     if idx_emu >= len(emu_trace) or idx_vice >= len(vice_trace):
         for i in range(idx_emu, len(emu_trace)):
             emu_buffer.append(emu_trace[i])
