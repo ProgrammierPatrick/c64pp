@@ -4,7 +4,7 @@
 
 void VIC::tick() {
     tickBackground();
-    // tickBorder();
+    tickBorder();
 
     // compare y with rasterCompareLine
     if (y == 0 && cycleInLine == 2 || y != 0 && cycleInLine == 1) {
@@ -21,7 +21,7 @@ void VIC::tick() {
     if (cycleInLine == 64) {
         cycleInLine = 1;
         y++;
-        if (y >= screenHeight) {
+        if (y >= lastY) {
             y = 0;
             // for(int i = 0; i < screenWidth * screenHeight; i++) screen[i] = 0;
         }
@@ -81,32 +81,52 @@ void VIC::tickBackground() {
 }
 
 void VIC::tickBorder() {
-    if (x == (cSel ? 344 : 335))
-        mainBorderFlipFlop = true;
-    if (y == (rSel ? 51 : 55) && x == 8 * 63)
-        verticalBorderFlipFlop = true;
+    // if mainFF set, output border color
+    // if verticalFF set, bg-sequencer outputs background color (related to sprite collisions)
 
-    if (mainBorderFlipFlop)
-        for(int i = 0; i < 8; i++)
-            screen[y * screenWidth + cycleInLine * 8 + i] = borderColor;
+    int top = rSel ? 51 : 55;
+    int bottom = rSel ? 251 : 247;
+    int left = cSel ? 24 : 31;
+    int right = cSel ? 344 : 335;
+
+    for(int i = 0; i < 8; i++) {
+        int xx = firstCycleX + (cycleInLine - 1) * 8 + i;
+        if (xx > maxX) xx -= maxX + 1;
+
+        if (xx == right)
+            mainBorderFlipFlop = true;
+        if (y == bottom && cycleInLine == 63)
+            verticalBorderFlipFlop = true;
+        if (y == top && cycleInLine == 63 && displayEnable)
+            verticalBorderFlipFlop = false;
+        if (xx == left && y == bottom)
+            verticalBorderFlipFlop = true;
+        if (xx == left && y == top && displayEnable)
+            verticalBorderFlipFlop = false;
+        if (xx == left && !verticalBorderFlipFlop)
+            mainBorderFlipFlop = false;
+
+        int sy = y - firstVisibleY;
+        int sx = (cycleInLine - firstVisibleCycle) * 8 + i;
+        if (mainBorderFlipFlop && sy >= 0 && sy < screenHeight && sx >= 0  && sx < screenWidth)
+            screen[sy * screenWidth + sx] = borderColor;
+    }
 }
 
 void VIC::advanceGraphicsPipeline() {
     int delay = 0; // 2
     // graphics are drawn with two cycles delay. for xScroll, one further delayed value is needed
-    if (inDisplayState && (cycleInLine - delay) >= firstBackgroundGraphicsCycle && (cycleInLine - delay) <= lastBackgroundGraphicsCycle
-            && y >= firstVisibleY && y <= lastVisibleY) {
-
+    if (inDisplayState) {
         for (int i = 0; i < 8; i++) {
-            if (i < xScroll)
-                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[1][i - xScroll + 8];
-            else
-                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[0][i - xScroll];
-            //screen[(y - firstVisibleY) * screenWidth + (cycleInLine - delay - firstVisibleCycle) * 8 + i]
-                    // = videoMatrixLine[cycleInLine - delay - firstBackgroundGraphicsCycle].val % 16;
-            //        = (g & (1 << (7 - i))) ? 2 : 0;
+            int sy = y - firstVisibleY;
+            int sx = (cycleInLine - firstVisibleCycle - delay) * 8 + i + 4;
+            if (sy >= 0 && sy < screenHeight && sx >= 0  && sx < screenWidth) {
+                if (i < xScroll)
+                    screen[sy * screenWidth + sx] = graphicsDataPipeline[1][i - xScroll + 8];
+                else
+                    screen[sy * screenWidth + sx] = graphicsDataPipeline[0][i - xScroll];
+            }
         }
-        // std::cout << "x: " << (cycleInLine - 2 - firstVisibleCycle) * 8 << " y: " << y - firstVisibleY << " VC: " << VC << std::endl;
     }
     graphicsDataPipeline[3] = graphicsDataPipeline[2];
     graphicsDataPipeline[2] = graphicsDataPipeline[1];
