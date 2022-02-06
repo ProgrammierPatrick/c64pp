@@ -124,7 +124,7 @@ ColoredVal VIC::accessMem(uint16_t addr) {
         uint16_t absAddr = (bankSetting << 14) | addr;
         val = mainRAM->read(absAddr);
     }
-    return ColoredVal(val, colorRAM->read(addr & 0x3F));
+    return ColoredVal(val, colorRAM->read(addr & 0x03FF));
 }
 
 uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
