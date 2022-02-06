@@ -99,7 +99,7 @@ void VIC::advanceGraphicsPipeline() {
 
         for (int i = 0; i < 8; i++) {
             if (i < xScroll)
-                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[0][i - xScroll + 8];
+                screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[1][i - xScroll + 8];
             else
                 screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle - delay) * 8 + i] = graphicsDataPipeline[0][i - xScroll];
             //screen[(y - firstVisibleY) * screenWidth + (cycleInLine - delay - firstVisibleCycle) * 8 + i]
