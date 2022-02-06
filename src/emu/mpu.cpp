@@ -779,7 +779,8 @@ OpCode bitShiftZeroPageX(void (*handler)(MPU& mpu)) {
     return opcodeData;
 }
 void fetchModValAbsoluteX(MPU& mpu) {
-    mpu.modVal = mpu.mem->read(mpu.baseAddr + mpu.X);
+    mpu.effectiveAddr = mpu.baseAddr + mpu.X;
+    mpu.modVal = mpu.mem->read(mpu.effectiveAddr);
     mpu.T++;
 }
 OpCode bitShiftAbsoluteX(void (*handler)(MPU& mpu)) {
