@@ -429,7 +429,7 @@ void VIC::write(uint16_t addr, uint8_t data) {
         // Control register 1
         case 0x11:
             yScroll = data & 0x07;
-            cSel = data & 0x08;
+            rSel = data & 0x08;
             displayEnable = data & 0x10;
             bitmapMode = data & 0x20;
             extendedColorMode = data & 0x40;
