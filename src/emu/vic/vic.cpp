@@ -55,6 +55,11 @@ void VIC::tickBackground() {
 
         VC++;
         VMLI++;
+    } else {
+        // idle state
+        auto gPixels = backgroundGraphics.idleStateGAccess(bitmapMode, multiColorMode, extendedColorMode);
+        graphicsDataPipeline[0] = gPixels;
+        advanceGraphicsPipeline();
     }
     if (cycleInLine >= 15 && cycleInLine <= 54 && inDisplayState && isBadLine()) {
         backgroundGraphics.cAccess();
@@ -93,6 +98,15 @@ void VIC::tickBorder() {
         int xx = firstCycleX + (cycleInLine - 1) * 8 + i;
         if (xx > maxX) xx -= maxX + 1;
 
+        //bool debug = false;
+        //bool debug2 = false;
+        //if (xx == right) debug = true;
+        //if (y == bottom && cycleInLine == 63) debug2 = true;
+        //if (y == top && cycleInLine == 63 && displayEnable) debug2 = true;
+        //if (xx == left && y == bottom) debug2 = true;
+        //if (xx == left && y == top && displayEnable) debug2 = true;
+        //if (xx == left && !verticalBorderFlipFlop) debug = true;
+
         if (xx == right)
             mainBorderFlipFlop = true;
         if (y == bottom && cycleInLine == 63)
@@ -108,15 +122,23 @@ void VIC::tickBorder() {
 
         int sy = y - firstVisibleY;
         int sx = (cycleInLine - firstVisibleCycle) * 8 + i;
-        if (mainBorderFlipFlop && sy >= 0 && sy < screenHeight && sx >= 0  && sx < screenWidth)
+        if (mainBorderFlipFlop && sy >= 0 && sy < screenHeight && sx >= 0  && sx < screenWidth) {
             screen[sy * screenWidth + sx] = borderColor;
+        }
+
+        //if (debug && sy >= 0 && sy < screenHeight && sx >= 0 && sx < screenWidth) {
+        //    screen[sy * screenWidth + sx] = 10;
+        //}
+        //if (debug2 && sy >= 0 && sy < screenHeight && sx >= 0 && sx < screenWidth) {
+        //    screen[sy * screenWidth + sx] = 13;
+        //}
     }
 }
 
 void VIC::advanceGraphicsPipeline() {
     int delay = 0; // 2
     // graphics are drawn with two cycles delay. for xScroll, one further delayed value is needed
-    if (inDisplayState) {
+    //if (inDisplayState) {
         for (int i = 0; i < 8; i++) {
             int sy = y - firstVisibleY;
             int sx = (cycleInLine - firstVisibleCycle - delay) * 8 + i + 4;
@@ -127,7 +149,7 @@ void VIC::advanceGraphicsPipeline() {
                     screen[sy * screenWidth + sx] = graphicsDataPipeline[0][i - xScroll];
             }
         }
-    }
+    //}
     graphicsDataPipeline[3] = graphicsDataPipeline[2];
     graphicsDataPipeline[2] = graphicsDataPipeline[1];
     graphicsDataPipeline[1] = graphicsDataPipeline[0];

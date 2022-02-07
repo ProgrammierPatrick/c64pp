@@ -137,3 +137,20 @@ std::array<uint8_t, 8> BackgroundGraphics::invalidBitMapMode2GAccess(ColoredVal 
     }
     return pixels;
 }
+
+std::array<uint8_t, 8> BackgroundGraphics::idleStateGAccess(bool bitmapMode, bool multiColorMode, bool extendedColorMode) {
+    std::array<uint8_t, 8> pixels = { 0 };
+    auto g = vic->accessMem(extendedColorMode ? 0x39FF : 0xFFFF).val;
+
+    if (!bitmapMode && !(multiColorMode && extendedColorMode))
+        for (int i = 0; i < 8; i++)
+            pixels[i] = (g & (1 << (7 - i))) ? 0 : vic->backgroundColors[0];
+    if ((!extendedColorMode && bitmapMode && !multiColorMode)
+            || (extendedColorMode && !bitmapMode && multiColorMode)
+            || (extendedColorMode &&  bitmapMode && !multiColorMode))
+        pixels = { 0 };
+    if (!extendedColorMode &&  bitmapMode &&  multiColorMode)
+        for (int i = 0; i < 4; i++)
+            pixels[2*i] = pixels[2*i+1] = (g & (0x3 << (6 - 2 * i))) ? 0 : vic->backgroundColors[0];
+    return pixels;
+}
