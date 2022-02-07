@@ -34,6 +34,16 @@ void VIC::tickBackground() {
     // std::cout << "y:" << (int)y << " x:" << (int)cycleInLine << " state:" << (inDisplayState ? "display" : "idle") << " RC:" << (int)RC
     //     << " VMLI:" << (int)VMLI << " VCBASE:" << (int)VCBASE << " VC:" << (int)VC << std::endl;
 
+    // debug stuff
+    {
+        int sy = y - firstVisibleY;
+        int sx = (cycleInLine - firstVisibleCycle) * 8;
+
+        // badline in red
+        if (isBadLine() && sx >= 0 && sx < screenWidth && sy >= 0 && sy < screenHeight)
+            screen[sy * screenWidth + sx] = (VMLI % 2) ? 1 : 2;
+    }
+
 
     if (cycleInLine == 9) {
         VMLI = 0;
