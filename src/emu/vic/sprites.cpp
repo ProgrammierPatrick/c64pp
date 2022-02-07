@@ -12,10 +12,10 @@ std::array<uint8_t, 8> Sprites::spriteSAccess(int spriteNr, uint8_t p) {
     std::array<uint8_t, 8> data = { 0 };
     if (spriteData[spriteNr].spriteMulticolor) {
         for (int i = 0; i < 4; i++) {
-            if (((s >> (6 - 2 * i)) & 0x3) == 0x0) data[i] = 0xFF;
-            else if (((s >> (6 - 2 * i)) & 0x3) == 0x1) data[i] = spriteMulticolor0;
-            else if (((s >> (6 - 2 * i)) & 0x3) == 0x2) data[i] = spriteData[spriteNr].spriteColor;
-            else data[i] = spriteMulticolor1;
+            if (((s >> (6 - 2 * i)) & 0x3) == 0x0) data[2*i] = data[2*i+1] = 0xFF;
+            else if (((s >> (6 - 2 * i)) & 0x3) == 0x1) data[2*i] = data[2*i+1] = spriteMulticolor0;
+            else if (((s >> (6 - 2 * i)) & 0x3) == 0x2) data[2*i] = data[2*i+1] = spriteData[spriteNr].spriteColor;
+            else data[2*i] = data[2*i+1] = spriteMulticolor1;
         }
     }
     else {

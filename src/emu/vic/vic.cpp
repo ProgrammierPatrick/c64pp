@@ -162,8 +162,9 @@ void VIC::tickSprites() {
 
                     int sy = y - firstVisibleY;
                     int sx = (cycleInLine - firstVisibleCycle) * 8 + j;
-                    if (sx >= 0 && sx < screenWidth && sy >= 0 && sy <= screenHeight)
-                        screen[sy * screenWidth + sx] = sprite.pixels[sprite.drawIndexByte][sprite.drawIndexPixel];
+                    auto pixelColor = sprite.pixels[sprite.drawIndexByte][sprite.drawIndexPixel];
+                    if (pixelColor != 0xFF && sx >= 0 && sx < screenWidth && sy >= 0 && sy <= screenHeight)
+                        screen[sy * screenWidth + sx] = pixelColor;
 
                     if (!sprite.spriteXExpansion || sprite.xExpansionFF) {
                         sprite.drawIndexPixel++;
