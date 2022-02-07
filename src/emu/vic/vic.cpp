@@ -4,6 +4,7 @@
 
 void VIC::tick() {
     tickBackground();
+    tickSprites();
     tickBorder();
 
     // compare y with rasterCompareLine
@@ -95,6 +96,102 @@ void VIC::tickBackground() {
     if (isBadLine()) inDisplayState = true;
 }
 
+void VIC::tickSprites() {
+    //cond. 2 toggle y expansion FF at end of line
+    if (cycleInLine == 55) {
+        for (int i = 0; i < 8; i++) {
+            if (sprites.spriteData[i].spriteYExpansion) {
+                sprites.spriteData[i].expansionFlipFlop = !sprites.spriteData[i].expansionFlipFlop;
+            }
+        }
+    }
+    // cond. 3 beginning of sprite: enableDMA
+    if (cycleInLine == 55 || cycleInLine == 56) {
+        for (int i = 0; i < 8; i++) {
+            if (sprites.spriteData[i].spriteEnabled
+                 && (sprites.spriteData[i].yCoord & 0x00FF) == (y & 0x00FF)) {
+                sprites.spriteData[i].enableDMA = true;
+                sprites.spriteData[i].spriteDataCounterBase = 0;
+                if (sprites.spriteData[i].spriteYExpansion) sprites.spriteData[i].expansionFlipFlop = true;
+            }
+        }
+    }
+    // cond. 4 beginning of sprite: currentlyDisplayed
+    if (cycleInLine == 58) {
+        for (int i = 0; i < 8; i++) {
+            sprites.spriteData[i].spriteDataCounter = sprites.spriteData[i].spriteDataCounterBase;
+            if (sprites.spriteData[i].enableDMA
+                    && (sprites.spriteData[i].yCoord & 0x00FF) == (y & 0x00FF)) {
+                sprites.spriteData[i].currentlyDisplayed = true;
+            }
+        }
+    }
+    // cond. 7 increment MCBASE only if expansionFF set
+    if (cycleInLine == 15) {
+        for (int i = 0; i < 8; i++) {
+            if (sprites.spriteData[i].expansionFlipFlop) {
+                sprites.spriteData[i].spriteDataCounterBase += 2;
+            }
+        }
+    }
+    // cond. 8 check for sprite end; increment MCBASE only if expansionFF set
+    if (cycleInLine == 16) {
+        for (int i = 0; i < 8; i++) {
+            if (sprites.spriteData[i].expansionFlipFlop) {
+                sprites.spriteData[i].spriteDataCounterBase++;
+                if (sprites.spriteData[i].spriteDataCounterBase == 63) {
+                    sprites.spriteData[i].currentlyDisplayed = false;
+                    sprites.spriteData[i].enableDMA = false;
+                }
+            }
+        }
+    }
+
+    // every line
+    for (int i = 0; i < 8; i++) {
+        auto& sprite = sprites.spriteData[i];
+        // cond. 1 when no expansion, always load new data
+        if (!sprite.spriteYExpansion) sprite.expansionFlipFlop = true;
+
+        // cond. 5 p- and s-Accesses
+        if (sprite.enableDMA) {
+            auto pCycle = (i >= 3) ? (2 * i - 5) : (i * 2 + 59);
+            if (cycleInLine == pCycle)
+                sprites.spritePointer = sprites.spritePAccess(i);
+            if (sprite.spriteEnabled && cycleInLine >= pCycle + 1 && cycleInLine <= pCycle + 3) {
+                sprite.pixels[cycleInLine - pCycle - 1] = sprites.spriteSAccess(i, sprites.spritePointer);
+                sprite.spriteDataCounter++;
+            }
+        }
+
+        // cond. 6 draw pixels
+        if (sprite.currentlyDisplayed) {
+            for (int j = 0; j < 8; j++) {
+                if (x + j == sprite.xCoord || sprite.drawIndexByte != 0 || sprite.drawIndexPixel != 0) {
+                    if (x + j == sprite.xCoord) sprite.xExpansionFF = false;
+
+                    int sy = y - firstVisibleY;
+                    int sx = (cycleInLine - firstVisibleCycle) * 8 + j;
+                    auto pixelColor = sprite.pixels[sprite.drawIndexByte][sprite.drawIndexPixel];
+                    if (pixelColor != 0xFF && sx >= 0 && sx < screenWidth && sy >= 0 && sy <= screenHeight)
+                        screen[sy * screenWidth + sx] = pixelColor;
+
+                    if (!sprite.spriteXExpansion || sprite.xExpansionFF) {
+                        sprite.drawIndexPixel++;
+                        if (sprite.drawIndexPixel >= 8) {
+                            sprite.drawIndexPixel = 0;
+                            sprite.drawIndexByte++;
+                            if (sprite.drawIndexByte >= 3)
+                                sprite.drawIndexByte = 0;
+                        }
+                    }
+                    sprite.xExpansionFF = !sprite.xExpansionFF;
+                }
+            }
+        }
+    }
+}
+
 void VIC::tickBorder() {
     // if mainFF set, output border color
     // if verticalFF set, bg-sequencer outputs background color (related to sprite collisions)
@@ -184,57 +281,57 @@ uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
     switch (effAddr) {
         // X coordinate sprite 0
         case 0x00:
-            return sprites[0].xCoord & 0x00FF;
+            return sprites.spriteData[0].xCoord & 0x00FF;
         // Y coordinate sprite 0
         case 0x01:
-            return sprites[0].yCoord & 0x00FF;
+            return sprites.spriteData[0].yCoord & 0x00FF;
         // X coordinate sprite 1
         case 0x02:
-            return sprites[1].xCoord & 0x00FF;
+            return sprites.spriteData[1].xCoord & 0x00FF;
         // Y coordinate sprite 1
         case 0x03:
-            return sprites[1].yCoord & 0x00FF;
+            return sprites.spriteData[1].yCoord & 0x00FF;
         // X coordinate sprite 2
         case 0x04:
-            return sprites[2].xCoord & 0x00FF;
+            return sprites.spriteData[2].xCoord & 0x00FF;
         // Y coordinate sprite 2
         case 0x05:
-            return sprites[2].yCoord & 0x00FF;
+            return sprites.spriteData[2].yCoord & 0x00FF;
         // X coordinate sprite 3
         case 0x06:
-            return sprites[3].xCoord & 0x00FF;
+            return sprites.spriteData[3].xCoord & 0x00FF;
         // Y coordinate sprite 3
         case 0x07:
-            return sprites[3].yCoord & 0x00FF;
+            return sprites.spriteData[3].yCoord & 0x00FF;
         // X coordinate sprite 4
         case 0x08:
-            return sprites[4].xCoord & 0x00FF;
+            return sprites.spriteData[4].xCoord & 0x00FF;
         // Y coordinate sprite 4
         case 0x09:
-            return sprites[4].yCoord & 0x00FF;
+            return sprites.spriteData[4].yCoord & 0x00FF;
         // X coordinate sprite 5
         case 0x0A:
-            return sprites[5].xCoord & 0x00FF;
+            return sprites.spriteData[5].xCoord & 0x00FF;
         // Y coordinate sprite 5
         case 0x0B:
-            return sprites[5].yCoord & 0x00FF;
+            return sprites.spriteData[5].yCoord & 0x00FF;
         // X coordinate sprite 6
         case 0x0C:
-            return sprites[6].xCoord & 0x00FF;
+            return sprites.spriteData[6].xCoord & 0x00FF;
         // Y coordinate sprite 6
         case 0x0D:
-            return sprites[6].yCoord & 0x00FF;
+            return sprites.spriteData[6].yCoord & 0x00FF;
         // X coordinate sprite 7
         case 0x0E:
-            return sprites[7].xCoord & 0x00FF;
+            return sprites.spriteData[7].xCoord & 0x00FF;
         // Y coordinate sprite 7
         case 0x0F:
-            return sprites[7].yCoord & 0x00FF;
+            return sprites.spriteData[7].yCoord & 0x00FF;
         // MSBs of X coordinates
         case 0x10: {
             uint8_t msbs = 0;
             for (int i = 0; i < 8; i++) {
-                msbs |= ((sprites[i].xCoord >> 8) & 0x01) << i;
+                msbs |= ((sprites.spriteData[i].xCoord >> 8) & 0x01) << i;
             }
             return msbs;
         }
@@ -248,7 +345,7 @@ uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
         case 0x15: {
             uint8_t enabled = 0;
             for (int i = 0; i < 8; i++) {
-                enabled |= sprites[i].spriteEnabled << i;
+                enabled |= sprites.spriteData[i].spriteEnabled << i;
             }
             return enabled;
         }
@@ -259,7 +356,7 @@ uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
         case 0x17: {
             uint8_t yExp = 0;
             for (int i = 0; i < 8; i++) {
-                yExp |= sprites[i].spriteYExpansion << i;
+                yExp |= sprites.spriteData[i].spriteYExpansion << i;
             }
             return yExp;
         }
@@ -276,7 +373,7 @@ uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
         case 0x1B: {
             uint8_t dataPrio = 0;
             for (int i = 0; i < 8; i++) {
-                dataPrio |= sprites[i].spriteDataPriority << i;
+                dataPrio |= sprites.spriteData[i].spriteDataPriority << i;
             }
             return dataPrio;
         }
@@ -284,7 +381,7 @@ uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
         case 0x1C: {
             uint8_t spriteMC = 0;
             for (int i = 0; i < 8; i++) {
-                spriteMC |= sprites[i].spriteMulticolor << i;
+                spriteMC |= sprites.spriteData[i].spriteMulticolor << i;
             }
             return spriteMC;
         }
@@ -292,7 +389,7 @@ uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
         case 0x1D: {
             uint8_t xExp = 0;
             for (int i = 0; i < 8; i++) {
-                xExp |= sprites[i].spriteXExpansion << i;
+                xExp |= sprites.spriteData[i].spriteXExpansion << i;
             }
             return xExp;
         }
@@ -300,8 +397,8 @@ uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
         case 0x1E: {
             uint8_t spriteSpriteColl = 0;
             for (int i = 0; i < 8; i++) {
-                spriteSpriteColl |= sprites[i].spriteSpriteCollision << i;
-                sprites[i].spriteSpriteCollision = 0;
+                spriteSpriteColl |= sprites.spriteData[i].spriteSpriteCollision << i;
+                if (!nonDestructive) sprites.spriteData[i].spriteSpriteCollision = false;
             }
             return spriteSpriteColl;
         }
@@ -309,8 +406,8 @@ uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
         case 0x1F: {
             uint8_t spriteDataColl = 0;
             for (int i = 0; i < 8; i++) {
-                spriteDataColl |= sprites[i].spriteDataCollision << i;
-                sprites[i].spriteDataCollision = 0;
+                spriteDataColl |= sprites.spriteData[i].spriteDataCollision << i;
+                if (!nonDestructive) sprites.spriteData[i].spriteDataCollision = false;
             }
             return spriteDataColl;
         }
@@ -331,34 +428,34 @@ uint8_t VIC::read(uint16_t addr, bool nonDestructive) {
             return backgroundColors[3] | 0xF0;
         // Sprite multicolor 0
         case 0x25:
-            return spriteMulticolor0 | 0xF0;
+            return sprites.spriteMulticolor0 | 0xF0;
         // Sprite multicolor 1
         case 0x26:
-            return spriteMulticolor1 | 0xF0;
+            return sprites.spriteMulticolor1 | 0xF0;
         // Color sprite 0
         case 0x027:
-            return sprites[0].spriteColor | 0xF0;
+            return sprites.spriteData[0].spriteColor | 0xF0;
         // Color sprite 1
         case 0x028:
-            return sprites[1].spriteColor | 0xF0;
+            return sprites.spriteData[1].spriteColor | 0xF0;
         // Color sprite 2
         case 0x029:
-            return sprites[2].spriteColor | 0xF0;
+            return sprites.spriteData[2].spriteColor | 0xF0;
         // Color sprite 3
         case 0x02A:
-            return sprites[3].spriteColor | 0xF0;
+            return sprites.spriteData[3].spriteColor | 0xF0;
         // Color sprite 4
         case 0x2B:
-            return sprites[4].spriteColor | 0xF0;
+            return sprites.spriteData[4].spriteColor | 0xF0;
         // Color sprite 5
         case 0x02C:
-            return sprites[5].spriteColor | 0xF0;
+            return sprites.spriteData[5].spriteColor | 0xF0;
         // Color sprite 6
         case 0x02D:
-            return sprites[6].spriteColor | 0xF0;
+            return sprites.spriteData[6].spriteColor | 0xF0;
         // Color sprite 7
         case 0x02E:
-            return sprites[7].spriteColor | 0xF0;
+            return sprites.spriteData[7].spriteColor | 0xF0;
         default:
             return 0xFF;
     }
@@ -369,71 +466,71 @@ void VIC::write(uint16_t addr, uint8_t data) {
     switch (effAddr) {
         // X coordinate sprite 0
         case 0x00:
-            sprites[0].xCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[0].xCoord = data | (sprites.spriteData[0].xCoord & 0x0100);
             break;
         // Y coordinate sprite 0
         case 0x01:
-            sprites[0].yCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[0].yCoord = data | (sprites.spriteData[0].xCoord & 0x0100);
             break;
         // X coordinate sprite 1
         case 0x02:
-            sprites[1].xCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[1].xCoord = data | (sprites.spriteData[1].xCoord & 0x0100);
             break;
         // Y coordinate sprite 1
         case 0x03:
-            sprites[1].yCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[1].yCoord = data | (sprites.spriteData[1].xCoord & 0x0100);
             break;
         // X coordinate sprite 2
         case 0x04:
-            sprites[2].xCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[2].xCoord = data | (sprites.spriteData[2].xCoord & 0x0100);
             break;
         // Y coordinate sprite 2
         case 0x05:
-            sprites[2].yCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[2].yCoord = data | (sprites.spriteData[2].xCoord & 0x0100);
             break;
         // X coordinate sprite 3
         case 0x06:
-            sprites[3].xCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[3].xCoord = data | (sprites.spriteData[3].xCoord & 0x0100);
             break;
         // Y coordinate sprite 3
         case 0x07:
-            sprites[3].yCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[3].yCoord = data | (sprites.spriteData[3].xCoord & 0x0100);
             break;
         // X coordinate sprite 4
         case 0x08:
-            sprites[4].xCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[4].xCoord = data | (sprites.spriteData[4].xCoord & 0x0100);
             break;
         // Y coordinate sprite 4
         case 0x09:
-            sprites[4].yCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[4].yCoord = data | (sprites.spriteData[4].xCoord & 0x0100);
             break;
         // X coordinate sprite 5
         case 0x0A:
-            sprites[5].xCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[5].xCoord = data | (sprites.spriteData[5].xCoord & 0x0100);
             break;
         // Y coordinate sprite 5
         case 0x0B:
-            sprites[5].yCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[5].yCoord = data | (sprites.spriteData[5].xCoord & 0x0100);
             break;
         // X coordinate sprite 6
         case 0x0C:
-            sprites[6].xCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[6].xCoord = data | (sprites.spriteData[6].xCoord & 0x0100);
             break;
         // Y coordinate sprite 6
         case 0x0D:
-            sprites[6].yCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[6].yCoord = data | (sprites.spriteData[6].xCoord & 0x0100);
             break;
         // X coordinate sprite 7
         case 0x0E:
-            sprites[7].xCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[7].xCoord = data | (sprites.spriteData[7].xCoord & 0x0100);
             break;
         // Y coordinate sprite 7
         case 0x0F:
-            sprites[7].yCoord = data | (sprites[0].xCoord & 0x0100);
+            sprites.spriteData[7].yCoord = data | (sprites.spriteData[7].xCoord & 0x0100);
             break;
         case 0x10:
             for (int i = 0; i < 8; i++) {
-                sprites[i].xCoord = (sprites[i].xCoord & 0x00FF) | (((data >> i) & 0x01) << 8);
+                sprites.spriteData[i].xCoord = (sprites.spriteData[i].xCoord & 0x00FF) | (((data >> i) & 0x01) << 8);
             }
             break;
         // Control register 1
@@ -452,7 +549,7 @@ void VIC::write(uint16_t addr, uint8_t data) {
         // Sprite enabled
         case 0x15:
             for (int i = 0; i < 8; i++) {
-                sprites[i].spriteEnabled = (data >> i) & 0x01;
+                sprites.spriteData[i].spriteEnabled = (data >> i) & 0x01;
             }
             break;
         // Control register 2
@@ -463,7 +560,7 @@ void VIC::write(uint16_t addr, uint8_t data) {
             break;
         case 0x17:
             for (int i = 0; i < 8; i++) {
-                sprites[i].spriteYExpansion = (data >> i) & 0x01;
+                sprites.spriteData[i].spriteYExpansion = (data >> i) & 0x01;
             }
             break;
         // Memory pointers
@@ -488,19 +585,19 @@ void VIC::write(uint16_t addr, uint8_t data) {
             break;
         case 0x1B:
             for (int i = 0; i < 8; i++) {
-                sprites[i].spriteDataPriority = (data >> i) & 0x01;
+                sprites.spriteData[i].spriteDataPriority = (data >> i) & 0x01;
             }
             break;
         // Sprite multicolor
         case 0x1C:
             for (int i = 0; i < 8; i++) {
-                sprites[i].spriteMulticolor = (data >> i) & 0x01;
+                sprites.spriteData[i].spriteMulticolor = (data >> i) & 0x01;
             }
             break;
         // Sprite X epansion
         case 0x1D:
             for (int i = 0; i < 8; i++) {
-                sprites[i].spriteXExpansion = (data >> i) & 0x01;
+                sprites.spriteData[i].spriteXExpansion = (data >> i) & 0x01;
             }
             break;
         // Border color
@@ -525,45 +622,43 @@ void VIC::write(uint16_t addr, uint8_t data) {
             break;
         // Sprite multicolor 0
         case 0x25:
-            spriteMulticolor0 = data & 0x0F;
+            sprites.spriteMulticolor0 = data & 0x0F;
             break;
         // Sprite multicolor 1
         case 0x26:
-            spriteMulticolor1 = data & 0x0F;
+            sprites.spriteMulticolor1 = data & 0x0F;
             break;
         // Color sprite 0
         case 0x27:
-            sprites[0].spriteColor = data & 0x0F;
+            sprites.spriteData[0].spriteColor = data & 0x0F;
             break;
         // Color sprite 1
         case 0x28:
-            sprites[1].spriteColor = data & 0x0F;
+            sprites.spriteData[1].spriteColor = data & 0x0F;
             break;
         // Color sprite 2
         case 0x29:
-            sprites[2].spriteColor = data & 0x0F;
+            sprites.spriteData[2].spriteColor = data & 0x0F;
             break;
         // Color sprite 3
         case 0x2A:
-            sprites[3].spriteColor = data & 0x0F;
+            sprites.spriteData[3].spriteColor = data & 0x0F;
             break;
         // Color sprite 4
         case 0x2B:
-            sprites[4].spriteColor = data & 0x0F;
+            sprites.spriteData[4].spriteColor = data & 0x0F;
             break;
         // Color sprite 5
         case 0x2C:
-            sprites[5].spriteColor = data & 0x0F;
+            sprites.spriteData[5].spriteColor = data & 0x0F;
             break;
         // Color sprite 6
         case 0x2D:
-            sprites[6].spriteColor = data & 0x0F;
+            sprites.spriteData[6].spriteColor = data & 0x0F;
             break;
         // Color sprite 7
         case 0x2E:
-            sprites[7].spriteColor = data & 0x0F;
-            break;
-        default:
+            sprites.spriteData[7].spriteColor = data & 0x0F;
             break;
     }
 }
