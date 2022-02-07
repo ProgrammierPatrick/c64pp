@@ -74,6 +74,7 @@
     <addaction name="actionPause"/>
     <addaction name="actionStep"/>
     <addaction name="actionStep_Instruction"/>
+    <addaction name="actionStep_Line"/>
     <addaction name="actionStep_Frame"/>
     <addaction name="separator"/>
     <addaction name="actionHard_Reset"/>
@@ -215,6 +216,14 @@
    </property>
    <property name="shortcut">
     <string>Alt+V</string>
+   </property>
+  </action>
+  <action name="actionStep_Line">
+   <property name="text">
+    <string>Step Line</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
  </widget>

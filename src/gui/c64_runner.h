@@ -33,6 +33,14 @@ public:
         } while (c64->mpu.T != 0);
         return numTicks;
     }
+    int stepLine() {
+        int numTicks = 0;
+        do {
+            c64->tick();
+            numTicks++;
+        } while(c64->vic.cycleInLine != 1);
+        return numTicks;
+    }
     int stepFrame() {
         int numTicks = 0;
         do {

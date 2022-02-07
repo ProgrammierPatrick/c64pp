@@ -81,6 +81,23 @@ MainWindow::MainWindow(QWidget *parent) :
 
         updateUI();
     };
+    auto stepLine = [this, stop]() {
+        if (running) {
+            stop();
+        }
+
+        try {
+            c64Runner.c64->breakPoints.resetBreakpoints();
+            cycle += c64Runner.stepLine();
+            if (c64Runner.c64->vic.y == 0) frame++;
+        } catch (std::runtime_error&) {
+            stop();
+        } catch (BreakPointException&) {
+            stop();
+        }
+
+        updateUI();
+    };
     auto stepFrame = [this, stop]() {
         if (running) {
             stop();
@@ -172,6 +189,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionPause, &QAction::triggered, pauseUnpause);
     QObject::connect(ui->actionStep, &QAction::triggered, step);
     QObject::connect(ui->actionStep_Instruction, &QAction::triggered, stepInstruction);
+    QObject::connect(ui->actionStep_Line, &QAction::triggered, stepLine);
     QObject::connect(ui->actionStep_Frame, &QAction::triggered, stepFrame);
 
     QObject::connect(ui->actionMPU_Viewer, &QAction::triggered, mpuViewer);
@@ -212,6 +230,7 @@ MainWindow::MainWindow(QWidget *parent) :
     toolbarPauseAction = ui->toolBar->addAction("Pause", pauseUnpause);
     ui->toolBar->addAction("Step", step);
     ui->toolBar->addAction("Step Instr", stepInstruction);
+    ui->toolBar->addAction("Step Line", stepLine);
     ui->toolBar->addAction("Step Frame", stepFrame);
     ui->toolBar->addSeparator();
     ui->toolBar->addAction("Reset", hardReset);

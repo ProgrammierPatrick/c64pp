@@ -159,6 +159,7 @@ void VICViewer::updateC64() {
     auto& vic = this->c64Runner->c64->vic;
     auto& cia = this->c64Runner->c64->cia;
 
+    // render charset
     for (int y = 0; y < 16; y++) {
         for (int x = 0; x < 16; x++) {
             for (int i = 0; i < 8; i++) {
@@ -169,12 +170,17 @@ void VICViewer::updateC64() {
         }
     }
 
+    // render matrixScreen
     for (int y = 0; y < 25; y++) {
         for (int x = 0; x < 40; x++) {
             for (int i = 0; i < 8; i++) {
-                auto c = vic.accessMem(((vic.videoMatrixMemoryPosition & 0xF) << 10) | (y * 40 + x));
-                auto pixels = vic.backgroundGraphics.gAccess(c, y * 40 + x, i % 8);
-                for (int j = 0; j < 8; j++) matrixScreen[y * 40 * 8 * 8 + i * 40 * 8 + x * 8 + j] = pixels[j];
+                if ((y * 8 + i) == (vic.VC / 40 * 8 + vic.RC)) {
+                    for (int j = 0; j < 8; j++) matrixScreen[y * 40 * 8 * 8 + i * 40 * 8 + x * 8 + j] = 4;
+                } else {
+                    auto c = vic.accessMem(((vic.videoMatrixMemoryPosition & 0xF) << 10) | (y * 40 + x));
+                    auto pixels = vic.backgroundGraphics.gAccess(c, y * 40 + x, i % 8);
+                    for (int j = 0; j < 8; j++) matrixScreen[y * 40 * 8 * 8 + i * 40 * 8 + x * 8 + j] = pixels[j];
+                }
             }
         }
     }
