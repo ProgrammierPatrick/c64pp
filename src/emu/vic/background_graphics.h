@@ -13,6 +13,7 @@ public:
 
     void cAccess();
     std::array<uint8_t, 8> gAccess(ColoredVal c, uint16_t VC, uint8_t RC);
+    std::array<uint8_t, 8> idleStateGAccess(bool bitmapMode, bool multiColorMode, bool extendedColorMode);
 
     std::array<uint8_t, 8> standardTextModeGAccess(ColoredVal c, uint16_t VC, uint8_t RC);
     std::array<uint8_t, 8> multicolorTextModeGAccess(ColoredVal c, uint16_t VC, uint8_t RC);

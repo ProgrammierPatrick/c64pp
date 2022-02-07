@@ -579,10 +579,18 @@ void storeYLen3(MPU& mpu) {
 }
 void setEffectiveAddrAbsX(MPU& mpu) {
     mpu.effectiveAddr = mpu.baseAddr + mpu.X;
+
+    // 6502 bug: ghost read at base addr +X
+    mpu.mem->read(mpu.baseAddr);
+
     mpu.T++;
 }
 void setEffectiveAddrAbsY(MPU& mpu) {
     mpu.effectiveAddr = mpu.baseAddr + mpu.Y;
+
+    // 6502 bug: ghost read at base addr +X
+    mpu.mem->read(mpu.baseAddr);
+
     mpu.T++;
 }
 void storeAZeroPageX(MPU& mpu) {
@@ -686,6 +694,9 @@ OpCode createSTAIndirectYOpCode() {
 
 // Bit shift ops (ASL,LSR,ROL,ROR) and Inc/Dec
 void opASLMod(MPU& mpu) {
+    // 6502 bug: double store at RMW
+    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+
     uint8_t oldVal = mpu.modVal;
     mpu.modVal = mpu.modVal << 1;
     bool carry = oldVal & 0x80;
@@ -696,6 +707,9 @@ void opASLMod(MPU& mpu) {
     mpu.T++;
 }
 void opLSRMod(MPU& mpu) {
+    // 6502 bug: double store at RMW
+    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+
     uint8_t oldVal = mpu.modVal;
     mpu.modVal = mpu.modVal >> 1;
     bool carry = 0x01 & oldVal;
@@ -705,6 +719,9 @@ void opLSRMod(MPU& mpu) {
     mpu.T++;
 }
 void opROLMod(MPU& mpu) {
+    // 6502 bug: double store at RMW
+    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+
     uint8_t oldVal = mpu.modVal;
     mpu.modVal = (mpu.modVal << 1) | (mpu.P & MPU::Flag::C);
     bool carry = 0x80 & oldVal;
@@ -715,6 +732,9 @@ void opROLMod(MPU& mpu) {
     mpu.T++;
 }
 void opRORMod(MPU& mpu) {
+    // 6502 bug: double store at RMW
+    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+
     uint8_t oldVal = mpu.modVal;
     mpu.modVal = (mpu.modVal >> 1) | ((mpu.P & MPU::Flag::C) << 7);
     bool carry = 0x01 & oldVal;
@@ -725,6 +745,9 @@ void opRORMod(MPU& mpu) {
     mpu.T++;
 }
 void opINC(MPU& mpu) {
+    // 6502 bug: double store at RMW
+    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+
     mpu.modVal += 1;
     bool zero = mpu.modVal == 0;
     bool neg = static_cast<int8_t>(mpu.modVal) < 0;
@@ -733,6 +756,9 @@ void opINC(MPU& mpu) {
     mpu.T++;
 }
 void opDEC(MPU& mpu) {
+    // 6502 bug: double store at RMW
+    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+
     mpu.modVal -= 1;
     bool zero = mpu.modVal == 0;
     bool neg = static_cast<int8_t>(mpu.modVal) < 0;
