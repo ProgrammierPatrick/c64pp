@@ -2,6 +2,7 @@
 
 #include "colored_val.h"
 #include "background_graphics.h"
+#include "sprites.h"
 #include "../mem/memory.h"
 
 #include <array>
@@ -10,26 +11,13 @@
 
 class CIA;
 
-struct Sprite {
-    uint16_t xCoord = 0;
-    uint16_t yCoord = 0;
-    uint8_t spriteColor = 0;
-    bool spriteEnabled = false;
-    bool spriteXExpansion = false;
-    bool spriteYExpansion = false;
-    bool spriteSpriteCollision = false;
-    bool spriteDataCollision = false;
-    bool spriteDataPriority = false;
-    bool spriteMulticolor = false;
-};
-
 class VIC {
 public:
     // VIC-II (6569)
 
     VIC(Memory* mainRAM, Memory* charROM, Memory* colorRAM, CIA* cia)
         : mainRAM(mainRAM), charROM(charROM), colorRAM(colorRAM), cia(cia),
-          backgroundGraphics(this) {
+          backgroundGraphics(this), sprites(this) {
         screen.resize(screenWidth * screenHeight);
     }
 
@@ -48,15 +36,13 @@ public:
 
 private:
     void tickBackground();
+    void tickSprites();
     void tickBorder();
 
     void advanceGraphicsPipeline();
 
     void checkIRQ();
 public:
-    std::array<Sprite, 8> sprites;
-    uint8_t spriteMulticolor0 = 0;
-    uint8_t spriteMulticolor1 = 0;
 
     bool BA = true; // Bus Available: when true, MPU may use the bus and is not "stunned"
 
@@ -130,6 +116,7 @@ public:
     uint8_t charGenMemoryPosition = 2; // 3-bit (CB11-CB13)
 
     BackgroundGraphics backgroundGraphics;
+    Sprites sprites;
 
     Memory* mainRAM;
     Memory* charROM;
