@@ -41,6 +41,8 @@ public:
     uint8_t opcode = 0;
     int T = 0;
 
+    bool lastMemWritten = false;
+
     // temp values for addresses during opcode processing
     uint16_t effectiveAddr = 0;
     uint16_t baseAddr = 0;

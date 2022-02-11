@@ -9,6 +9,16 @@
  *  - BCD Variants
  */
 
+
+uint8_t readMem(MPU& mpu, uint16_t addr) {
+    mpu.lastMemWritten = false;
+    return mpu.mem->read(addr);
+}
+void writeMem(MPU& mpu, uint16_t addr, uint8_t data) {
+    mpu.lastMemWritten = true;
+    mpu.mem->write(addr, data);
+}
+
 void dataHandlerNop(MPU& mpu, uint8_t data) {
     throw std::runtime_error("[MPU] DataHandlerNop() called!");
 }
@@ -26,7 +36,7 @@ void undefinedOpcode(MPU& mpu) {
 }
 
 void fetchOpCode(MPU& mpu) {
-    mpu.opcode = mpu.mem->read(mpu.PC);
+    mpu.opcode = readMem(mpu, mpu.PC);
     mpu.T++;
 }
 
@@ -35,7 +45,7 @@ void handlerNop(MPU& mpu) {
 }
 
 void fetchImmediate(MPU& mpu) {
-    uint8_t value = mpu.mem->read(mpu.PC + 1);
+    uint8_t value = readMem(mpu, mpu.PC + 1);
     opcodes[mpu.opcode].dataHandler(mpu, value);
     mpu.T = 0;
     mpu.PC += 2;
@@ -49,15 +59,15 @@ OpCode immediateMode(void (*handler)(MPU&,uint8_t)) {
 }
 
 void fetchAbsoluteLowAddr(MPU& mpu) {
-    mpu.effectiveAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.effectiveAddr = readMem(mpu, mpu.PC + 1);
     mpu.T++;
 }
 void fetchAbsoluteHighAddr(MPU& mpu) {
-    mpu.effectiveAddr |= mpu.mem->read(mpu.PC + 2) << 8;
+    mpu.effectiveAddr |= readMem(mpu, mpu.PC + 2) << 8;
     mpu.T++;
 }
 void fetchAbsoluteData(MPU& mpu) {
-    uint8_t value = mpu.mem->read(mpu.effectiveAddr);
+    uint8_t value = readMem(mpu, mpu.effectiveAddr);
     opcodes[mpu.opcode].dataHandler(mpu, value);
     mpu.T = 0;
     mpu.PC += 3;
@@ -70,11 +80,11 @@ OpCode absoluteMode(void (*handler)(MPU&,uint8_t)) {
 }
 
 void fetchZeroPageAddr(MPU& mpu) {
-    mpu.effectiveAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.effectiveAddr = readMem(mpu, mpu.PC + 1);
     mpu.T++;
 }
 void fetchZeroPageData(MPU& mpu) {
-    uint8_t value = mpu.mem->read(mpu.effectiveAddr);
+    uint8_t value = readMem(mpu, mpu.effectiveAddr);
     opcodes[mpu.opcode].dataHandler(mpu, value);
     mpu.T = 0;
     mpu.PC += 2;
@@ -87,19 +97,19 @@ OpCode zeroPageMode(void (*handler)(MPU&,uint8_t)) {
 }
 
 void fetchIndirectXBase(MPU& mpu) {
-    mpu.baseAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.baseAddr = readMem(mpu, mpu.PC + 1);
     mpu.T++;
 }
 void fetchIndirectXAddrLow(MPU& mpu) {
-    mpu.effectiveAddr = mpu.mem->read((mpu.baseAddr + mpu.X) & 0x00FF);
+    mpu.effectiveAddr = readMem(mpu, (mpu.baseAddr + mpu.X) & 0x00FF);
     mpu.T++;
 }
 void fetchIndirectXAddrHigh(MPU& mpu) {
-    mpu.effectiveAddr |= mpu.mem->read((mpu.baseAddr + mpu.X + 1) & 0x00FF) << 8;
+    mpu.effectiveAddr |= readMem(mpu, (mpu.baseAddr + mpu.X + 1) & 0x00FF) << 8;
     mpu.T++;
 }
 void fetchIndirectXData(MPU& mpu) {
-    uint8_t value = mpu.mem->read(mpu.effectiveAddr);
+    uint8_t value = readMem(mpu, mpu.effectiveAddr);
     opcodes[mpu.opcode].dataHandler(mpu, value);
     mpu.T = 0;
     mpu.PC += 2;
@@ -112,15 +122,15 @@ OpCode indirectXMode(void (*handler)(MPU&,uint8_t)) {
 }
 
 void fetchAbsoluteXAddrLow(MPU& mpu) {
-    mpu.baseAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.baseAddr = readMem(mpu, mpu.PC + 1);
     mpu.T++;
 }
 void fetchAbsoluteXAddrHigh(MPU& mpu) {
-    mpu.baseAddr |= mpu.mem->read(mpu.PC + 2) << 8;
+    mpu.baseAddr |= readMem(mpu, mpu.PC + 2) << 8;
     mpu.T++;
 }
 void fetchAbsoluteXData(MPU& mpu) {
-    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.X);
+    uint8_t value = readMem(mpu, mpu.baseAddr + mpu.X);
     bool boundaryCrossed = (mpu.baseAddr & 0x00FF) + mpu.X > 0x00FF;
     if (boundaryCrossed) {
         mpu.T++;
@@ -131,7 +141,7 @@ void fetchAbsoluteXData(MPU& mpu) {
     }
 }
 void fetchAbsoluteXDataNextPage(MPU& mpu) {
-    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.X);
+    uint8_t value = readMem(mpu, mpu.baseAddr + mpu.X);
     opcodes[mpu.opcode].dataHandler(mpu, value);
     mpu.T = 0;
     mpu.PC += 3;
@@ -144,15 +154,15 @@ OpCode absoluteXMode(void (*handler)(MPU&,uint8_t)) {
 }
 
 void fetchAbsoluteYAddrLow(MPU& mpu) {
-    mpu.baseAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.baseAddr = readMem(mpu, mpu.PC + 1);
     mpu.T++;
 }
 void fetchAbsoluteYAddrHigh(MPU& mpu) {
-    mpu.baseAddr |= mpu.mem->read(mpu.PC + 2) << 8;
+    mpu.baseAddr |= readMem(mpu, mpu.PC + 2) << 8;
     mpu.T++;
 }
 void fetchAbsoluteYData(MPU& mpu) {
-    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.Y);
+    uint8_t value = readMem(mpu, mpu.baseAddr + mpu.Y);
     bool boundaryCrossed = (mpu.baseAddr & 0x00FF) + mpu.Y > 0x00FF;
     if (boundaryCrossed) {
         mpu.T++;
@@ -163,7 +173,7 @@ void fetchAbsoluteYData(MPU& mpu) {
     }
 }
 void fetchAbsoluteYDataNextPage(MPU& mpu) {
-    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.Y);
+    uint8_t value = readMem(mpu, mpu.baseAddr + mpu.Y);
     opcodes[mpu.opcode].dataHandler(mpu, value);
     mpu.T = 0;
     mpu.PC += 3;
@@ -176,11 +186,11 @@ OpCode absoluteYMode(void (*handler)(MPU&,uint8_t)) {
 }
 
 void fetchZeroPageXBase(MPU& mpu) {
-    mpu.baseAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.baseAddr = readMem(mpu, mpu.PC + 1);
     mpu.T++;
 }
 void fetchZeroPageXData(MPU& mpu) {
-    uint8_t value = mpu.mem->read((mpu.baseAddr + mpu.X) & 0x00FF);
+    uint8_t value = readMem(mpu, (mpu.baseAddr + mpu.X) & 0x00FF);
     opcodes[mpu.opcode].dataHandler(mpu, value);
     mpu.T = 0;
     mpu.PC += 2;
@@ -193,11 +203,11 @@ OpCode zeroPageXMode(void (*handler)(MPU&,uint8_t)) {
 }
 
 void fetchZeroPageYBase(MPU& mpu) {
-    mpu.baseAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.baseAddr = readMem(mpu, mpu.PC + 1);
     mpu.T++;
 }
 void fetchZeroPageYData(MPU& mpu) {
-    uint8_t value = mpu.mem->read((mpu.baseAddr + mpu.Y) & 0x00FF);
+    uint8_t value = readMem(mpu, (mpu.baseAddr + mpu.Y) & 0x00FF);
     opcodes[mpu.opcode].dataHandler(mpu, value);
     mpu.T = 0;
     mpu.PC += 2;
@@ -210,19 +220,19 @@ OpCode zeroPageYMode(void (*handler)(MPU&,uint8_t)) {
 }
 
 void fetchIndirectYIndirectAddr(MPU& mpu) {
-    mpu.indirectAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.indirectAddr = readMem(mpu, mpu.PC + 1);
     mpu.T++;
 }
 void fetchIndirectYAddrLow(MPU& mpu) {
-    mpu.baseAddr = mpu.mem->read(mpu.indirectAddr);
+    mpu.baseAddr = readMem(mpu, mpu.indirectAddr);
     mpu.T++;
 }
 void fetchIndirectYAddrHigh(MPU& mpu) {
-    mpu.baseAddr |= mpu.mem->read((mpu.indirectAddr + 1) & 0x00FF) << 8;
+    mpu.baseAddr |= readMem(mpu, (mpu.indirectAddr + 1) & 0x00FF) << 8;
     mpu.T++;
 }
 void fetchIndirectYData(MPU& mpu) {
-    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.Y);
+    uint8_t value = readMem(mpu, mpu.baseAddr + mpu.Y);
     bool boundaryCrossed = ((mpu.baseAddr & 0x00FF) + mpu.Y) > 0x00FF;
     if (boundaryCrossed) {
         mpu.T++;
@@ -233,7 +243,7 @@ void fetchIndirectYData(MPU& mpu) {
     }
 }
 void fetchIndirectYDataNextPage(MPU& mpu) {
-    uint8_t value = mpu.mem->read(mpu.baseAddr + mpu.Y);
+    uint8_t value = readMem(mpu, mpu.baseAddr + mpu.Y);
     opcodes[mpu.opcode].dataHandler(mpu, value);
     mpu.T = 0;
     mpu.PC += 2;
@@ -548,32 +558,32 @@ void opTYA(MPU& mpu) {
 
 // STA, STX, STY
 void storeALen2(MPU& mpu) {
-    mpu.mem->write(mpu.effectiveAddr, mpu.A);
+    writeMem(mpu, mpu.effectiveAddr, mpu.A);
     mpu.T = 0;
     mpu.PC += 2;
 }
 void storeXLen2(MPU& mpu) {
-    mpu.mem->write(mpu.effectiveAddr, mpu.X);
+    writeMem(mpu, mpu.effectiveAddr, mpu.X);
     mpu.T = 0;
     mpu.PC += 2;
 }
 void storeYLen2(MPU& mpu) {
-    mpu.mem->write(mpu.effectiveAddr, mpu.Y);
+    writeMem(mpu, mpu.effectiveAddr, mpu.Y);
     mpu.T = 0;
     mpu.PC += 2;
 }
 void storeALen3(MPU& mpu) {
-    mpu.mem->write(mpu.effectiveAddr, mpu.A);
+    writeMem(mpu, mpu.effectiveAddr, mpu.A);
     mpu.T = 0;
     mpu.PC += 3;
 }
 void storeXLen3(MPU& mpu) {
-    mpu.mem->write(mpu.effectiveAddr, mpu.X);
+    writeMem(mpu, mpu.effectiveAddr, mpu.X);
     mpu.T = 0;
     mpu.PC += 3;
 }
 void storeYLen3(MPU& mpu) {
-    mpu.mem->write(mpu.effectiveAddr, mpu.Y);
+    writeMem(mpu, mpu.effectiveAddr, mpu.Y);
     mpu.T = 0;
     mpu.PC += 3;
 }
@@ -581,7 +591,7 @@ void setEffectiveAddrAbsX(MPU& mpu) {
     mpu.effectiveAddr = mpu.baseAddr + mpu.X;
 
     // 6502 bug: ghost read at base addr +X
-    mpu.mem->read(mpu.baseAddr);
+    readMem(mpu, mpu.baseAddr);
 
     mpu.T++;
 }
@@ -589,31 +599,31 @@ void setEffectiveAddrAbsY(MPU& mpu) {
     mpu.effectiveAddr = mpu.baseAddr + mpu.Y;
 
     // 6502 bug: ghost read at base addr +X
-    mpu.mem->read(mpu.baseAddr);
+    readMem(mpu, mpu.baseAddr);
 
     mpu.T++;
 }
 void storeAZeroPageX(MPU& mpu) {
     mpu.effectiveAddr = (mpu.baseAddr + mpu.X) & 0x00FF;
-    mpu.mem->write(mpu.effectiveAddr, mpu.A);
+    writeMem(mpu, mpu.effectiveAddr, mpu.A);
     mpu.T = 0;
     mpu.PC += 2;
 }
 void storeYZeroPageX(MPU& mpu) {
     mpu.effectiveAddr = (mpu.baseAddr + mpu.X) & 0x00FF;
-    mpu.mem->write(mpu.effectiveAddr, mpu.Y);
+    writeMem(mpu, mpu.effectiveAddr, mpu.Y);
     mpu.T = 0;
     mpu.PC += 2;
 }
 void storeAZeroPageY(MPU& mpu) {
     mpu.effectiveAddr = (mpu.baseAddr + mpu.Y) & 0x00FF;
-    mpu.mem->write(mpu.effectiveAddr, mpu.A);
+    writeMem(mpu, mpu.effectiveAddr, mpu.A);
     mpu.T = 0;
     mpu.PC += 2;
 }
 void storeXZeroPageY(MPU& mpu) {
     mpu.effectiveAddr = (mpu.baseAddr + mpu.Y) & 0x00FF;
-    mpu.mem->write(mpu.effectiveAddr, mpu.X);
+    writeMem(mpu, mpu.effectiveAddr, mpu.X);
     mpu.T = 0;
     mpu.PC += 2;
 }
@@ -695,7 +705,7 @@ OpCode createSTAIndirectYOpCode() {
 // Bit shift ops (ASL,LSR,ROL,ROR) and Inc/Dec
 void opASLMod(MPU& mpu) {
     // 6502 bug: double store at RMW
-    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+    writeMem(mpu, mpu.effectiveAddr, mpu.modVal);
 
     uint8_t oldVal = mpu.modVal;
     mpu.modVal = mpu.modVal << 1;
@@ -708,7 +718,7 @@ void opASLMod(MPU& mpu) {
 }
 void opLSRMod(MPU& mpu) {
     // 6502 bug: double store at RMW
-    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+    writeMem(mpu, mpu.effectiveAddr, mpu.modVal);
 
     uint8_t oldVal = mpu.modVal;
     mpu.modVal = mpu.modVal >> 1;
@@ -720,7 +730,7 @@ void opLSRMod(MPU& mpu) {
 }
 void opROLMod(MPU& mpu) {
     // 6502 bug: double store at RMW
-    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+    writeMem(mpu, mpu.effectiveAddr, mpu.modVal);
 
     uint8_t oldVal = mpu.modVal;
     mpu.modVal = (mpu.modVal << 1) | (mpu.P & MPU::Flag::C);
@@ -733,7 +743,7 @@ void opROLMod(MPU& mpu) {
 }
 void opRORMod(MPU& mpu) {
     // 6502 bug: double store at RMW
-    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+    writeMem(mpu, mpu.effectiveAddr, mpu.modVal);
 
     uint8_t oldVal = mpu.modVal;
     mpu.modVal = (mpu.modVal >> 1) | ((mpu.P & MPU::Flag::C) << 7);
@@ -746,7 +756,7 @@ void opRORMod(MPU& mpu) {
 }
 void opINC(MPU& mpu) {
     // 6502 bug: double store at RMW
-    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+    writeMem(mpu, mpu.effectiveAddr, mpu.modVal);
 
     mpu.modVal += 1;
     bool zero = mpu.modVal == 0;
@@ -757,7 +767,7 @@ void opINC(MPU& mpu) {
 }
 void opDEC(MPU& mpu) {
     // 6502 bug: double store at RMW
-    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+    writeMem(mpu, mpu.effectiveAddr, mpu.modVal);
 
     mpu.modVal -= 1;
     bool zero = mpu.modVal == 0;
@@ -767,11 +777,11 @@ void opDEC(MPU& mpu) {
     mpu.T++;
 }
 void fetchModValZeroPage(MPU& mpu) {
-    mpu.modVal = mpu.mem->read(mpu.effectiveAddr);
+    mpu.modVal = readMem(mpu, mpu.effectiveAddr);
     mpu.T++;
 }
 void storeModValLen2(MPU& mpu) {
-    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+    writeMem(mpu, mpu.effectiveAddr, mpu.modVal);
     mpu.T = 0;
     mpu.PC += 2;
 }
@@ -781,11 +791,11 @@ OpCode bitShiftZeroPage(void (*handler)(MPU&)) {
     return opcodeData;
 }
 void fetchModValAbsolute(MPU& mpu) {
-    mpu.modVal = mpu.mem->read(mpu.effectiveAddr);
+    mpu.modVal = readMem(mpu, mpu.effectiveAddr);
     mpu.T++;
 }
 void storeModValLen3(MPU& mpu) {
-    mpu.mem->write(mpu.effectiveAddr, mpu.modVal);
+    writeMem(mpu, mpu.effectiveAddr, mpu.modVal);
     mpu.T = 0;
     mpu.PC += 3;
 }
@@ -796,7 +806,7 @@ OpCode bitShiftAbsolute(void (*handler)(MPU& mpu)) {
 }
 void fetchModValZeroPageX(MPU& mpu) {
     mpu.effectiveAddr = (mpu.baseAddr + mpu.X) & 0x00FF;
-    mpu.modVal = mpu.mem->read(mpu.effectiveAddr);
+    mpu.modVal = readMem(mpu, mpu.effectiveAddr);
     mpu.T++;
 }
 OpCode bitShiftZeroPageX(void (*handler)(MPU& mpu)) {
@@ -806,7 +816,7 @@ OpCode bitShiftZeroPageX(void (*handler)(MPU& mpu)) {
 }
 void fetchModValAbsoluteX(MPU& mpu) {
     mpu.effectiveAddr = mpu.baseAddr + mpu.X;
-    mpu.modVal = mpu.mem->read(mpu.effectiveAddr);
+    mpu.modVal = readMem(mpu, mpu.effectiveAddr);
     mpu.T++;
 }
 OpCode bitShiftAbsoluteX(void (*handler)(MPU& mpu)) {
@@ -817,7 +827,7 @@ OpCode bitShiftAbsoluteX(void (*handler)(MPU& mpu)) {
 
 // Branch Operations
 void opBCC(MPU& mpu) {
-    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    mpu.offset = readMem(mpu, mpu.PC + 1);
     bool carry = mpu.P & MPU::Flag::C;
     if (carry) {
         mpu.T = 0;
@@ -827,7 +837,7 @@ void opBCC(MPU& mpu) {
     }
 }
 void opBCS(MPU& mpu) {
-    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    mpu.offset = readMem(mpu, mpu.PC + 1);
     bool carry = mpu.P & MPU::Flag::C;
     if (!carry) {
         mpu.T = 0;
@@ -837,7 +847,7 @@ void opBCS(MPU& mpu) {
     }
 }
 void opBEQ(MPU& mpu) {
-    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    mpu.offset = readMem(mpu, mpu.PC + 1);
     bool zero = mpu.P & MPU::Flag::Z;
     if (!zero) {
         mpu.T = 0;
@@ -847,7 +857,7 @@ void opBEQ(MPU& mpu) {
     }
 }
 void opBNE(MPU& mpu) {
-    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    mpu.offset = readMem(mpu, mpu.PC + 1);
     bool zero = mpu.P & MPU::Flag::Z;
     if (zero) {
         mpu.T = 0;
@@ -857,7 +867,7 @@ void opBNE(MPU& mpu) {
     }
 }
 void opBMI(MPU& mpu) {
-    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    mpu.offset = readMem(mpu, mpu.PC + 1);
     bool neg = mpu.P & MPU::Flag::N;
     if (!neg) {
         mpu.T = 0;
@@ -867,7 +877,7 @@ void opBMI(MPU& mpu) {
     }
 }
 void opBPL(MPU& mpu) {
-    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    mpu.offset = readMem(mpu, mpu.PC + 1);
     bool neg = mpu.P & MPU::Flag::N;
     if (neg) {
         mpu.T = 0;
@@ -877,7 +887,7 @@ void opBPL(MPU& mpu) {
     }
 }
 void opBVC(MPU& mpu) {
-    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    mpu.offset = readMem(mpu, mpu.PC + 1);
     bool overflow = mpu.P & MPU::Flag::V;
     if (overflow) {
         mpu.T = 0;
@@ -887,7 +897,7 @@ void opBVC(MPU& mpu) {
     }
 }
 void opBVS(MPU& mpu) {
-    mpu.offset = mpu.mem->read(mpu.PC + 1);
+    mpu.offset = readMem(mpu, mpu.PC + 1);
     bool overflow = mpu.P & MPU::Flag::V;
     if (!overflow) {
         mpu.T = 0;
@@ -917,13 +927,13 @@ OpCode branchOps(void (*handler)(MPU& mpu)) {
 
 // Push / Pull Instructions
 void opPHA(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, mpu.A);
+    writeMem(mpu, 0x0100 | mpu.S, mpu.A);
     mpu.S--;
     mpu.T = 0;
     mpu.PC += 1;
 }
 void opPHP(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, mpu.P | MPU::Flag::B | 0x20); // B and empty flag are always 1 when read
+    writeMem(mpu, 0x0100 | mpu.S, mpu.P | MPU::Flag::B | 0x20); // B and empty flag are always 1 when read
     mpu.S--;
     mpu.T = 0;
     mpu.PC += 1;
@@ -935,7 +945,7 @@ OpCode pushOperation(void (*handler)(MPU& mpu)) {
 }
 void opPLA(MPU& mpu) {
     mpu.S++;
-    mpu.A = mpu.mem->read(0x0100 | mpu.S);
+    mpu.A = readMem(mpu, 0x0100 | mpu.S);
     bool neg = static_cast<int8_t>(mpu.A) < 0;
     bool zero = mpu.A == 0;
     mpu.P &= ~MPU::Flag::N & ~MPU::Flag::Z;
@@ -945,7 +955,7 @@ void opPLA(MPU& mpu) {
 }
 void opPLP(MPU& mpu) {
     mpu.S++;
-    mpu.P = mpu.mem->read(0x0100 | mpu.S) & ~MPU::Flag::B & ~MPU::Flag::EmptyBit;
+    mpu.P = readMem(mpu, 0x0100 | mpu.S) & ~MPU::Flag::B & ~MPU::Flag::EmptyBit;
     mpu.T = 0;
     mpu.PC += 1;
 }
@@ -957,27 +967,27 @@ OpCode pullOperation(void (*handler)(MPU& mpu)) {
 
 // BRK instruction (called for hardware interrupt)
 void brkPushPCH(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, ((mpu.PC + (mpu.handlingIRQorNMI ? 0 : 2)) >> 8) & 0xFF);
+    writeMem(mpu, 0x0100 | mpu.S, ((mpu.PC + (mpu.handlingIRQorNMI ? 0 : 2)) >> 8) & 0xFF);
     mpu.S--;
     mpu.T++;
 }
 void brkPushPCL(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, (mpu.PC + (mpu.handlingIRQorNMI ? 0 : 2)) & 0xFF);
+    writeMem(mpu, 0x0100 | mpu.S, (mpu.PC + (mpu.handlingIRQorNMI ? 0 : 2)) & 0xFF);
     mpu.S--;
     mpu.T++;
 }
 void brkPushP(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, mpu.P | MPU::Flag::EmptyBit | (mpu.handlingIRQorNMI ? 0 : MPU::Flag::B));
+    writeMem(mpu, 0x0100 | mpu.S, mpu.P | MPU::Flag::EmptyBit | (mpu.handlingIRQorNMI ? 0 : MPU::Flag::B));
     mpu.P |= MPU::Flag::I; // disable IRQ
     mpu.S--;
     mpu.T++;
 }
 void brkFetchAddrLow(MPU& mpu) {
-    mpu.PC = mpu.mem->read(mpu.handlingNMI ? 0xFFFA : 0xFFFE);
+    mpu.PC = readMem(mpu, mpu.handlingNMI ? 0xFFFA : 0xFFFE);
     mpu.T++;
 }
 void brkFetchAddrHigh(MPU& mpu) {
-    mpu.PC |= mpu.mem->read(mpu.handlingNMI ? 0xFFFB : 0xFFFF) << 8;
+    mpu.PC |= readMem(mpu, mpu.handlingNMI ? 0xFFFB : 0xFFFF) << 8;
     mpu.handlingNMI = false;
     mpu.handlingIRQorNMI = false;
     mpu.T = 0;
@@ -990,17 +1000,17 @@ OpCode createBRKOpCode() {
 
 // Jump & Jump To Subroutine
 void jsrPushPCH(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, ((mpu.PC + 2) >> 8) & 0xFF);
+    writeMem(mpu, 0x0100 | mpu.S, ((mpu.PC + 2) >> 8) & 0xFF);
     mpu.S--;
     mpu.T++;
 }
 void jsrPushPCL(MPU& mpu) {
-    mpu.mem->write(0x0100 | mpu.S, (mpu.PC + 2) & 0xFF);
+    writeMem(mpu, 0x0100 | mpu.S, (mpu.PC + 2) & 0xFF);
     mpu.S--;
     mpu.T++;
 }
 void fetchJSRHighAddr(MPU& mpu) {
-    mpu.effectiveAddr |= mpu.mem->read(mpu.PC + 2) << 8;
+    mpu.effectiveAddr |= readMem(mpu, mpu.PC + 2) << 8;
     mpu.T = 0;
     mpu.PC = mpu.effectiveAddr;
 }
@@ -1015,20 +1025,20 @@ OpCode createJMPAbsolute() {
     return opcodeData;
 }
 void fetchJMPIndirAddrLow(MPU& mpu) {
-    mpu.indirectAddr = mpu.mem->read(mpu.PC + 1);
+    mpu.indirectAddr = readMem(mpu, mpu.PC + 1);
     mpu.T++;
 }
 void fetchJMPIndirAddrHigh(MPU& mpu) {
-    mpu.indirectAddr |= (mpu.mem->read(mpu.PC + 2) << 8);
+    mpu.indirectAddr |= (readMem(mpu, mpu.PC + 2) << 8);
     mpu.T++;
 }
 void fetchJMPEffAddrLow(MPU& mpu) {
-    mpu.effectiveAddr = mpu.mem->read(mpu.indirectAddr);
+    mpu.effectiveAddr = readMem(mpu, mpu.indirectAddr);
     mpu.T++;
 }
 void fetchJMPEffAddrHigh(MPU& mpu) {
     // 6502 bug: JMP indirect can't cross page boundary
-    mpu.effectiveAddr |= mpu.mem->read((mpu.indirectAddr & 0xFF00) | ((mpu.indirectAddr + 1) & 0x00FF)) << 8;
+    mpu.effectiveAddr |= readMem(mpu, (mpu.indirectAddr & 0xFF00) | ((mpu.indirectAddr + 1) & 0x00FF)) << 8;
     mpu.T = 0;
     mpu.PC = mpu.effectiveAddr;
 }
@@ -1041,17 +1051,17 @@ OpCode createJMPIndirect() {
 // RTI instruction (return from interrupt)
 void rtiPullP(MPU& mpu) {
     mpu.S++;
-    mpu.P = mpu.mem->read(0x0100 | mpu.S) & ~MPU::Flag::B & ~MPU::Flag::EmptyBit;
+    mpu.P = readMem(mpu, 0x0100 | mpu.S) & ~MPU::Flag::B & ~MPU::Flag::EmptyBit;
     mpu.T++;
 }
 void rtiPullPCL(MPU& mpu) {
     mpu.S++;
-    mpu.PC = mpu.mem->read(0x0100 | mpu.S);
+    mpu.PC = readMem(mpu, 0x0100 | mpu.S);
     mpu.T++;
 }
 void rtiPullPCH(MPU& mpu) {
     mpu.S++;
-    mpu.PC |= mpu.mem->read(0x0100 | mpu.S) << 8;
+    mpu.PC |= readMem(mpu, 0x0100 | mpu.S) << 8;
     mpu.T = 0;
 }
 OpCode createRTIOpCode() {
@@ -1061,7 +1071,7 @@ OpCode createRTIOpCode() {
 }
 void rtsPullPCH(MPU& mpu) {
     mpu.S++;
-    mpu.PC |= mpu.mem->read(0x0100 | mpu.S) << 8;
+    mpu.PC |= readMem(mpu, 0x0100 | mpu.S) << 8;
     mpu.T++;
 }
 void rtsLastCycle(MPU& mpu) {

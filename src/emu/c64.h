@@ -42,5 +42,7 @@ public:
     MPUTrace mpuTrace;
     KernalTrace kernalTrace;
     BreakPoints breakPoints;
+
+    bool mpuStunned = false;
 };
 
