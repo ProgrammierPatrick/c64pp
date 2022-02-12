@@ -44,7 +44,7 @@ private:
     void checkIRQ();
 public:
 
-    bool BA = true; // Bus Available: when true, MPU may use the bus and is not "stunned"
+    bool BA = true; // Bus Available: when false, MPU is stunned on the next read
 
     uint16_t x = firstCycleX; // "sprite coordinate system", internal
     uint16_t y = 0; // "raster line number", internal, same range as rasterCompareLine

@@ -32,8 +32,7 @@ void VIC::tick() {
 }
 
 void VIC::tickBackground() {
-    // std::cout << "y:" << (int)y << " x:" << (int)cycleInLine << " state:" << (inDisplayState ? "display" : "idle") << " RC:" << (int)RC
-    //     << " VMLI:" << (int)VMLI << " VCBASE:" << (int)VCBASE << " VC:" << (int)VC << std::endl;
+    bool badLine = isBadLine();
 
     if (cycleInLine == 9) {
         VMLI = 0;
@@ -41,17 +40,14 @@ void VIC::tickBackground() {
     if (cycleInLine == 11) {
         VC = VCBASE;
     }
-    if (cycleInLine == 14 && inDisplayState && isBadLine()) {
+    BA = !(cycleInLine >= 13 && cycleInLine <= 54 && badLine);
+    if (cycleInLine == 14 && inDisplayState && badLine) {
         RC = 0;
     }
     if (cycleInLine >= 16 && cycleInLine <= 55 && inDisplayState) {
         auto gPixels = backgroundGraphics.gAccess(videoMatrixLine[VMLI], VC, RC);
         graphicsDataPipeline[0] = gPixels;
         advanceGraphicsPipeline();
-
-        // draw character bad line in alternating colors
-        // if (RC == 0) for (int i = 0; i < 8; i++)
-        //     screen[(y - firstVisibleY) * screenWidth + (cycleInLine - firstVisibleCycle) * 8 + i] = (VMLI % 2) ? 1 : 2;
 
         VC++;
         VMLI++;
@@ -61,7 +57,7 @@ void VIC::tickBackground() {
         graphicsDataPipeline[0] = gPixels;
         advanceGraphicsPipeline();
     }
-    if (cycleInLine >= 15 && cycleInLine <= 54 && inDisplayState && isBadLine()) {
+    if (cycleInLine >= 15 && cycleInLine <= 54 && inDisplayState && badLine) {
         backgroundGraphics.cAccess();
     }
     if (cycleInLine == 58 && (!inDisplayState || RC == 7)) {
@@ -70,7 +66,7 @@ void VIC::tickBackground() {
     if (cycleInLine == 58 && RC == 7) {
         inDisplayState = false;
     }
-    if (cycleInLine == 58 && (RC < 7 || isBadLine())) {
+    if (cycleInLine == 58 && (RC < 7 || badLine)) {
         RC++;
     }
 
@@ -82,7 +78,7 @@ void VIC::tickBackground() {
     if (y == 0x30 && displayEnable)
         displayEnableSetInThisFrame = true;
 
-    if (isBadLine()) inDisplayState = true;
+    if (badLine) inDisplayState = true;
 }
 
 void VIC::tickSprites() {
