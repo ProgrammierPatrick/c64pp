@@ -174,7 +174,9 @@ void VICViewer::updateC64() {
     for (int y = 0; y < 25; y++) {
         for (int x = 0; x < 40; x++) {
             for (int i = 0; i < 8; i++) {
-                if ((y * 8 + i) == (vic.VC / 40 * 8 + vic.RC)) {
+                uint16_t vicY = (vic.VCBASE == vic.VC) ? (vic.VCBASE / 40 * 8 + vic.RC - 7) : (vic.VCBASE / 40 * 8 + vic.RC);
+                if ((y * 8 + i) == vicY) {
+                    // red line for current y
                     for (int j = 0; j < 8; j++) matrixScreen[y * 40 * 8 * 8 + i * 40 * 8 + x * 8 + j] = 4;
                 } else {
                     auto c = vic.accessMem(((vic.videoMatrixMemoryPosition & 0xF) << 10) | (y * 40 + x));

@@ -35,17 +35,6 @@ void VIC::tickBackground() {
     // std::cout << "y:" << (int)y << " x:" << (int)cycleInLine << " state:" << (inDisplayState ? "display" : "idle") << " RC:" << (int)RC
     //     << " VMLI:" << (int)VMLI << " VCBASE:" << (int)VCBASE << " VC:" << (int)VC << std::endl;
 
-    // debug stuff
-    {
-        int sy = y - firstVisibleY;
-        int sx = (cycleInLine - firstVisibleCycle) * 8;
-
-        // badline in red
-        if (isBadLine() && sx >= 0 && sx < screenWidth && sy >= 0 && sy < screenHeight)
-            screen[sy * screenWidth + sx] = (VMLI % 2) ? 1 : 2;
-    }
-
-
     if (cycleInLine == 9) {
         VMLI = 0;
     }
@@ -260,6 +249,18 @@ void VIC::advanceGraphicsPipeline() {
     graphicsDataPipeline[3] = graphicsDataPipeline[2];
     graphicsDataPipeline[2] = graphicsDataPipeline[1];
     graphicsDataPipeline[1] = graphicsDataPipeline[0];
+
+    // debug: draw badlines
+    //{
+    //    int sy = y - firstVisibleY;
+    //    int sx0 = (cycleInLine - firstVisibleCycle) * 8 + 4;
+    //
+    //    // badline in red
+    //    if (isBadLine())
+    //        for(int sx = sx0; sx < sx0 + 8; sx++)
+    //            if (sx >= 0 && sx < screenWidth && sy >= 0 && sy < screenHeight)
+    //                screen[sy * screenWidth + sx] = (VMLI % 2) ? 1 : 2;
+    //}
 }
 
 
