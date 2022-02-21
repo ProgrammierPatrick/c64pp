@@ -66,6 +66,7 @@
     </property>
     <addaction name="actionOpen_PRG"/>
     <addaction name="actionEnter_Hex_Data"/>
+    <addaction name="actionExtract_RAM_to_File"/>
    </widget>
    <widget class="QMenu" name="menuEmulation">
     <property name="title">
@@ -223,7 +224,12 @@
     <string>Step Line</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+L</string>
+    <string>Alt+L</string>
+   </property>
+  </action>
+  <action name="actionExtract_RAM_to_File">
+   <property name="text">
+    <string>Extract RAM to File...</string>
    </property>
   </action>
  </widget>

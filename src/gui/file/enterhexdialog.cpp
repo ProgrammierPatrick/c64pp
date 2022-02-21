@@ -1,7 +1,7 @@
 #include "enterhexdialog.h"
 #include "ui_enterhexdialog.h"
 
-#include "text_utils.h"
+#include "../text_utils.h"
 
 #include <QMessageBox>
 

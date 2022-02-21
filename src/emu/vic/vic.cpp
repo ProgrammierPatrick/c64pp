@@ -247,16 +247,16 @@ void VIC::advanceGraphicsPipeline() {
     graphicsDataPipeline[1] = graphicsDataPipeline[0];
 
     // debug: draw badlines
-    //{
-    //    int sy = y - firstVisibleY;
-    //    int sx0 = (cycleInLine - firstVisibleCycle) * 8 + 4;
-    //
-    //    // badline in red
-    //    if (isBadLine())
-    //        for(int sx = sx0; sx < sx0 + 8; sx++)
-    //            if (sx >= 0 && sx < screenWidth && sy >= 0 && sy < screenHeight)
-    //                screen[sy * screenWidth + sx] = (VMLI % 2) ? 1 : 2;
-    //}
+    {
+        int sy = y - firstVisibleY;
+        int sx0 = (cycleInLine - firstVisibleCycle) * 8 + 4;
+
+        // badline in red
+        //if (isBadLine())
+        //    for(int sx = sx0; sx < sx0 + 8; sx++)
+        //        if (sx >= 0 && sx < screenWidth && sy >= 0 && sy < screenHeight)
+        //            screen[sy * screenWidth + sx] = (VMLI % 2) ? 1 : 2;
+    }
 }
 
 

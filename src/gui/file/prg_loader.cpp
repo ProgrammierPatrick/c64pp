@@ -1,7 +1,6 @@
 #include "prg_loader.h"
 #include "ui_prg_loader.h"
-#include "text_utils.h"
-#include "memory"
+#include "../text_utils.h"
 
 #include <QPushButton>
 #include <QFileDialog>

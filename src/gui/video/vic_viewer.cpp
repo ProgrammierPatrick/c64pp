@@ -147,6 +147,11 @@ VICViewer::VICViewer(MainWindow *parent, C64Runner *c64Runner) :
         mainWindow->updateUI();
     });
 
+    QObject::connect(ui->DEN, &QCheckBox::stateChanged, [this]() {
+        this->c64Runner->c64->vic.displayEnable = ui->DEN->isChecked();
+        mainWindow->updateUI();
+    });
+
     updateC64();
 }
 
@@ -235,4 +240,6 @@ void VICViewer::updateC64() {
     ui->cb13->setChecked(vic.charGenMemoryPosition & 0x04);
     ui->cb12->setChecked(vic.charGenMemoryPosition & 0x02);
     ui->cb11->setChecked(vic.charGenMemoryPosition & 0x01);
+
+    ui->DEN->setChecked(vic.displayEnable);
 }

@@ -2,8 +2,9 @@
 #include "ui_main_window.h"
 
 #include "text_utils.h"
-#include "enterhexdialog.h"
-#include "prg_loader.h"
+#include "file/enterhexdialog.h"
+#include "file/prg_loader.h"
+#include "file/extract_prg.h"
 
 #include <iostream>
 #include <sstream>
@@ -220,6 +221,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(ui->actionOpen_PRG, &QAction::triggered, [this]() {
         PRGLoader::openPRGFile(this, &c64Runner);
+        updateUI();
+    });
+
+    QObject::connect(ui->actionExtract_RAM_to_File, &QAction::triggered, [this]() {
+        ExtractPRG diag(this, &c64Runner);
+        diag.exec();
         updateUI();
     });
 

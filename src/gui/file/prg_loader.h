@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "c64_runner.h"
+#include "../c64_runner.h"
 
 namespace Ui {
 class PRGLoader;
