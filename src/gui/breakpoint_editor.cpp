@@ -12,7 +12,6 @@ BreakpointEditor::BreakpointEditor(MainWindow *parent, C64Runner *c64Runner) :
     mainWindow(parent)
 {
     ui->setupUi(this);
-    updateC64();
     // disable resizing
     setFixedSize(size());
     ui->inputLine->setFocus();
@@ -47,7 +46,7 @@ BreakpointEditor::BreakpointEditor(MainWindow *parent, C64Runner *c64Runner) :
             uint16_t addr = fromHexStr16(hex);
             if (std::find(vec.begin(), vec.end(), addr) == vec.end()) {
                 ui->list->addItem(QString::fromStdString(toHexStr(addr)));
-                this->c64Runner->c64->breakPoints.instructionBreakpoints.push_back(addr);
+                vec.push_back(addr);
                 std::sort(vec.begin(), vec.end());
             }
         }
@@ -63,6 +62,7 @@ BreakpointEditor::BreakpointEditor(MainWindow *parent, C64Runner *c64Runner) :
         updateC64();
     });
 
+    updateC64();
 }
 
 BreakpointEditor::~BreakpointEditor()
@@ -79,14 +79,18 @@ void BreakpointEditor::updateC64() {
     }
 
     bool refresh = false;
-    for (int i = 0; i < vec.size(); i++) {
-        if (toHexStr(vec[i]) != ui->list->item(i)->text().toStdString()) {
-                ui->list->clear();
+    if (vec.size() != ui->list->count()) {
+        refresh = true;
+    } else {
+        for (int i = 0; i < vec.size(); i++) {
+            if (toHexStr(vec[i]) != ui->list->item(i)->text().toStdString()) {
                 refresh = true;
+            }
         }
     }
 
     if (refresh) {
+        ui->list->clear();
         for (auto val : vec) {
             ui->list->addItem(QString::fromStdString(toHexStr(val)));
         }

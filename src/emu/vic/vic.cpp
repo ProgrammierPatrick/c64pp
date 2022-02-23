@@ -140,11 +140,18 @@ void VIC::tickSprites() {
 
         // cond. 5 p- and s-Accesses
         if (sprite.enableDMA) {
-            auto pCycle = (i >= 3) ? (2 * i - 5) : (i * 2 + 59);
-            if (cycleInLine == pCycle)
+            auto pCycle = (i >= 3) ? (2 * i - 5) : (i * 2 + 60);
+            if (cycleInLine == pCycle) {
                 sprites.spritePointer = sprites.spritePAccess(i);
-            if (sprite.spriteEnabled && cycleInLine >= pCycle + 1 && cycleInLine <= pCycle + 3) {
-                sprite.pixels[cycleInLine - pCycle - 1] = sprites.spriteSAccess(i, sprites.spritePointer);
+                if (sprite.spriteEnabled) {
+                    sprite.pixels[0] = sprites.spriteSAccess(i, sprites.spritePointer);
+                    sprite.spriteDataCounter++;
+                }
+            }
+            if (cycleInLine == pCycle + 1 && sprite.spriteEnabled) {
+                sprite.pixels[1] = sprites.spriteSAccess(i, sprites.spritePointer);
+                sprite.spriteDataCounter++;
+                sprite.pixels[2] = sprites.spriteSAccess(i, sprites.spritePointer);
                 sprite.spriteDataCounter++;
             }
         }
@@ -152,13 +159,15 @@ void VIC::tickSprites() {
         // cond. 6 draw pixels
         if (sprite.currentlyDisplayed) {
             for (int j = 0; j < 8; j++) {
-                if (x + j == sprite.xCoord || sprite.drawIndexByte != 0 || sprite.drawIndexPixel != 0) {
-                    if (x + j == sprite.xCoord) sprite.xExpansionFF = false;
-
+                if (x + j == sprite.xCoord) {
+                    sprite.isDrawingPixels = true;
+                    sprite.xExpansionFF = false;
+                }
+                if (sprite.isDrawingPixels) {
                     int sy = y - firstVisibleY;
                     int sx = (cycleInLine - firstVisibleCycle) * 8 + j;
                     auto pixelColor = sprite.pixels[sprite.drawIndexByte][sprite.drawIndexPixel];
-                    if (pixelColor != 0xFF && sx >= 0 && sx < screenWidth && sy >= 0 && sy <= screenHeight)
+                    if (pixelColor != 0xFF && sx >= 0 && sx < screenWidth && sy >= 0 && sy < screenHeight)
                         screen[sy * screenWidth + sx] = pixelColor;
 
                     if (!sprite.spriteXExpansion || sprite.xExpansionFF) {
@@ -166,8 +175,10 @@ void VIC::tickSprites() {
                         if (sprite.drawIndexPixel >= 8) {
                             sprite.drawIndexPixel = 0;
                             sprite.drawIndexByte++;
-                            if (sprite.drawIndexByte >= 3)
+                            if (sprite.drawIndexByte >= 3) {
                                 sprite.drawIndexByte = 0;
+                                sprite.isDrawingPixels = false;
+                            }
                         }
                     }
                     sprite.xExpansionFF = !sprite.xExpansionFF;

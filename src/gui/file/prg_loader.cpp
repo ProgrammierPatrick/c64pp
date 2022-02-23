@@ -51,7 +51,7 @@ PRGLoader::PRGLoader(QWidget *parent, C64Runner* c64Runner, const std::string& f
         return static_cast<uint16_t>(data[addr - offset + 2] | (data[addr - offset + 3] << 8));
     };
     uint16_t nextLine = rd16(offset);
-    bool singleLine = rd16(nextLine) == 0x0000;
+    bool singleLine = rd16(nextLine) == 0x0000 || rd16(nextLine) == 0x00A0; // 00A0 seems to terminate as well. maybe all 00xx work?
     bool isSYS = data[6] == 0x9E;
 
     QPushButton *openAndRun = ui->buttonBox->addButton("Open And Run", QDialogButtonBox::AcceptRole);

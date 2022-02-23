@@ -25,6 +25,7 @@ struct SpriteData {
     int drawIndexByte = 0;
     int drawIndexPixel = 0;
     bool xExpansionFF = false;
+    bool isDrawingPixels = false;
 };
 
 class VIC;
