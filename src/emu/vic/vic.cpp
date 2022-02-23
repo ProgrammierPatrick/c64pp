@@ -129,9 +129,27 @@ void VIC::tickSprites() {
         }
     }
 
+    if (cycleInLine == 55 && sprites.spriteData[0].spriteEnabled) BA = false;
+    if (cycleInLine == 57 && sprites.spriteData[1].spriteEnabled) BA = false;
+    if (cycleInLine == 59 && sprites.spriteData[2].spriteEnabled) BA = false;
+    if (cycleInLine == 61 && sprites.spriteData[3].spriteEnabled) BA = false;
+    if (cycleInLine == 63 && sprites.spriteData[4].spriteEnabled) BA = false;
+    if (cycleInLine ==  2 && sprites.spriteData[5].spriteEnabled) BA = false;
+    if (cycleInLine ==  4 && sprites.spriteData[6].spriteEnabled) BA = false;
+    if (cycleInLine ==  6 && sprites.spriteData[7].spriteEnabled) BA = false;
+    if (cycleInLine == 58 && !sprites.spriteData[1].spriteEnabled && !sprites.spriteData[2].spriteEnabled) BA = true;
+    if (cycleInLine == 60 && !sprites.spriteData[2].spriteEnabled && !sprites.spriteData[3].spriteEnabled) BA = true;
+    if (cycleInLine == 62 && !sprites.spriteData[3].spriteEnabled && !sprites.spriteData[4].spriteEnabled) BA = true;
+    if (cycleInLine ==  1 && !sprites.spriteData[4].spriteEnabled && !sprites.spriteData[5].spriteEnabled) BA = true;
+    if (cycleInLine ==  3 && !sprites.spriteData[5].spriteEnabled && !sprites.spriteData[6].spriteEnabled) BA = true;
+    if (cycleInLine ==  5 && !sprites.spriteData[6].spriteEnabled && !sprites.spriteData[7].spriteEnabled) BA = true;
+    if (cycleInLine ==  7 && !sprites.spriteData[7].spriteEnabled) BA = true;
+    if (cycleInLine ==  9) BA = true;
+
     // every line
     for (int i = 0; i < 8; i++) {
         auto& sprite = sprites.spriteData[i];
+
         // cond. 1 when no expansion, always load new data
         if (!sprite.spriteYExpansion) sprite.expansionFlipFlop = true;
 
