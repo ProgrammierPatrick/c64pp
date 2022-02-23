@@ -13,11 +13,8 @@ void VIC::tick() {
     }
 
     x += 8;
-    if (x > VIC::maxX) x = 0;
+    if (x > VIC::maxX) x = 4; // reset happens in half cycle, in full cycle, x is already at 4.
     cycleInLine++;
-    if (cycleInLine == 63) {
-        // TODO: interrupt here
-    }
 
     if (cycleInLine == 64) {
         cycleInLine = 1;
@@ -140,7 +137,7 @@ void VIC::tickSprites() {
 
         // cond. 5 p- and s-Accesses
         if (sprite.enableDMA) {
-            auto pCycle = (i >= 3) ? (2 * i - 5) : (i * 2 + 60);
+            auto pCycle = (i >= 3) ? (2 * i - 5) : (i * 2 + 58);
             if (cycleInLine == pCycle) {
                 sprites.spritePointer = sprites.spritePAccess(i);
                 if (sprite.spriteEnabled) {
@@ -159,7 +156,8 @@ void VIC::tickSprites() {
         // cond. 6 draw pixels
         if (sprite.currentlyDisplayed) {
             for (int j = 0; j < 8; j++) {
-                if (x + j == sprite.xCoord) {
+                int pixelX = x + j > maxX ? x + j - maxX - 1 : x + j;
+                if (pixelX == sprite.xCoord) {
                     sprite.isDrawingPixels = true;
                     sprite.xExpansionFF = false;
                 }

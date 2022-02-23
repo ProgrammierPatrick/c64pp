@@ -46,7 +46,7 @@ public:
 
     bool BA = true; // Bus Available: when false, MPU is stunned on the next read
 
-    uint16_t x = firstCycleX; // "sprite coordinate system", internal
+    uint16_t x = 0x194; // "sprite coordinate system", internal
     uint16_t y = 0; // "raster line number", internal, same range as rasterCompareLine
     uint16_t cycleInLine = 1; // counts 8 pixels at a time
     uint16_t rasterCompareLine = 0; // rst8 (1 bit), raster (8 bit)
@@ -70,10 +70,10 @@ public:
     static const uint16_t firstVisibleY = 16; // including border
     static const uint16_t lastVisibleY = 299; // including border
 
-    static const uint16_t firstCycleX = 404; // including border and hblank
-    static const uint16_t firstVisibleX = 480; // including border
-    static const uint16_t lastVisibleX = 380; // including border
-    static const uint16_t maxX = 0x1F7; // =503
+    static const uint16_t firstCycleX = 404; // including border and hblank (from VIC-Article)
+    static const uint16_t firstVisibleX = 480; // including border          (from VIC-Article)
+    static const uint16_t lastVisibleX = 380; // including border           (from VIC-Article)
+    static const uint16_t maxX = 0x1F7; // =503                             (from VIC-Article)
     static const uint16_t firstVisibleCycle = 11;
     static const uint16_t firstBackgroundGraphicsCycle = 16;
     static const uint16_t lastBackgroundGraphicsCycle = 55;
