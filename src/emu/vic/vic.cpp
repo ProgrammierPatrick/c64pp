@@ -564,11 +564,13 @@ void VIC::write(uint16_t addr, uint8_t data) {
             displayEnable = data & 0x10;
             bitmapMode = data & 0x20;
             extendedColorMode = data & 0x40;
+            rasterCompareLine &= ~0x100;
             rasterCompareLine |= (data >> 7) << 8;
             break;
         // Raster counter
         case 0x12:
-            rasterCompareLine = data;
+            rasterCompareLine &= 0x100;
+            rasterCompareLine |= data;
             break;
         // Sprite enabled
         case 0x15:
@@ -594,11 +596,14 @@ void VIC::write(uint16_t addr, uint8_t data) {
             break;
         // Interrupt register
         case 0x19:
-            rasterInterrupt = data & 0x01;
-            spriteBitmapCollisionInterrupt = data & 0x02;
-            spriteSpriteCollisionInterrupt = data & 0x04;
-            lightpenInterrupt = data & 0x08;
-            IRQ = data & 0x80;
+            if (data & 0x01) rasterInterrupt = false;
+            if (data & 0x02) spriteBitmapCollisionInterrupt = false;
+            if (data & 0x04) spriteSpriteCollisionInterrupt = false;
+            if (data & 0x08) lightpenInterrupt = false;
+            if (!(enableRasterInterrupt && rasterInterrupt
+                  || enableSpriteBitmapCollisionInterrupt && spriteBitmapCollisionInterrupt
+                  || enableSpriteSpriteCollisionInterrupt && spriteSpriteCollisionInterrupt))
+                IRQ = false;
             break;
         // Interrupt enabled
         case 0x1A:
@@ -690,8 +695,8 @@ void VIC::write(uint16_t addr, uint8_t data) {
 // Checks if interrupt enable register and interrupt latch are both set for any interrupt
 // If so, IRQ is set to true
 void VIC::checkIRQ() {
-    if (enableRasterInterrupt & rasterInterrupt) IRQ = true; // RST
-    if (enableSpriteBitmapCollisionInterrupt & spriteBitmapCollisionInterrupt) IRQ = true; // MBC
-    if (enableSpriteSpriteCollisionInterrupt & spriteSpriteCollisionInterrupt) IRQ = true; // MMC
-    if (enableLightpenInterrupt & lightpenInterrupt) IRQ = true; // LP
+    if (enableRasterInterrupt && rasterInterrupt) IRQ = true; // RST
+    if (enableSpriteBitmapCollisionInterrupt && spriteBitmapCollisionInterrupt) IRQ = true; // MBC
+    if (enableSpriteSpriteCollisionInterrupt && spriteSpriteCollisionInterrupt) IRQ = true; // MMC
+    if (enableLightpenInterrupt && lightpenInterrupt) IRQ = true; // LP
 }
