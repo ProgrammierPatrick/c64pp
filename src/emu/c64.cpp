@@ -1,7 +1,7 @@
 #include "c64.h"
 
 const bool traceMPU = false;
-const bool traceKernal = true;
+const bool traceKernal = false;
 const bool enableBreakPoints = true;
 
 void C64::tick() {
