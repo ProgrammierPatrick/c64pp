@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../emu/c64.h"
-#include "keyboard/keyboard_state.h"
+#include "input/keyboard_state.h"
 
 #include <memory>
 

@@ -17,7 +17,7 @@ void C64::tick() {
 
 
         if (!mpuStunned)
-            mpu.tick(cia.IRQ || vic.IRQ , cia.NMI);
+            mpu.tick(cia.IRQ || vic.IRQ , cia.NMI || keyboard->queryRestore());
 
         // mpu is stunned at first read
         // the condition (BA && !lastMemWritten) is not quite correct as the MPU is stunned before! the first read access.

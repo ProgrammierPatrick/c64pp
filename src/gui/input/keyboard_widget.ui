@@ -896,6 +896,19 @@
     <string>reset Keys</string>
    </property>
   </widget>
+  <widget class="QCheckBox" name="keymapCheckBox">
+   <property name="geometry">
+    <rect>
+     <x>540</x>
+     <y>200</y>
+     <width>91</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>keymap</string>
+   </property>
+  </widget>
  </widget>
  <resources>
   <include location="../../../data/data_res.qrc"/>

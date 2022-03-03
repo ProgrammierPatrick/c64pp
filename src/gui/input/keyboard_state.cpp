@@ -1,12 +1,42 @@
 #include "keyboard_state.h"
 
+#include <QMetaEnum>
+
 #include <sstream>
 #include <iostream>
 
 void KeyboardState::processKeyEvent(QKeyEvent* event, bool pressed) {
-    // TODO: also handle RESTORE
     QKeyCombination comb = event->keyCombination();
+    auto key = comb.key();
     int dir = pressed ? 1 : -1;
+    auto setJoystick = [pressed,this](bool first, int bit) {
+        uint8_t& reg = first ? joystick1State : joystick2State;
+        if (pressed) reg &= ~(1 << bit);
+        else         reg |=   1 << bit;
+    };
+
+    // joystick keymap: (1) WASD+Space, (2) WASD+Space + Arrows+Enter
+    if (joystick1Enabled && joystick2Enabled) {
+        if (key == Qt::Key_W)     { setJoystick(true, 0); return; }
+        if (key == Qt::Key_S)     { setJoystick(true, 1); return; }
+        if (key == Qt::Key_A)     { setJoystick(true, 2); return; }
+        if (key == Qt::Key_D)     { setJoystick(true, 3); return; }
+        if (key == Qt::Key_Space) { setJoystick(true, 4); return; }
+        if (key == Qt::Key_Up)    { setJoystick(false, 0); return; }
+        if (key == Qt::Key_Down)  { setJoystick(false, 1); return; }
+        if (key == Qt::Key_Left)  { setJoystick(false, 2); return; }
+        if (key == Qt::Key_Right) { setJoystick(false, 3); return; }
+        if (key == Qt::Key_Enter) { setJoystick(false, 4); return; }
+    }
+    else if (joystick1Enabled || joystick2Enabled) {
+        bool joy = joystick1Enabled;
+        if (key == Qt::Key_W)     { setJoystick(joy, 0); return; }
+        if (key == Qt::Key_S)     { setJoystick(joy, 1); return; }
+        if (key == Qt::Key_A)     { setJoystick(joy, 2); return; }
+        if (key == Qt::Key_D)     { setJoystick(joy, 3); return; }
+        if (key == Qt::Key_Space) { setJoystick(joy, 4); return; }
+    }
+
     for (auto& mapping : keymap) {
         if (mapping.key == comb.key()) {
             if (mapping.mode & ShiftMode::COMBINED_WITH_SHIFT)
@@ -17,6 +47,11 @@ void KeyboardState::processKeyEvent(QKeyEvent* event, bool pressed) {
                 matrixKeyCount[ctrlPos] += dir;
 
             matrixKeyCount[mapping.matrixPos] += dir;
+        }
+    }
+    for (auto& key : restoreKeymap) {
+        if (key == comb.key()) {
+            restoreKeyCount += dir;
         }
     }
 }
@@ -35,7 +70,11 @@ void KeyboardState::loadKeymap(const std::string &viceKeymapText) {
             int row, column, shiftmode;
             std::string keyname = s;
             ss >> row >> column;
-            if (row < 0) continue;
+            bool isRestore = false;
+            if (row < 0) {
+                if (row == -3) isRestore = true;
+                else continue;
+            }
             ss >> shiftmode;
 
             Qt::Key key = Qt::Key_unknown;
@@ -115,10 +154,35 @@ void KeyboardState::loadKeymap(const std::string &viceKeymapText) {
             else if(keyname == "dead_circumflex") key = Qt::Key_Dead_Circumflex;
 
             if(key != Qt::Key_unknown) {
-                keymap.push_back(Mapping(key, row * 8 + column, ShiftMode(shiftmode)));
+                if (row >= 0)
+                    keymap.push_back(Mapping(key, row * 8 + column, ShiftMode(shiftmode)));
+                if (isRestore)
+                    restoreKeymap.push_back(key);
             } else {
                 std::cout << "Keymap Error: key '" << keyname << "' unknown." << std::endl;
             }
         }
     }
+}
+
+std::string KeyboardState::getBindingName(int row, int col, bool shifted) {
+    QMetaEnum metaEnum = QMetaEnum::fromType<Qt::Key>();
+
+    for(auto& binding : this->keymap) {
+        if (binding.matrixPos == row * 8 + col) {
+            if (binding.mode == ShiftMode::SHIFT_OR_NOT
+                    || binding.mode == ShiftMode::NOT_SHIFTED && !shifted
+                    || binding.mode == ShiftMode::SHIFT_REQUIRED && shifted
+                    || binding.mode == ShiftMode::IS_LEFT_CBM
+                    || binding.mode == ShiftMode::IS_LEFT_CTRL
+                    || binding.mode == ShiftMode::IS_LEFT_SHIFT)
+                return std::string(metaEnum.valueToKey(binding.key)).substr(4); // Key_Space to Space
+        }
+    }
+    return "";
+}
+
+std::string KeyboardState::getRestoreBindingName() {
+    QMetaEnum metaEnum = QMetaEnum::fromType<Qt::Key>();
+    return std::string(metaEnum.valueToKey(restoreKeymap.front()));
 }

@@ -230,6 +230,48 @@ MainWindow::MainWindow(QWidget *parent) :
         updateUI();
     });
 
+    QObject::connect(ui->actiondisable_joysticks, &QAction::triggered, [this](bool enabled) {
+        std::cout << "actionoff:" << enabled << std::endl;
+        if (enabled) {
+            c64Runner.keyboard->setJoystick1Enabled(false);
+            c64Runner.keyboard->setJoystick2Enabled(false);
+            ui->actionjoystick_1->setChecked(false);
+            ui->actionjoystick_2->setChecked(false);
+            ui->actionboth_joysticks->setChecked(false);
+            updateUI();
+        }
+    });
+    QObject::connect(ui->actionjoystick_1, &QAction::triggered, [this](bool enabled) {
+        if (enabled) {
+            c64Runner.keyboard->setJoystick1Enabled(true);
+            c64Runner.keyboard->setJoystick2Enabled(false);
+            ui->actiondisable_joysticks->setChecked(false);
+            ui->actionjoystick_2->setChecked(false);
+            ui->actionboth_joysticks->setChecked(false);
+            updateUI();
+        }
+    });
+    QObject::connect(ui->actionjoystick_2, &QAction::triggered, [this](bool enabled) {
+        if (enabled) {
+            c64Runner.keyboard->setJoystick1Enabled(false);
+            c64Runner.keyboard->setJoystick2Enabled(true);
+            ui->actiondisable_joysticks->setChecked(false);
+            ui->actionjoystick_1->setChecked(false);
+            ui->actionboth_joysticks->setChecked(false);
+            updateUI();
+        }
+    });
+    QObject::connect(ui->actionboth_joysticks, &QAction::triggered, [this](bool enabled) {
+        if (enabled) {
+            c64Runner.keyboard->setJoystick1Enabled(true);
+            c64Runner.keyboard->setJoystick2Enabled(true);
+            ui->actiondisable_joysticks->setChecked(false);
+            ui->actionjoystick_1->setChecked(false);
+            ui->actionjoystick_2->setChecked(false);
+            updateUI();
+        }
+    });
+
     frameTimer.setInterval(20); // 50Hz -> 20ms
     frameTimer.start();
     running = true;

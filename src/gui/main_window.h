@@ -5,7 +5,7 @@
 #include "cia_viewer.h"
 #include "ram_viewer.h"
 #include "breakpoint_editor.h"
-#include "keyboard/keyboard_window.h"
+#include "input/keyboard_window.h"
 #include "video/video_widget.h"
 #include "video/vic_viewer.h"
 

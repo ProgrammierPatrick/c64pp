@@ -5,8 +5,8 @@
 uint8_t CIA::read(uint16_t addr, bool nonDestructive) {
     addr &= 0xFF0F;
     switch (addr) {
-        case 0x0000: return PRA1;
-        case 0x0001: return keyboard->query(PRA1);
+        case 0x0000: return PRA1 & keyboard->queryJoystick2();
+        case 0x0001: return keyboard->query(PRA1) & keyboard->queryJoystick1();
         case 0x0002: return DDRA;
         case 0x0003: return DDRB;
         case 0x0004: return static_cast<uint8_t>(timerCIA1.counterA & 0xFF);

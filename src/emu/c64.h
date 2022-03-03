@@ -19,7 +19,8 @@ public:
           basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM),
           cia(keyboard),
           vic(&mainRAM, &this->chargenROM, &colorRAM, &cia),
-          mpuTrace(&mpu), kernalTrace(&mpu) {
+          mpuTrace(&mpu), kernalTrace(&mpu),
+          keyboard(keyboard) {
         reset();
     }
 
@@ -42,6 +43,8 @@ public:
     MPUTrace mpuTrace;
     KernalTrace kernalTrace;
     BreakPoints breakPoints;
+
+    Keyboard *keyboard;
 
     bool mpuStunned = false;
 };

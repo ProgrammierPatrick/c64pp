@@ -46,6 +46,12 @@ KeyboardWidget::KeyboardWidget(QWidget *parent, C64Runner *c64Runner, MainWindow
         this->mainWindow->updateUI();
     });
     ui->resetKeysButton->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+
+    QObject::connect(ui->keymapCheckBox, &QCheckBox::toggled, [this](bool checked) {
+        if (checked) showBindings();
+        else hideBindings();
+    });
+    ui->keymapCheckBox->setFocusPolicy(Qt::FocusPolicy::NoFocus);
 }
 
 KeyboardWidget::~KeyboardWidget()
@@ -57,6 +63,34 @@ void KeyboardWidget::updateUI() {
     for (auto& [button, row, col] : virtualKeyboard) {
         button->setDown(c64Runner->keyboard->querySingleKey(row, col));
     }
+}
+
+
+void KeyboardWidget::showBindings() {
+    for (auto& [button, row, col] : virtualKeyboard) {
+        button->setFlat(false);
+        button->setText(QString::fromStdString(c64Runner->keyboard->getBindingName(row, col, false)));
+    }
+    ui->keyRestore->setFlat(false);
+    ui->keyRestore->setText(QString::fromStdString(c64Runner->keyboard->getRestoreBindingName()));
+    bindingsShown = true;
+}
+void KeyboardWidget::hideBindings() {
+    for (auto& [button, row, col] : virtualKeyboard) {
+        button->setFlat(true);
+        button->setText("");
+    }
+    ui->keyRestore->setFlat(true);
+    ui->keyRestore->setText("");
+    bindingsShown = false;
+}
+void KeyboardWidget::toggleBindings() {
+    bindingsShown = !bindingsShown;
+    if (bindingsShown) showBindings();
+    else hideBindings();
+}
+void KeyboardWidget::updateBindings() {
+    if (bindingsShown) showBindings();
 }
 
 void KeyboardWidget::initVirtualKeyboard() {

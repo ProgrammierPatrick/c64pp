@@ -1,4 +1,4 @@
-CMakeLists.txt.user
+CMakeLists.txt.*
 build/
 out/
 .vs/

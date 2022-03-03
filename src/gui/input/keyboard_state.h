@@ -25,7 +25,15 @@ public:
                         result &= ~(1 << i);
         return result;
     }
-    bool queryRestore() { return restoreKeyCount > 0; }
+    bool queryRestore() override {
+        return restoreKeyCount > 0;
+    }
+    uint8_t queryJoystick1() override {
+        return joystick1State;
+    }
+    uint8_t queryJoystick2() override {
+        return joystick1State;
+    }
     bool querySingleKey(int row, int col) { return matrixKeyCount[row * 8 + col] > 0; }
 
     void pressKey  (int row, int col) { matrixKeyCount[row * 8 + col]++; }
@@ -35,10 +43,28 @@ public:
     void handleKeyPressEvent(QKeyEvent* event) { processKeyEvent(event, true); }
     void handleKeyReleaseEvent(QKeyEvent* event) { processKeyEvent(event, false); }
 
+    void setJoystick1Enabled(bool enabled) {
+        joystick1Enabled = enabled;
+        if (!enabled) {
+            joystick1State = 0xFF;
+        }
+    }
+    void setJoystick2Enabled(bool enabled) {
+        joystick2Enabled = enabled;
+        if (!enabled) {
+            joystick2State = 0xFF;
+        }
+    }
+
+    std::string getBindingName(int row, int col, bool shifted);
+    std::string getRestoreBindingName();
+
     void resetPressedKeys() {
         for (auto& m : matrixKeyCount)
             m = 0;
         restoreKeyCount = 0;
+        joystick1State = 0xFF;
+        joystick2State = 0xFF;
     }
 
 private:
@@ -81,5 +107,10 @@ private:
     };
 
     std::vector<Mapping> keymap;
+    std::vector<Qt::Key> restoreKeymap;
 
+    uint8_t joystick1State = 0xFF;
+    uint8_t joystick2State = 0xFF;
+    bool joystick1Enabled = false;
+    bool joystick2Enabled = false;
 };

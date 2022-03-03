@@ -93,8 +93,18 @@
     <addaction name="separator"/>
     <addaction name="actionBreakpoint_Editor"/>
    </widget>
+   <widget class="QMenu" name="menuInput">
+    <property name="title">
+     <string>Input</string>
+    </property>
+    <addaction name="actiondisable_joysticks"/>
+    <addaction name="actionjoystick_1"/>
+    <addaction name="actionjoystick_2"/>
+    <addaction name="actionboth_joysticks"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEmulation"/>
+   <addaction name="menuInput"/>
    <addaction name="menuDebug"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -230,6 +240,50 @@
   <action name="actionExtract_RAM_to_File">
    <property name="text">
     <string>Extract RAM to File...</string>
+   </property>
+  </action>
+  <action name="actiondisable_joysticks">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>disabled</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+0</string>
+   </property>
+  </action>
+  <action name="actionjoystick_1">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>joystick 1</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+1</string>
+   </property>
+  </action>
+  <action name="actionjoystick_2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>joystick 2</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+2</string>
+   </property>
+  </action>
+  <action name="actionboth_joysticks">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>joystick 1+ 2</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+3</string>
    </property>
   </action>
  </widget>

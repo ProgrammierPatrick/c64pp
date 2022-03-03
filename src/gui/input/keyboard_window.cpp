@@ -23,6 +23,8 @@ KeyboardWindow::KeyboardWindow(QWidget *parent, C64Runner *c64Runner, MainWindow
 {
     ui->setupUi(this);
 
+    setFixedSize(size());
+
     keyboardWidget = new KeyboardWidget(centralWidget(), c64Runner, mainWindow);
     keyboardWidget->lower();
 

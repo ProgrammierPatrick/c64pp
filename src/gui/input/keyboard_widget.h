@@ -25,12 +25,19 @@ public:
 
     void updateUI();
 
+    void showBindings();
+    void hideBindings();
+    void toggleBindings();
+    void updateBindings();
+
 private:
     void initVirtualKeyboard();
 
     Ui::KeyboardWidget *ui;
     MainWindow *mainWindow;
     C64Runner *c64Runner;
+
+    bool bindingsShown = false;
 
     std::vector<std::tuple<QPushButton*,int,int>> virtualKeyboard;
 };
