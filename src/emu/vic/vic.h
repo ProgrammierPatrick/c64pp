@@ -1,6 +1,7 @@
 #pragma once
 
 #include "colored_val.h"
+#include "outputPixels.h"
 #include "background_graphics.h"
 #include "sprites.h"
 #include "../mem/memory.h"
@@ -35,11 +36,9 @@ public:
     void write(uint16_t addr, uint8_t data);
 
 private:
-    void tickBackground();
-    void tickSprites();
+    OutputPixels tickBackground();
+    OutputPixels tickSprites(std::array<bool,8> isForeground);
     void tickBorder();
-
-    void advanceGraphicsPipeline();
 
     void checkIRQ();
 public:
@@ -58,7 +57,7 @@ public:
     bool inDisplayState = false;
     bool displayEnableSetInThisFrame = false;
 
-    std::array<std::array<uint8_t, 8>, 4> graphicsDataPipeline;
+    OutputPixels backgroundGraphicsLastPixels;
 
     bool mainBorderFlipFlop = false;
     bool verticalBorderFlipFlop = false;

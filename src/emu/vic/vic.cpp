@@ -3,8 +3,34 @@
 #include "../io/cia.h"
 
 void VIC::tick() {
-    tickBackground();
-    tickSprites();
+    std::array<uint8_t, 8> pixels = { 0xFF };
+
+    OutputPixels graphicPixels = tickBackground();
+    OutputPixels spritePixels = tickSprites(graphicPixels.isForeground);
+
+    uint8_t spriteDataPrioReg = read(0x1B, false);
+    pixels = graphicPixels.pixels;
+
+    for (int i = 0; i < 8; i++) {
+        if ((!graphicPixels.isForeground[i]
+             || ((spriteDataPrioReg >> spritePixels.spriteNr[i]) & 0x1) == 0)
+             && spritePixels.pixels[i] != 0xFF) {
+
+            pixels[i] = spritePixels.pixels[i];
+
+            // set MxD bits (sprite-data collision) in register $d01f
+            if (graphicPixels.isForeground[i])
+                sprites.spriteData[spritePixels.spriteNr[i]].spriteDataCollision = true;
+        }
+    }
+
+    for (int i = 0; i < 8; i++) {
+        int sy = y - firstVisibleY;
+        int sx = (cycleInLine - firstVisibleCycle) * 8 + i + 4;
+        if (pixels[i] != 0xFF && sx >= 0 && sx < screenWidth && sy >= 0 && sy < screenHeight)
+            screen[sy * screenWidth + sx] = pixels[i];
+    }
+
     tickBorder();
 
     // compare y with rasterCompareLine
@@ -28,8 +54,9 @@ void VIC::tick() {
     checkIRQ();
 }
 
-void VIC::tickBackground() {
+OutputPixels VIC::tickBackground() {
     bool badLine = isBadLine();
+    OutputPixels gPixels;
 
     if (cycleInLine == 9) {
         VMLI = 0;
@@ -42,17 +69,17 @@ void VIC::tickBackground() {
         RC = 0;
     }
     if (cycleInLine >= 16 && cycleInLine <= 55 && inDisplayState) {
-        auto gPixels = backgroundGraphics.gAccess(videoMatrixLine[VMLI], VC, RC);
-        graphicsDataPipeline[0] = gPixels;
-        advanceGraphicsPipeline();
+        gPixels = backgroundGraphics.gAccess(videoMatrixLine[VMLI], VC, RC);
+        // graphicsDataPipeline[0] = gPixels.pixels;
+        // advanceGraphicsPipeline();
 
         VC++;
         VMLI++;
     } else {
         // idle state
-        auto gPixels = backgroundGraphics.idleStateGAccess(bitmapMode, multiColorMode, extendedColorMode);
-        graphicsDataPipeline[0] = gPixels;
-        advanceGraphicsPipeline();
+        gPixels = backgroundGraphics.idleStateGAccess(bitmapMode, multiColorMode, extendedColorMode);
+        // graphicsDataPipeline[0] = gPixels.pixels;
+        // advanceGraphicsPipeline();
     }
     if (cycleInLine >= 15 && cycleInLine <= 54 && inDisplayState && badLine) {
         backgroundGraphics.cAccess();
@@ -76,9 +103,29 @@ void VIC::tickBackground() {
         displayEnableSetInThisFrame = true;
 
     if (badLine) inDisplayState = true;
+
+    OutputPixels outPixels;
+
+    for (int i = 0; i < 8; i++) {
+        if (i < xScroll) {
+            outPixels.pixels[i]       = backgroundGraphicsLastPixels.pixels[      i - xScroll + 8];
+            outPixels.isForeground[i] = backgroundGraphicsLastPixels.isForeground[i - xScroll + 8];
+        } else {
+            outPixels.pixels[i]       = gPixels.pixels[      i - xScroll];
+            outPixels.isForeground[i] = gPixels.isForeground[i - xScroll];
+        }
+    }
+    backgroundGraphicsLastPixels = gPixels;
+
+    return outPixels;
 }
 
-void VIC::tickSprites() {
+OutputPixels VIC::tickSprites(std::array<bool,8> isForeground) {
+    OutputPixels outputPixels;
+
+    uint8_t spriteDataPrioReg = read(0x1B, false);
+    std::array<bool,8> pixelOccupied { false };
+
     //cond. 2 toggle y expansion FF at end of line
     if (cycleInLine == 55) {
         for (int i = 0; i < 8; i++) {
@@ -174,18 +221,27 @@ void VIC::tickSprites() {
         // cond. 6 draw pixels
         if (sprite.currentlyDisplayed) {
             for (int j = 0; j < 8; j++) {
-                int pixelX = x + j > maxX ? x + j - maxX - 1 : x + j;
+                int pixelX = x + j + 4 > maxX ? x + j + 4 - maxX - 1 : x + j + 4;
                 if (pixelX == sprite.xCoord) {
                     sprite.isDrawingPixels = true;
                     sprite.xExpansionFF = false;
                 }
                 if (sprite.isDrawingPixels) {
-                    int sy = y - firstVisibleY;
-                    int sx = (cycleInLine - firstVisibleCycle) * 8 + j;
                     auto pixelColor = sprite.pixels[sprite.drawIndexByte][sprite.drawIndexPixel];
-                    if (pixelColor != 0xFF && sx >= 0 && sx < screenWidth && sy >= 0 && sy < screenHeight)
-                        screen[sy * screenWidth + sx] = pixelColor;
-
+                    if (pixelColor != 0xFF) {
+                        // sprite sprite collision here
+                        if (pixelOccupied[j]) {
+                            sprites.spriteData[outputPixels.spriteNr[j]].spriteSpriteCollision = true;
+                            sprites.spriteData[i].spriteSpriteCollision = true;
+                        } else {
+                            bool inFrontOfForeground = (spriteDataPrioReg & (1 << j)) == 0;
+                            if (inFrontOfForeground || !isForeground[j]) {
+                                outputPixels.pixels[j] = pixelColor;
+                                outputPixels.spriteNr[j] = i;
+                            }
+                        }
+                        pixelOccupied[j] = true;
+                    }
                     if (!sprite.spriteXExpansion || sprite.xExpansionFF) {
                         sprite.drawIndexPixel++;
                         if (sprite.drawIndexPixel >= 8) {
@@ -202,6 +258,7 @@ void VIC::tickSprites() {
             }
         }
     }
+    return outputPixels;
 }
 
 void VIC::tickBorder() {
@@ -216,15 +273,6 @@ void VIC::tickBorder() {
     for(int i = 0; i < 8; i++) {
         int xx = firstCycleX + (cycleInLine - 1) * 8 + i;
         if (xx > maxX) xx -= maxX + 1;
-
-        //bool debug = false;
-        //bool debug2 = false;
-        //if (xx == right) debug = true;
-        //if (y == bottom && cycleInLine == 63) debug2 = true;
-        //if (y == top && cycleInLine == 63 && displayEnable) debug2 = true;
-        //if (xx == left && y == bottom) debug2 = true;
-        //if (xx == left && y == top && displayEnable) debug2 = true;
-        //if (xx == left && !verticalBorderFlipFlop) debug = true;
 
         if (xx == right)
             mainBorderFlipFlop = true;
@@ -244,48 +292,8 @@ void VIC::tickBorder() {
         if (mainBorderFlipFlop && sy >= 0 && sy < screenHeight && sx >= 0  && sx < screenWidth) {
             screen[sy * screenWidth + sx] = borderColor;
         }
-
-        //if (debug && sy >= 0 && sy < screenHeight && sx >= 0 && sx < screenWidth) {
-        //    screen[sy * screenWidth + sx] = 10;
-        //}
-        //if (debug2 && sy >= 0 && sy < screenHeight && sx >= 0 && sx < screenWidth) {
-        //    screen[sy * screenWidth + sx] = 13;
-        //}
     }
 }
-
-void VIC::advanceGraphicsPipeline() {
-    int delay = 0; // 2
-    // graphics are drawn with two cycles delay. for xScroll, one further delayed value is needed
-    //if (inDisplayState) {
-        for (int i = 0; i < 8; i++) {
-            int sy = y - firstVisibleY;
-            int sx = (cycleInLine - firstVisibleCycle - delay) * 8 + i + 4;
-            if (sy >= 0 && sy < screenHeight && sx >= 0  && sx < screenWidth) {
-                if (i < xScroll)
-                    screen[sy * screenWidth + sx] = graphicsDataPipeline[1][i - xScroll + 8];
-                else
-                    screen[sy * screenWidth + sx] = graphicsDataPipeline[0][i - xScroll];
-            }
-        }
-    //}
-    graphicsDataPipeline[3] = graphicsDataPipeline[2];
-    graphicsDataPipeline[2] = graphicsDataPipeline[1];
-    graphicsDataPipeline[1] = graphicsDataPipeline[0];
-
-    // debug: draw badlines
-    {
-        int sy = y - firstVisibleY;
-        int sx0 = (cycleInLine - firstVisibleCycle) * 8 + 4;
-
-        // badline in red
-        //if (isBadLine())
-        //    for(int sx = sx0; sx < sx0 + 8; sx++)
-        //        if (sx >= 0 && sx < screenWidth && sy >= 0 && sy < screenHeight)
-        //            screen[sy * screenWidth + sx] = (VMLI % 2) ? 1 : 2;
-    }
-}
-
 
 ColoredVal VIC::accessMem(uint16_t addr) {
     uint8_t bankSetting = ~cia->PRA2 & 0x03;
@@ -629,6 +637,7 @@ void VIC::write(uint16_t addr, uint8_t data) {
                 sprites.spriteData[i].spriteXExpansion = (data >> i) & 0x01;
             }
             break;
+        // registers $d01e and $d01f cannot be written
         // Border color
         case 0x20:
             borderColor = data & 0x0F;

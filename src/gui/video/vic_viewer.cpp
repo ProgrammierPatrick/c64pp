@@ -170,7 +170,7 @@ void VICViewer::updateC64() {
             for (int i = 0; i < 8; i++) {
                 auto c = vic.bitmapMode ? ColoredVal(0x10, 0x2) : ColoredVal(y * 16 + x, 0xE);
                 auto pixels = vic.backgroundGraphics.gAccess(c, y * 16 + x, i % 8);
-                for (int j = 0; j < 8; j++) charsetScreen[y * 16 * 8 * 8 + i * 16 * 8 + x * 8 + j] = pixels[j];
+                for (int j = 0; j < 8; j++) charsetScreen[y * 16 * 8 * 8 + i * 16 * 8 + x * 8 + j] = pixels.pixels[j];
             }
         }
     }
@@ -186,7 +186,7 @@ void VICViewer::updateC64() {
                 } else {
                     auto c = vic.accessMem(((vic.videoMatrixMemoryPosition & 0xF) << 10) | (y * 40 + x));
                     auto pixels = vic.backgroundGraphics.gAccess(c, y * 40 + x, i % 8);
-                    for (int j = 0; j < 8; j++) matrixScreen[y * 40 * 8 * 8 + i * 40 * 8 + x * 8 + j] = pixels[j];
+                    for (int j = 0; j < 8; j++) matrixScreen[y * 40 * 8 * 8 + i * 40 * 8 + x * 8 + j] = pixels.pixels[j];
                 }
             }
         }
