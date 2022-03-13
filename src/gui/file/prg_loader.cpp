@@ -1,6 +1,7 @@
 #include "prg_loader.h"
 #include "ui_prg_loader.h"
 #include "../text_utils.h"
+#include "../main_window.h"
 
 #include <QPushButton>
 #include <QFileDialog>
@@ -8,10 +9,11 @@
 #include <fstream>
 #include <vector>
 
-PRGLoader::PRGLoader(QWidget *parent, C64Runner* c64Runner, const std::string& fileName) :
+PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string& fileName) :
     QDialog(parent),
     ui(new Ui::PRGLoader),
-    c64Runner(c64Runner)
+    c64Runner(c64Runner),
+    mainWindow(parent)
 {
     ui->setupUi(this);
 
@@ -85,25 +87,32 @@ PRGLoader::PRGLoader(QWidget *parent, C64Runner* c64Runner, const std::string& f
         ui->targetNumber->setText(QString::fromStdString(toHexStr(offset)));
     }
 
-    QObject::connect(open, &QAbstractButton::clicked, [dataPtr, this](bool b){
+    QObject::connect(open, &QAbstractButton::clicked, [dataPtr, fileName, this](bool b){
         for (int i = 2; i < dataPtr->size(); i++) {
             this->c64Runner->c64->mpu.mem->write(fromHexStr16(ui->offset->text().toStdString()) + i - 2, (*dataPtr)[i]);
         }
+
+        auto title = "C64++ " + fileName.substr(fileName.find_last_of('/'));
+        mainWindow->setWindowTitle(QString::fromStdString(title));
     });
 
 
-    QObject::connect(openAndRun, &QAbstractButton::clicked, [dataPtr, this](bool b){
+    QObject::connect(openAndRun, &QAbstractButton::clicked, [dataPtr, fileName, this](bool b){
         for (int i = 2; i < dataPtr->size(); i++) {
             this->c64Runner->c64->mpu.mem->write(fromHexStr16(ui->offset->text().toStdString()) + i - 2, (*dataPtr)[i]);
         }
         this->c64Runner->c64->mpu.PC = fromHexStr16(ui->targetNumber->text().toStdString());
         this->c64Runner->c64->mpu.T = 0;
+
+        auto title = "C64++ " + fileName.substr(fileName.find_last_of('/') + 1);
+        mainWindow->setWindowTitle(QString::fromStdString(title));
     });
 
 
 }
-void PRGLoader::openPRGFile(QWidget *parent, C64Runner* c64Runner) {
-    auto fileName = QFileDialog::getOpenFileName(parent, "Open PRG File","", "PRG File (*.prg);;All Files (*.*)").toStdString();
+void PRGLoader::openPRGFile(MainWindow *parent, C64Runner* c64Runner) {
+    auto fileName = //QFileDialog::getOpenFileName(parent, "Open PRG File","", "PRG File (*.prg);;All Files (*.*)").toStdString();
+    QFileDialog::getOpenFileName(parent, "OpenPRG File", "", "").toStdString();
     if (fileName != "") {
         PRGLoader prgLoader(parent, c64Runner, fileName);
         prgLoader.exec();

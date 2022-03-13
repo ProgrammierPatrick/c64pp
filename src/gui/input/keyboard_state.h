@@ -55,6 +55,8 @@ public:
             joystick2State = 0xFF;
         }
     }
+    bool getJoystick1Enabled() { return joystick1Enabled; }
+    bool getJoystick2Enabled() { return joystick2Enabled; }
 
     std::string getBindingName(int row, int col, bool shifted);
     std::string getRestoreBindingName();

@@ -36,6 +36,14 @@ int main(int argc, char** argv) {
                 return -1;
             }
             return trace(argv[2], argv[3]);
+        } else if (argv[1] == std::string("args")) {
+            std::vector<char*> args(argv, argv + argc);
+            args.erase(args.begin() + 1);
+            int size = args.size();
+            QApplication app(size, args.data());
+            MainWindow win;
+            win.show();
+            return app.exec();
         } else {
             std::cout << "Unknown command " << argv[1] << "! Call " << argv[0] << " help for help" << std::endl;
             return -1;

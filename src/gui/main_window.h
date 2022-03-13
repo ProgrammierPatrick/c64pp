@@ -6,6 +6,7 @@
 #include "ram_viewer.h"
 #include "breakpoint_editor.h"
 #include "input/keyboard_window.h"
+#include "input/joystick_window.h"
 #include "video/video_widget.h"
 #include "video/vic_viewer.h"
 
@@ -54,6 +55,7 @@ private:
     CIAViewer *toolCIAViewer = nullptr;
     VICViewer *toolVICViewer = nullptr;
     KeyboardWindow *toolKeyboardWindow = nullptr;
+    JoystickWindow *toolJoystickWindow = nullptr;
     BreakpointEditor *toolBreakpointEditor = nullptr;
 
     QSize mainScreenOffset;

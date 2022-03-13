@@ -15,9 +15,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    frameTimer.setTimerType(Qt::TimerType::PreciseTimer);
+
     auto tickFPS = [this]() {
         auto t = std::chrono::system_clock::now();
-        currentFPS = 1.f / std::chrono::duration<float>(t - lastFrameTime).count();
+        float newFPS = 1.f / std::chrono::duration<float>(t - lastFrameTime).count();
+        currentFPS = 0.9 * currentFPS + 0.1 * newFPS; // exponential smoothing
         lastFrameTime = t;
     };
 
@@ -185,6 +188,17 @@ MainWindow::MainWindow(QWidget *parent) :
             toolKeyboardWindow->show();
         }
     };
+    auto joystickWindow = [this]() {
+        if (toolJoystickWindow) {
+            delete toolJoystickWindow;
+            toolJoystickWindow = nullptr;
+        } else {
+            toolJoystickWindow = new JoystickWindow(this, &c64Runner);
+            QObject::connect(toolJoystickWindow, &QObject::destroyed, [this](QObject *o) { toolJoystickWindow = nullptr; });
+            toolJoystickWindow->setAttribute(Qt::WA_DeleteOnClose, true);
+            toolJoystickWindow->show();
+        }
+    };
 
     QObject::connect(ui->actionHard_Reset, &QAction::triggered, hardReset);
     QObject::connect(ui->actionPause, &QAction::triggered, pauseUnpause);
@@ -198,6 +212,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionCIA_Viewer, &QAction::triggered, ciaViewer);
     QObject::connect(ui->actionVIC_Viewer, &QAction::triggered, vicViewer);
     QObject::connect(ui->actionVirtual_Keyboard, &QAction::triggered, virtualKeyboard);
+    QObject::connect(ui->actionVirtual_Joysticks, &QAction::triggered, joystickWindow);
     QObject::connect(ui->actionBreakpoint_Editor, &QAction::triggered, breakpointEditor);
 
     QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop, tickFPS]() {
@@ -336,6 +351,8 @@ void MainWindow::updateUI() {
         toolVICViewer->updateC64();
     if (toolKeyboardWindow)
         toolKeyboardWindow->updateUI();
+    if (toolJoystickWindow)
+        toolJoystickWindow->updateUI();
     if (toolBreakpointEditor)
         toolBreakpointEditor->updateC64();
 

@@ -90,6 +90,7 @@
     <addaction name="actionVIC_Viewer"/>
     <addaction name="separator"/>
     <addaction name="actionVirtual_Keyboard"/>
+    <addaction name="actionVirtual_Joysticks"/>
     <addaction name="separator"/>
     <addaction name="actionBreakpoint_Editor"/>
    </widget>
@@ -284,6 +285,14 @@
    </property>
    <property name="shortcut">
     <string>Alt+3</string>
+   </property>
+  </action>
+  <action name="actionVirtual_Joysticks">
+   <property name="text">
+    <string>Virtual Joysticks</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+J</string>
    </property>
   </action>
  </widget>

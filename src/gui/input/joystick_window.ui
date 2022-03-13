@@ -236,6 +236,19 @@
      <bool>false</bool>
     </property>
    </widget>
+   <widget class="QCheckBox" name="keymap">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>160</y>
+      <width>91</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>keymap</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources>
