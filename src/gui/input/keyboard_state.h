@@ -32,7 +32,7 @@ public:
         return joystick1State;
     }
     uint8_t queryJoystick2() override {
-        return joystick1State;
+        return joystick2State;
     }
     bool querySingleKey(int row, int col) { return matrixKeyCount[row * 8 + col] > 0; }
 

@@ -200,6 +200,13 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     };
 
+    // make shortcuts usable from other windows
+    for (auto& menu : menuBar()->findChildren<QMenu*>()) {
+        for (auto& action : menu->actions()) {
+            action->setShortcutContext(Qt::ShortcutContext::ApplicationShortcut);
+        }
+    }
+
     QObject::connect(ui->actionHard_Reset, &QAction::triggered, hardReset);
     QObject::connect(ui->actionPause, &QAction::triggered, pauseUnpause);
     QObject::connect(ui->actionStep, &QAction::triggered, step);
@@ -245,8 +252,8 @@ MainWindow::MainWindow(QWidget *parent) :
         updateUI();
     });
 
+    ui->actiondisable_joysticks->trigger();
     QObject::connect(ui->actiondisable_joysticks, &QAction::triggered, [this](bool enabled) {
-        std::cout << "actionoff:" << enabled << std::endl;
         if (enabled) {
             c64Runner.keyboard->setJoystick1Enabled(false);
             c64Runner.keyboard->setJoystick2Enabled(false);

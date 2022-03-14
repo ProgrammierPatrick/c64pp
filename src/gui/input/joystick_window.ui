@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>694</width>
-    <height>479</height>
+    <width>280</width>
+    <height>290</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,10 @@
    <widget class="QLabel" name="joystickImg1">
     <property name="geometry">
      <rect>
-      <x>110</x>
-      <y>190</y>
-      <width>256</width>
-      <height>256</height>
+      <x>10</x>
+      <y>10</y>
+      <width>128</width>
+      <height>128</height>
      </rect>
     </property>
     <property name="text">
@@ -36,10 +36,10 @@
    <widget class="QLabel" name="joystickImg2">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>190</y>
-      <width>256</width>
-      <height>256</height>
+      <x>140</x>
+      <y>10</y>
+      <width>128</width>
+      <height>128</height>
      </rect>
     </property>
     <property name="text">
@@ -55,17 +55,17 @@
    <widget class="QLabel" name="c64ImgSide">
     <property name="geometry">
      <rect>
-      <x>-10</x>
-      <y>-100</y>
-      <width>650</width>
-      <height>284</height>
+      <x>0</x>
+      <y>200</y>
+      <width>319</width>
+      <height>90</height>
      </rect>
     </property>
     <property name="text">
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap resource="../../../data/data_res.qrc">:/c64_images/c64_side_improved.png</pixmap>
+     <pixmap resource="../../../data/data_res.qrc">:/c64_images/c64_side_improved_cropped.png</pixmap>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -74,14 +74,17 @@
    <widget class="QCheckBox" name="enabledJoy1">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>160</y>
+      <x>40</x>
+      <y>109</y>
       <width>91</width>
-      <height>24</height>
+      <height>31</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color: white</string>
+    </property>
     <property name="text">
-     <string>joystick 1</string>
+     <string>enabled</string>
     </property>
     <property name="iconSize">
      <size>
@@ -93,26 +96,29 @@
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QCheckBox" name="enableJoy2">
+   <widget class="QCheckBox" name="enabledJoy2">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>160</y>
-      <width>91</width>
-      <height>24</height>
+      <x>170</x>
+      <y>109</y>
+      <width>71</width>
+      <height>31</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color: white</string>
+    </property>
     <property name="text">
-     <string>joystick 2</string>
+     <string>enabled</string>
     </property>
    </widget>
    <widget class="QPushButton" name="keyFire1">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>210</y>
-      <width>51</width>
-      <height>51</height>
+      <x>20</x>
+      <y>20</y>
+      <width>31</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="flat">
@@ -122,10 +128,10 @@
    <widget class="QPushButton" name="keyFire2">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>210</y>
-      <width>51</width>
-      <height>51</height>
+      <x>150</x>
+      <y>20</y>
+      <width>31</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="flat">
@@ -135,10 +141,10 @@
    <widget class="QPushButton" name="keyUp1">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>260</y>
-      <width>51</width>
-      <height>51</height>
+      <x>60</x>
+      <y>30</y>
+      <width>31</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="flat">
@@ -148,10 +154,10 @@
    <widget class="QPushButton" name="keyDown1">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>360</y>
-      <width>51</width>
-      <height>51</height>
+      <x>60</x>
+      <y>90</y>
+      <width>31</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="flat">
@@ -161,10 +167,10 @@
    <widget class="QPushButton" name="keyLeft1">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>310</y>
-      <width>51</width>
-      <height>51</height>
+      <x>30</x>
+      <y>60</y>
+      <width>31</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="flat">
@@ -174,10 +180,10 @@
    <widget class="QPushButton" name="keyRight1">
     <property name="geometry">
      <rect>
-      <x>270</x>
-      <y>310</y>
-      <width>51</width>
-      <height>51</height>
+      <x>90</x>
+      <y>60</y>
+      <width>31</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="flat">
@@ -187,10 +193,10 @@
    <widget class="QPushButton" name="keyLeft2">
     <property name="geometry">
      <rect>
-      <x>440</x>
-      <y>300</y>
-      <width>51</width>
-      <height>51</height>
+      <x>160</x>
+      <y>60</y>
+      <width>31</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="flat">
@@ -200,10 +206,10 @@
    <widget class="QPushButton" name="keyUp2">
     <property name="geometry">
      <rect>
-      <x>490</x>
-      <y>250</y>
-      <width>51</width>
-      <height>51</height>
+      <x>190</x>
+      <y>30</y>
+      <width>31</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="flat">
@@ -213,10 +219,10 @@
    <widget class="QPushButton" name="keyRight2">
     <property name="geometry">
      <rect>
-      <x>540</x>
-      <y>300</y>
-      <width>51</width>
-      <height>51</height>
+      <x>220</x>
+      <y>60</y>
+      <width>31</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="flat">
@@ -226,10 +232,10 @@
    <widget class="QPushButton" name="keyDown2">
     <property name="geometry">
      <rect>
-      <x>490</x>
-      <y>350</y>
-      <width>51</width>
-      <height>51</height>
+      <x>190</x>
+      <y>90</y>
+      <width>31</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="flat">
@@ -239,9 +245,9 @@
    <widget class="QCheckBox" name="keymap">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>160</y>
-      <width>91</width>
+      <x>200</x>
+      <y>180</y>
+      <width>71</width>
       <height>24</height>
      </rect>
     </property>
@@ -249,6 +255,233 @@
      <string>keymap</string>
     </property>
    </widget>
+   <widget class="QLabel" name="plugImg1">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>120</y>
+      <width>61</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="../../../data/data_res.qrc">:/c64_images/atari_plug_cropped.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="plugImg2">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>120</y>
+      <width>61</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="../../../data/data_res.qrc">:/c64_images/atari_plug_cropped.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="plugText2">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>210</y>
+      <width>61</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>7</pointsize>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white</string>
+    </property>
+    <property name="text">
+     <string>CONTROL PORT 2</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+    <property name="textInteractionFlags">
+     <set>Qt::LinksAccessibleByMouse</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="plugText1">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>210</y>
+      <width>61</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>7</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: white</string>
+    </property>
+    <property name="text">
+     <string>CONTROL PORT 1</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+    <property name="textInteractionFlags">
+     <set>Qt::LinksAccessibleByMouse</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="plugButton1">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>150</y>
+      <width>61</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="plugButton2">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>150</y>
+      <width>61</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="help1">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>150</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>[Alt] + 1: Joystick 1</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="help0">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>140</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>[Alt] + 0: disabled</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="help2">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>160</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>[Alt] + 2: Joystick 2</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="help3">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>170</y>
+      <width>101</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>[Alt] + 3: both</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <zorder>c64ImgSide</zorder>
+   <zorder>plugImg2</zorder>
+   <zorder>plugImg1</zorder>
+   <zorder>joystickImg1</zorder>
+   <zorder>joystickImg2</zorder>
+   <zorder>enabledJoy1</zorder>
+   <zorder>enabledJoy2</zorder>
+   <zorder>keyFire1</zorder>
+   <zorder>keyFire2</zorder>
+   <zorder>keyUp1</zorder>
+   <zorder>keyDown1</zorder>
+   <zorder>keyLeft1</zorder>
+   <zorder>keyRight1</zorder>
+   <zorder>keyLeft2</zorder>
+   <zorder>keyUp2</zorder>
+   <zorder>keyRight2</zorder>
+   <zorder>keyDown2</zorder>
+   <zorder>keymap</zorder>
+   <zorder>plugText2</zorder>
+   <zorder>plugText1</zorder>
+   <zorder>plugButton1</zorder>
+   <zorder>plugButton2</zorder>
+   <zorder>help1</zorder>
+   <zorder>help0</zorder>
+   <zorder>help2</zorder>
+   <zorder>help3</zorder>
   </widget>
  </widget>
  <resources>

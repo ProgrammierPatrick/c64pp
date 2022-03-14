@@ -6,6 +6,7 @@
         <file>c64_images/C64C_cropped.jpg</file>
         <file>keymaps/gtk3_sym_de.vkm</file>
         <file>c64_images/joystick_cropped.jpg</file>
-        <file>c64_images/c64_side_improved.png</file>
+        <file>c64_images/c64_side_improved_cropped.png</file>
+        <file>c64_images/atari_plug_cropped.png</file>
     </qresource>
 </RCC>

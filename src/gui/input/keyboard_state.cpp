@@ -26,7 +26,7 @@ void KeyboardState::processKeyEvent(QKeyEvent* event, bool pressed) {
         if (key == Qt::Key_Down)  { setJoystick(false, 1); return; }
         if (key == Qt::Key_Left)  { setJoystick(false, 2); return; }
         if (key == Qt::Key_Right) { setJoystick(false, 3); return; }
-        if (key == Qt::Key_Enter) { setJoystick(false, 4); return; }
+        if (key == Qt::Key_Return) { setJoystick(false, 4); return; }
     }
     else if (joystick1Enabled || joystick2Enabled) {
         bool joy = joystick1Enabled;
