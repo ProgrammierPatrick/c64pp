@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
         c64Runner.hardReset();
         frame = 0;
         cycle = 0;
+        setWindowTitle("C64++");
         updateUI();
     };
     auto start = [this]() {
@@ -224,6 +225,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop, tickFPS]() {
         try {
+            cycle += c64Runner.stepFrame();
+            cycle += c64Runner.stepFrame();
+            cycle += c64Runner.stepFrame();
             cycle += c64Runner.stepFrame();
             tickFPS();
         } catch (std::runtime_error&) {

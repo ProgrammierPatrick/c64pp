@@ -92,7 +92,8 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
             this->c64Runner->c64->mpu.mem->write(fromHexStr16(ui->offset->text().toStdString()) + i - 2, (*dataPtr)[i]);
         }
 
-        auto title = "C64++ " + fileName.substr(fileName.find_last_of('/'));
+        auto slashPos = fileName.find_last_of('/');
+        auto title = "C64++ " + (slashPos != std::string::npos ? fileName.substr(slashPos + 1) : fileName);
         mainWindow->setWindowTitle(QString::fromStdString(title));
     });
 

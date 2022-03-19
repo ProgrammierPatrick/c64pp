@@ -168,7 +168,7 @@ OutputPixels VIC::tickSprites(std::array<bool,8> isForeground) {
         for (int i = 0; i < 8; i++) {
             if (sprites.spriteData[i].expansionFlipFlop) {
                 sprites.spriteData[i].spriteDataCounterBase++;
-                if (sprites.spriteData[i].spriteDataCounterBase == 63) {
+                if (sprites.spriteData[i].spriteDataCounterBase > 63) {
                     sprites.spriteData[i].currentlyDisplayed = false;
                     sprites.spriteData[i].enableDMA = false;
                 }

@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QDebug>
+#include <QImage>
 
 #include <array>
 #include <iostream>
@@ -34,12 +35,14 @@ VideoWidget::VideoWidget(QWidget *parent, int width, int height, std::vector<uin
     }
 }
 
-VideoWidget::~VideoWidget() {
+VideoWidget::~VideoWidget() { }
 
+void VideoWidget::setVideoBuffer(std::vector<uint8_t> *videoBuffer) {
+    this->videoBuffer = videoBuffer;
 }
 
 void VideoWidget::updateUI() {
-    repaint();
+    update();
 }
 
 void VideoWidget::paintEvent(QPaintEvent *event) {
