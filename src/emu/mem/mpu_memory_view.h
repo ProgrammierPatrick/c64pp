@@ -1,14 +1,16 @@
 #pragma once
 
 #include "memory.h"
-#include "../mpu.h"
-#include "../io/cia.h"
-#include "../vic/vic.h"
+
+class MPU;
+class CIA;
+class VIC;
+class SID;
 
 class MPUMemoryView : public Memory {
 public:
-    MPUMemoryView(MPU* mpu, Memory* mainRAM, Memory* colorRAM, Memory* basicROM, Memory* kernalROM, Memory* chargenROM, CIA* cia, VIC* vic)
-        : mpu(mpu), mainRAM(mainRAM), colorRAM(colorRAM), basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM), cia(cia), vic(vic) { }
+    MPUMemoryView(MPU* mpu, Memory* mainRAM, Memory* colorRAM, Memory* basicROM, Memory* kernalROM, Memory* chargenROM, CIA* cia, VIC* vic, SID* sid)
+        : mpu(mpu), mainRAM(mainRAM), colorRAM(colorRAM), basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM), cia(cia), vic(vic), sid(sid) { }
 
     uint8_t read(uint16_t addr, bool nonDestructive = false) override;
     void write(uint16_t addr, uint8_t data) override;
@@ -29,4 +31,5 @@ private:
     Memory* chargenROM;
     CIA* cia;
     VIC* vic;
+    SID* sid;
 };

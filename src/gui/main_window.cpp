@@ -6,6 +6,10 @@
 #include "file/prg_loader.h"
 #include "file/extract_prg.h"
 
+#include <QAudioFormat>
+#include <QAudioSink>
+#include <QIODevice>
+
 #include <iostream>
 #include <sstream>
 
@@ -226,9 +230,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop, tickFPS]() {
         try {
             cycle += c64Runner.stepFrame();
-            cycle += c64Runner.stepFrame();
-            cycle += c64Runner.stepFrame();
-            cycle += c64Runner.stepFrame();
+            
+            c64Runner.c64->sid.process(audioBuffer.size(), audioBuffer.data());
+            for(size_t i = 0; i < audioBuffer.size(); i++)
+                audioBufferFloat[i] = static_cast<float>(audioBuffer[i]);
+            audioOutputDevice->write(reinterpret_cast<const char*>(audioBufferFloat.data()), audioBufferFloat.size() * sizeof(float));
+
             tickFPS();
         } catch (std::runtime_error&) {
             stop();
@@ -322,6 +329,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mainScreen = new VideoWidget(ui->mainScreenFrame, VIC::screenWidth, VIC::screenHeight, &c64Runner.c64->vic.screen);
     ui->mainScreenFrame->layout()->addWidget(mainScreen);
+
+    QAudioFormat format;
+    format.setSampleRate(44'100);
+    format.setChannelConfig(QAudioFormat::ChannelConfigMono);
+    format.setChannelCount(1);
+    format.setSampleFormat(QAudioFormat::Float);
+    QAudioSink *audioOutput = new QAudioSink(format, this);
+    QObject::connect(audioOutput, &QAudioSink::stateChanged, [audioOutput](QAudio::State state) { qDebug() << "state is now: " << state << " volume: " << audioOutput->volume();});
+    audioOutput->setBufferSize(44000 / 50);
+    audioBuffer.resize(44000 / 50);
+    audioBufferFloat.resize(audioBuffer.size());
+    audioOutputDevice = audioOutput->start();
 
     updateUI();
 }

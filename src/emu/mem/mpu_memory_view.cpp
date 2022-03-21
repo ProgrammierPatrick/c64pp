@@ -1,5 +1,10 @@
 #include "mpu_memory_view.h"
 
+#include "../mpu.h"
+#include "../vic/vic.h"
+#include "../io/cia.h"
+#include "../sid/sid.h"
+
 uint8_t MPUMemoryView::read(uint16_t addr, bool nonDestructive) {
     // MCU IO Port
     if (addr == 0x0000) return 0x2F;
@@ -12,10 +17,8 @@ uint8_t MPUMemoryView::read(uint16_t addr, bool nonDestructive) {
         if (bankSetting & 0x4) {
             if (addr >= 0xD000 && addr <= 0xD3FF)
                 return vic->read(addr - 0xD000, nonDestructive);
-
-            if (addr >= 0xD400 && addr <= 0xD7FF && !nonDestructive)
-                std::cout << "Unsupported SID read" << std::endl;
-
+            else if (addr >= 0xD400 && addr <= 0xD7FF)
+                return sid->read(addr - 0xD400, nonDestructive);
             else if (addr >= 0xD800 && addr <= 0xDBE7)
                 return colorRAM->read(addr - 0xD800, nonDestructive) & 0x0F;
             else if (addr >= 0xDC00 && addr <= 0xDDFF)
@@ -42,13 +45,11 @@ void MPUMemoryView::write(uint16_t addr, uint8_t data) {
     else if (addr >= 0xD000 && addr <= 0xDFFF && (bankSetting & 0x3) != 0x0 && (bankSetting & 0x4)) {
         if (addr >= 0xD000 && addr <= 0xD3FF)
             vic->write(addr - 0xD000, data);
-
-        if (addr >= 0xD400 && addr <= 0xD7FF)
-            std::cout << "Unsupported SID write" << std::endl;
-
-        if (addr >= 0xD800 && addr<= 0xDBE7)
+        else if (addr >= 0xD400 && addr <= 0xD7FF)
+            sid->write(addr - 0xD400, data);
+        else if (addr >= 0xD800 && addr<= 0xDBE7)
             colorRAM->write(addr - 0xD800, data);
-        if (addr >= 0xDC00 && addr <= 0xDDFF)
+        else if (addr >= 0xDC00 && addr <= 0xDDFF)
             cia->write(addr - 0xDC00, data);
     }
 

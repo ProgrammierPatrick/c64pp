@@ -16,6 +16,8 @@
 #include <vector>
 #include <chrono>
 
+class QIODevice;
+
 namespace Ui {
 class MainWindow;
 }
@@ -59,5 +61,9 @@ private:
     BreakpointEditor *toolBreakpointEditor = nullptr;
 
     QSize mainScreenOffset;
+
+    QIODevice *audioOutputDevice;
+    std::vector<double> audioBuffer;
+    std::vector<float> audioBufferFloat;
 };
 
