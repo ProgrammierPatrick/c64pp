@@ -1,5 +1,5 @@
 # qt directory
-$env:Path += ";C:\Qt\6.2.2\mingw_64\bin;C:\Qt\6.2.1\mingw81_64\bin"
+$env:Path += ";C:\Qt\6.2.4\mingw_64\bin"
 
 # mingw directory
 $env:Path += ";C:\Qt\Tools\mingw900_64\bin;C:\Qt\Tools\mingw810_64\bin"

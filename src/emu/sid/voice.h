@@ -10,14 +10,16 @@ public:
 
     void process(size_t sampleCount, double* buffer);
 
+    uint16_t getWaveOutput(); // get current internal oscillator output as 12bit number
+
     void setGate(bool gate) {
         envelope.setGate(gate);
     }
 
 private:
-    // void processOSC(size_t sampleCount, double* buffer);
     double tick(int numSteps);
-
+    void tickNoise();
+    uint16_t getNoiseOutput();
 
 public:
     Envelope envelope;
@@ -36,16 +38,9 @@ public:
     bool pulse = false;
     bool noise = false;
 
-    //uint8_t attack = 0;  // 4 bit value: Refer to table in data sheet for durations
-    //uint8_t decay = 0;   // 4 bit value: Refer to table in data sheet for durations
-    //uint8_t sustain = 0; // 4 bit value: 0h->0 Fh->1
-    //uint8_t release = 0; // 5 bit value: Refer to table in data sheet for durations
-
     uint32_t oscPhase = 0;   // 24 bit phase accumulator
-    double envState = 0;     // 0-2 in ADR mode, 0-1 in R mode
+    uint32_t noiseLFSR = 0;  // 23 bit fibonacci LFSR for noise
 
     double sampleRate;   // sample rate in Hz
     double phiFreq;   // frequency of C64 base clock in Hz, different between PAL and NTSC
-    //double oscCorePhase = 0; // cycles 0 to 1
-
 };

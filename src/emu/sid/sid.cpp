@@ -14,15 +14,19 @@ void SID::process(size_t sampleCount, double* buffer) {
     // mix audio
     double vol = volume * 1.0 / 0x0F;
     for (size_t i = 0; i < sampleCount; i++) {
-        double sum = tempVoiceBuffers[0][i] + tempVoiceBuffers[1][i] + tempVoiceBuffers[2][i];
+        double sum = tempVoiceBuffers[0][i] + tempVoiceBuffers[1][i] + (disableVoice3 ? 0 : tempVoiceBuffers[2][i]);
         buffer[i] = vol * (1.0 / 3.0) * sum;
     }
 }
 
 uint8_t SID::read(uint16_t addr, bool nonDestructive) {
     addr &= 0xFFCF;
-    // TODO: osc3/random and env3
-    return 0;
+    if (addr == 0x1B)
+        return static_cast<uint8_t>(voices[2].getWaveOutput() >> 4);
+    else if (addr == 0x1E)
+        return voices[2].envelope.counter;
+    else
+        return 0;
 }
 
 
