@@ -112,8 +112,7 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
 
 }
 void PRGLoader::openPRGFile(MainWindow *parent, C64Runner* c64Runner) {
-    auto fileName = //QFileDialog::getOpenFileName(parent, "Open PRG File","", "PRG File (*.prg);;All Files (*.*)").toStdString();
-    QFileDialog::getOpenFileName(parent, "OpenPRG File", "", "").toStdString();
+    auto fileName = QFileDialog::getOpenFileName(parent, "OpenPRG File", "Open PRG File", "PRG File (*.prg);;All Files (*.*)").toStdString();
     if (fileName != "") {
         PRGLoader prgLoader(parent, c64Runner, fileName);
         prgLoader.exec();

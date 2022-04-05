@@ -11,7 +11,7 @@ public:
 
     uint8_t attack = 0;  // 4 bit value: Refer to table in data sheet for durations
     uint8_t decay = 0;   // 4 bit value: Refer to table in data sheet for durations
-    uint8_t sustain = 0; // 4 bit value: 0h->0 Fh->1
+    uint8_t sustain = 0xF; // 4 bit value: 0h->0 Fh->1
     uint8_t release = 0; // 5 bit value: Refer to table in data sheet for durations
 
     uint16_t lfsr15 = 0x7FFF; // 15 bit LFSR for attack

@@ -6,8 +6,17 @@
 
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
-int testsid() {
+std::string prompt(const std::string& name, const std::string& def) {
+    std::cout << name << " [" << def << "] > ";
+    std::string param = "";
+    std::getline(std::cin, param);
+    if (param == "") param = def;
+    return param;
+}
+
+int envelopeTest() {
     std::cout << "run SID test: envelope\n";
 
     const int sampleRate = 44'100;
@@ -19,49 +28,30 @@ int testsid() {
     sid.voices[0].freq = 7382; // 440Hz at 1MHz, 7382*985248/16777216=443,511Hz
     sid.voices[0].saw = true;
 
-    std::cout << "output path: [test.bin] > ";
-    std::string outpath = "";
-    std::getline(std::cin, outpath);
-    if (outpath == "") outpath = "test.bin";
-
-    std::cout << "sweep parameter (A,D,S,R) [A] > ";
-    std::string param = "";
-    std::getline(std::cin, param);
-    if (param == "") param = "A";
+    std::string outpath = prompt("output path", "test.bin");
+    std::string param = prompt("sweep parameter (A,D,S,R)", "A");
     if (param[0] >= 'a' && param[0] <= 'z') param[0] -= ('a' - 'A');
     if (!(param == "A" || param == "D" || param == "S" || param == "R")) {
         std::cout << "invalid param selected. exiting.";
         return 1;
     }
     if (param != "A") {
-        std::cout << "value for A: [A] > ";
-        std::string in;
-        std::getline(std::cin, in);
-        if (in == "") in = "A";
+        std::string in = prompt("value for A", "A");
         in = "0"+in;
         sid.voices[0].envelope.attack = fromHexStr8(in);
     }
     if (param != "D") {
-        std::cout << "value for D: [A] > ";
-        std::string in;
-        std::getline(std::cin, in);
-        if (in == "") in = "A";
+        std::string in = prompt("value for D", "A");
         in = "0"+in;
         sid.voices[0].envelope.decay = fromHexStr8(in);
     }
     if (param != "S") {
-        std::cout << "value for S: [7] > ";
-        std::string in;
-        std::getline(std::cin, in);
-        if (in == "") in = "7";
+        std::string in = prompt("value for S", "A");
         in = "0"+in;
         sid.voices[0].envelope.sustain = fromHexStr8(in);
     }
     if (param != "R") {
-        std::cout << "value for R: [7] > ";
-        std::string in;
-        std::getline(std::cin, in);
-        if (in == "") in = "7";
+        std::string in = prompt("value for R", "A");
         in = "0"+in;
         sid.voices[0].envelope.release = fromHexStr8(in);
     }
@@ -112,4 +102,64 @@ int testsid() {
     std::cout << "import in Audacity as binary data -> 32bit float stereo" << std::endl;
 
     return 0;
+}
+
+int sweepTest() {
+    std::cout << "run SID test: sweep\n";
+
+    const int sampleRate = 44'100;
+    const int phiRate = 985'248;
+    SID sid(sampleRate, phiRate);
+    sid.volume = 0xF;
+    sid.voices[1].test = true;
+    sid.voices[2].test = true;
+    sid.voices[0].test = false;
+    sid.voices[0].setGate(true);
+    sid.voices[0].envelope.attack = 0;
+    sid.voices[0].envelope.decay = 0;
+    sid.voices[0].envelope.sustain = 0xF;
+    sid.voices[0].envelope.release = 0;
+
+    std::string outpath = prompt("output path", "test.bin");
+    std::cout << "waveforms: saw, triangle, pulse, noise\n";
+    std::string waveform = prompt("waveform", "noise");
+
+    if (waveform == "saw") sid.voices[0].saw = true;
+    if (waveform == "triangle") sid.voices[0].triangle = true;
+    if (waveform == "pulse") sid.voices[0].pulse = true;
+    if (waveform == "noise") sid.voices[0].noise = true;
+
+    std::fstream file(outpath, std::ios::out | std::ios::binary);
+
+    double start_freq = static_cast<double>(0x0100);
+    double end_freq = static_cast<double>(0xFFFF);
+    for(int j = 0; j < 20 * sampleRate; j++) {
+        if ((j % sampleRate) == 0) std::cout << j / sampleRate / 2 * 10 << "%\n";
+        sid.voices[0].freq = (start_freq * pow(end_freq / start_freq,  static_cast<double>(j) / (20.0 * sampleRate - 1)));
+        double sample;
+        sid.process(1, &sample);
+        float sampleFloat = sample;
+        file.write(reinterpret_cast<char*>(&sampleFloat), sizeof(float));
+    }
+
+    std::cout << "test completed." << std::endl;
+    std::cout << "import in Audacity as binary data -> 32bit float mono" << std::endl;
+
+    return 0;
+}
+
+int testsid() {
+    std::cout << "SID test: supported tests: envelope sweep\n";
+    std::cout << "test: [sweep] >";
+    std::string mode = "";
+    std::getline(std::cin, mode);
+    if (mode == "") mode = "sweep";
+
+    if (mode == "envelope")
+        return envelopeTest();
+    if (mode == "sweep")
+        return sweepTest();
+
+    std:: cout << "invalid mode entered." << std::endl;
+    return 1;
 }

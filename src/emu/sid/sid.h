@@ -8,9 +8,9 @@
 
 class SID {
 public:
-    SID(double sampleRate, double phiFreq) :
-        sampleRate(sampleRate),
-        voices({{Voice(sampleRate, phiFreq),Voice(sampleRate, phiFreq),Voice(sampleRate, phiFreq)}}) {
+    SID(double sampleRate, double phiRate) :
+        sampleRate(sampleRate), phiRate(phiRate),
+        voices({{Voice(&voices[2], sampleRate, phiRate),Voice(&voices[0], sampleRate, phiRate),Voice(&voices[1], sampleRate, phiRate)}}) {
 
     }
 
@@ -38,4 +38,5 @@ private:
     std::array<std::vector<double>, 3> tempVoiceBuffers;
 
     double sampleRate;
+    double phiRate;
 };

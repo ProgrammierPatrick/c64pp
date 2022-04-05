@@ -4,22 +4,32 @@
 #include <array>
 #include <cmath>
 
-void Voice::process(size_t sampleCount, double *buffer) {
-    double time = 0;
-    double dt = phiFreq / sampleRate;
-    for (size_t i = 0; i < sampleCount; i++) {
-        int beforeTicks = time;
-        time += dt;
-        int afterTicks = time;
-        buffer[i] = tick(afterTicks - beforeTicks);
-    }
+void Voice::tick() {
+    bool reset = test || sync && syncMaster->oscPhase == 0x0080'0000;
+    oscPhase = reset ? 0 : ((oscPhase + freq) & 0x00FF'FFFF);
+    tickNoise();
+
+    envelope.tick();
+}
+
+double Voice::getOutput() {
+    uint16_t out = getWaveOutput();
+    double envValue = envelope.counter / 255.0;
+
+    // ANALOG DCA
+    double vcaOut = envValue * (2 * out / static_cast<double>(0xFFF) - 1);
+
+    return vcaOut;
 }
 
 uint16_t Voice::getWaveOutput() {
     uint16_t out = 0x0FFF;
     uint16_t sawwave = oscPhase >> 12;
     if (saw)      out &= sawwave;
-    if (triangle) out &= (sawwave & 0x800 ? ~sawwave : sawwave) << 1 | 0x001;
+    if (triangle) {
+        bool invert = ringMod ? ((sawwave & 0x800) ^ (syncMaster->oscPhase & 0x0080'0000)) : (sawwave & 0x800);
+        out &= (invert ? ~sawwave : sawwave) << 1;
+    }
     if (pulse)    out &= sawwave > pw ? 0xFFF : 0;
     if (noise)    out &= getNoiseOutput();
     return out;
@@ -28,10 +38,12 @@ uint16_t Voice::getWaveOutput() {
 void Voice::tickNoise() {
     if (test) noiseLFSR = 0x7F'FFFF;
     // clock LFSR when bit 19 in osc goes high
-    if ((oscPhase & 0x000F'FFFF) == 0x0008'0000) {
+    if (!test && !(noiseLastPhase & 0x0008'0000) && (oscPhase & 0x0008'0000)) {
         // taps at 17 and 22
-        noiseLFSR = test ? 0x7F'FFFF : ((noiseLFSR << 1) | (((noiseLFSR >> 17) & 1) ^ ((noiseLFSR >> 22) & 1)));
+        noiseLFSR = (noiseLFSR << 1) | (((noiseLFSR >> 17) & 1) ^ ((noiseLFSR >> 22) & 1));
     }
+
+    noiseLastPhase = oscPhase;
 }
 
 uint16_t Voice::getNoiseOutput() {
@@ -41,20 +53,3 @@ uint16_t Voice::getNoiseOutput() {
          | (((v >>11) & 1) << 8) | (((v >>14) & 1) << 9) | (((v >>18) & 1) <<10) | (((v >>20) & 1) <<11);
 }
 
-double Voice::tick(int numSteps) {
-    for (int i = 0; i < numSteps; i++) {
-        oscPhase = test ? 0 : ((oscPhase + freq) & 0x00FF'FFFF);
-        tickNoise();
-    }
-
-    uint16_t out = getWaveOutput();
-
-    for(int i = 0; i < numSteps; i++)
-        envelope.tick();
-    double envValue = envelope.counter / 255.0;
-
-    // ANALOG DCA
-    double vcaOut = envValue * (2 * out / static_cast<double>(0xFFF) - 1);
-
-    return vcaOut;
-}
