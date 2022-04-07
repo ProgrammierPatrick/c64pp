@@ -61,9 +61,7 @@ int envelopeTest() {
     auto nextSample = [&file, &sid]() {
         float value;
         float sample;
-        double sampleDouble;
-        sid.process(1, &sampleDouble);
-        sample = sampleDouble;
+        sid.process(1, &sample);
         value = sid.voices[0].envelope.counter / static_cast<float>(255);
         //value = sid.voices[0].envelope.countingEnabled ? 1 : 0;
         //value = sid.voices[0].envelope.debugLFSR15State * 1.0f / 0xFFFF;
@@ -136,10 +134,9 @@ int sweepTest() {
     for(int j = 0; j < 20 * sampleRate; j++) {
         if ((j % sampleRate) == 0) std::cout << j / sampleRate / 2 * 10 << "%\n";
         sid.voices[0].freq = (start_freq * pow(end_freq / start_freq,  static_cast<double>(j) / (20.0 * sampleRate - 1)));
-        double sample;
+        float sample;
         sid.process(1, &sample);
-        float sampleFloat = sample;
-        file.write(reinterpret_cast<char*>(&sampleFloat), sizeof(float));
+        file.write(reinterpret_cast<char*>(&sample), sizeof(float));
     }
 
     std::cout << "test completed." << std::endl;

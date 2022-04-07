@@ -46,7 +46,9 @@ private:
     float running = true;
     QTimer frameTimer;
     std::chrono::time_point<std::chrono::system_clock> lastFrameTime;
+    std::chrono::time_point<std::chrono::system_clock> startTick;
     float currentFPS = 0;
+    float currentLoad = 0;
 
     QAction* toolbarPauseAction;
 
@@ -63,7 +65,6 @@ private:
     QSize mainScreenOffset;
 
     QIODevice *audioOutputDevice;
-    std::vector<double> audioBuffer;
-    std::vector<float> audioBufferFloat;
+    std::vector<float> audioBuffer;
 };
 

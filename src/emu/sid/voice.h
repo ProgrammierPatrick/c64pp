@@ -6,10 +6,10 @@
 
 class Voice {
 public:
-    Voice(Voice* syncMaster, double sampleRate, double phiFreq) : syncMaster(syncMaster), sampleRate(sampleRate), phiFreq(phiFreq) { }
+    Voice(Voice* syncMaster, float sampleRate, float phiFreq) : syncMaster(syncMaster), sampleRate(sampleRate), phiFreq(phiFreq) { }
 
     void tick();
-    double getOutput();
+    float getOutput();
 
     uint16_t getWaveOutput(); // get current internal oscillator output as 12bit number
 
@@ -42,6 +42,6 @@ public:
     uint32_t noiseLastPhase = 0;
 
     Voice *syncMaster;
-    double sampleRate;   // sample rate in Hz
-    double phiFreq;   // frequency of C64 base clock in Hz, different between PAL and NTSC
+    float sampleRate;   // sample rate in Hz
+    float phiFreq;   // frequency of C64 base clock in Hz, different between PAL and NTSC
 };

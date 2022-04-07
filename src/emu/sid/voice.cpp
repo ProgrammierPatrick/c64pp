@@ -12,12 +12,12 @@ void Voice::tick() {
     envelope.tick();
 }
 
-double Voice::getOutput() {
+float Voice::getOutput() {
     uint16_t out = getWaveOutput();
-    double envValue = envelope.counter / 255.0;
+    float envValue = envelope.counter / 255.0;
 
     // ANALOG DCA
-    double vcaOut = envValue * (2 * out / static_cast<double>(0xFFF) - 1);
+    float vcaOut = envValue * (2 * out / static_cast<float>(0xFFF) - 1);
 
     return vcaOut;
 }

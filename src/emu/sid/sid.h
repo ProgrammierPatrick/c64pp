@@ -8,13 +8,13 @@
 
 class SID {
 public:
-    SID(double sampleRate, double phiRate) :
+    SID(float sampleRate, float phiRate) :
         sampleRate(sampleRate), phiRate(phiRate),
         voices({{Voice(&voices[2], sampleRate, phiRate),Voice(&voices[0], sampleRate, phiRate),Voice(&voices[1], sampleRate, phiRate)}}) {
 
     }
 
-    void process(size_t sampleCount, double* buffer);
+    void process(size_t sampleCount, float* buffer);
 
     uint8_t read(uint16_t addr, bool nonDestructive = false);
     void write(uint16_t addr, uint8_t data);
@@ -35,8 +35,11 @@ public:
     uint8_t volume = 0xF; // 4 bit volume: linear from 0h->off to Fh->1
 
 private:
-    std::array<std::vector<double>, 3> tempVoiceBuffers;
+    std::array<std::vector<float>, 3> tempVoiceBuffers;
+    float aaTempValue = 0;
+    std::array<float, 200> aaBuffer;
+    size_t aaIndex = 0;
 
-    double sampleRate;
-    double phiRate;
+    float sampleRate;
+    float phiRate;
 };

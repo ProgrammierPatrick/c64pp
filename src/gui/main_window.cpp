@@ -6,6 +6,7 @@
 #include "file/prg_loader.h"
 #include "file/extract_prg.h"
 
+#include <QMediaDevices>
 #include <QAudioFormat>
 #include <QAudioSink>
 #include <QIODevice>
@@ -21,11 +22,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     frameTimer.setTimerType(Qt::TimerType::PreciseTimer);
 
-    auto tickFPS = [this]() {
+    auto tickFPSStart = [this]() {
         auto t = std::chrono::system_clock::now();
         float newFPS = 1.f / std::chrono::duration<float>(t - lastFrameTime).count();
-        currentFPS = 0.9 * currentFPS + 0.1 * newFPS; // exponential smoothing
+        currentFPS = 0.95f * currentFPS + 0.05f * newFPS; // exponential smoothing
+        startTick = t;
         lastFrameTime = t;
+    };
+    auto tickFPSEnd = [this]() {
+        auto stopTick = std::chrono::system_clock::now();
+        float tickTime = std::chrono::duration<float>(stopTick - startTick).count();
+        float newLoad = tickTime * currentFPS;
+        currentLoad = 0.99f * currentLoad + 0.01f * newLoad; // exponential smoothing
     };
 
     auto hardReset = [this]() {
@@ -227,16 +235,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionVirtual_Joysticks, &QAction::triggered, joystickWindow);
     QObject::connect(ui->actionBreakpoint_Editor, &QAction::triggered, breakpointEditor);
 
-    QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop, tickFPS]() {
+    QObject::connect(&frameTimer, &QTimer::timeout, this, [this, stop, tickFPSStart, tickFPSEnd]() {
         try {
+            tickFPSStart();
             cycle += c64Runner.stepFrame();
-            
             c64Runner.c64->sid.process(audioBuffer.size(), audioBuffer.data());
-            for(size_t i = 0; i < audioBuffer.size(); i++)
-                audioBufferFloat[i] = static_cast<float>(audioBuffer[i]);
-            audioOutputDevice->write(reinterpret_cast<const char*>(audioBufferFloat.data()), audioBufferFloat.size() * sizeof(float));
+            tickFPSEnd();
 
-            tickFPS();
+            audioOutputDevice->write(reinterpret_cast<const char*>(audioBuffer.data()), audioBuffer.size() * sizeof(float));
         } catch (std::runtime_error&) {
             stop();
         } catch (BreakPointException&) {
@@ -331,15 +337,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mainScreenFrame->layout()->addWidget(mainScreen);
 
     QAudioFormat format;
-    format.setSampleRate(44'100);
+    format.setSampleRate(QMediaDevices::defaultAudioOutput().preferredFormat().sampleRate());
     format.setChannelConfig(QAudioFormat::ChannelConfigMono);
     format.setChannelCount(1);
     format.setSampleFormat(QAudioFormat::Float);
     QAudioSink *audioOutput = new QAudioSink(format, this);
-    QObject::connect(audioOutput, &QAudioSink::stateChanged, [audioOutput](QAudio::State state) { qDebug() << "state is now: " << state << " volume: " << audioOutput->volume();});
-    audioOutput->setBufferSize(44000 / 50);
-    audioBuffer.resize(44000 / 50);
-    audioBufferFloat.resize(audioBuffer.size());
+    QObject::connect(audioOutput, &QAudioSink::stateChanged, [audioOutput](QAudio::State state) {
+        qDebug() << "state is now: " << state << " volume: " << audioOutput->volume();
+    });
+    audioOutput->setBufferSize(10 * sizeof(float) * format.sampleRate() / 50); // 200ms
+    audioBuffer.resize(format.sampleRate() / 50);
     audioOutputDevice = audioOutput->start();
 
     updateUI();
@@ -392,7 +399,7 @@ void MainWindow::updateUI() {
     std::stringstream ss;
 
     auto& mpu = c64Runner.c64->mpu;
-    ss << "FPS:" << static_cast<int>(currentFPS) << " cycle:" << cycle << " frame:" << frame << " T:" << mpu.T;
+    ss << "FPS:" << currentFPS << "Load:" << static_cast<int>(100.0f * currentLoad) << "% cycle:" << cycle << " frame:" << frame << " T:" << mpu.T;
 
     ss << " A:" << toHexStr(mpu.A);
     ss << " X:" << toHexStr(mpu.X);
