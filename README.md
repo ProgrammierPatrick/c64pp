@@ -1,4 +1,4 @@
-C64++ - C64 Compiler written in C++17
+C64++ - C64 Emulator written in C++17
 =====================================
 
 Compiling in Windows with MinGW
