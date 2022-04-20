@@ -1,10 +1,11 @@
 #include "main_window.h"
 #include "ui_main_window.h"
 
-#include "text_utils.h"
 #include "file/enterhexdialog.h"
 #include "file/prg_loader.h"
 #include "file/extract_prg.h"
+
+#include "../emu/text_utils.h"
 
 #include <QMediaDevices>
 #include <QAudioFormat>

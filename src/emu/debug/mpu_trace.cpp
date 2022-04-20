@@ -2,7 +2,7 @@
 
 #include "../mpu.h"
 
-#include "../../gui/text_utils.h"
+#include "../text_utils.h"
 
 #include <sstream>
 #include <iostream>

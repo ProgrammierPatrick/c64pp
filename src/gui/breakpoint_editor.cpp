@@ -1,7 +1,8 @@
 #include "breakpoint_editor.h"
 #include "ui_breakpoint_editor.h"
-#include "text_utils.h"
 #include "main_window.h"
+
+#include "../emu/text_utils.h"
 
 #include <algorithm>
 

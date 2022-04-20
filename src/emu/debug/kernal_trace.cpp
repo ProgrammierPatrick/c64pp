@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <iostream>
 
-#include "../../gui/text_utils.h"
+#include "../text_utils.h"
 
 const bool includeSpammyNames = false;
 

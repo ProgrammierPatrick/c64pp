@@ -4,7 +4,7 @@
 #include "trace.h"
 #include "testsid.h"
 
-#include "../gui/text_utils.h"
+#include "../emu/text_utils.h"
 
 #include <iostream>
 

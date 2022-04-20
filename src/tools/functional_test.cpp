@@ -3,8 +3,7 @@
 #include "../emu/mem/ram_memory.h"
 #include "../emu/mpu.h"
 #include "../emu/debug/mpu_trace.h"
-
-#include "../gui/text_utils.h"
+#include "../emu/text_utils.h"
 
 #include <iostream>
 #include <fstream>

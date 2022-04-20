@@ -1,7 +1,7 @@
 #include "extract_prg.h"
 #include "ui_extract_prg.h"
 
-#include "../text_utils.h"
+#include "../../emu/text_utils.h"
 
 #include <QFileDialog>
 #include <fstream>

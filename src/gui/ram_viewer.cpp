@@ -2,7 +2,8 @@
 #include "ui_ram_viewer.h"
 
 #include "main_window.h"
-#include "text_utils.h"
+
+#include "../emu/text_utils.h"
 
 #include <QAbstractTableModel>
 #include <QLineEdit>

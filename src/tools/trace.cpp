@@ -1,7 +1,8 @@
 #include "trace.h"
 
+#include "../emu/text_utils.h"
+
 #include "../gui/c64_runner.h"
-#include "../gui/text_utils.h"
 
 #include <iostream>
 #include <fstream>

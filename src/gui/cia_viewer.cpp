@@ -2,9 +2,9 @@
 #include "ui_cia_viewer.h"
 
 #include "main_window.h"
-#include "../emu/io/cia.h"
 
-#include "text_utils.h"
+#include "../emu/io/cia.h"
+#include "../emu/text_utils.h"
 
 #include <cstdint>
 
