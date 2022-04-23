@@ -36,6 +36,13 @@ public:
     void keyReleaseEvent(QKeyEvent* event) override;
     void resizeEvent(QResizeEvent *event) override;
 
+    void tickFrames(int frameCount) {
+        for(int i = 0; i < frameCount; i++)
+            c64Runner.stepFrame();
+        updateUI();
+    }
+    void loadPRG(const std::string& prgPath);
+
 private:
     Ui::MainWindow *ui;
 

@@ -353,6 +353,13 @@ MainWindow::MainWindow(QWidget *parent) :
     updateUI();
 }
 
+void MainWindow::loadPRG(const std::string& prgPath) {
+    PRGLoader prgLoader(this, &c64Runner, prgPath, true);
+    prgLoader.show();
+    prgLoader.close();
+    updateUI();
+}
+
 MainWindow::~MainWindow()
 {
     delete ui;

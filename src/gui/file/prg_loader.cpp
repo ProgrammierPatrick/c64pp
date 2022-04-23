@@ -10,7 +10,7 @@
 #include <fstream>
 #include <vector>
 
-PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string& fileName) :
+PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string& fileName, bool fastAccept) :
     QDialog(parent),
     ui(new Ui::PRGLoader),
     c64Runner(c64Runner),
@@ -60,7 +60,9 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
     QPushButton *openAndRun = ui->buttonBox->addButton("Open And Run", QDialogButtonBox::AcceptRole);
     QPushButton *open = ui->buttonBox->addButton("Open", QDialogButtonBox::AcceptRole);
 
-    if (startAddr == "0801" && singleLine && isSYS) {
+    bool openAndRunSupported = startAddr == "0801" && singleLine && isSYS;
+
+    if (openAndRunSupported) {
         ui->fileTypeLabel->setText("Machine language with BASIC header");
         openAndRun->setDefault(true);
         uint16_t targetNum = 0;
@@ -110,7 +112,12 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
         mainWindow->setWindowTitle(QString::fromStdString(title));
     });
 
-
+    if (fastAccept) {
+        if (openAndRunSupported)
+            openAndRun->click();
+        else
+            open->click();
+    }
 }
 void PRGLoader::openPRGFile(MainWindow *parent, C64Runner* c64Runner) {
     auto fileName = QFileDialog::getOpenFileName(parent, "OpenPRG File", "Open PRG File", "PRG File (*.prg);;All Files (*.*)").toStdString();

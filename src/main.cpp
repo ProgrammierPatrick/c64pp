@@ -9,6 +9,15 @@
 
 int main(int argc, char** argv) {
     if (argc > 1) {
+        if (std::string(argv[1]).ends_with(".prg") || std::string(argv[1]).ends_with(".PRG")) {
+            QApplication app(argc, argv);
+            MainWindow win;
+            win.show();
+            win.tickFrames(120);
+            win.loadPRG(argv[1]);
+            return app.exec();
+        }
+
         if (argv[1] == std::string("args")) {
             std::vector<char*> args(argv, argv + argc);
             args.erase(args.begin() + 1);

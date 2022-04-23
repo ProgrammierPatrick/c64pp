@@ -16,7 +16,7 @@ class PRGLoader : public QDialog
     Q_OBJECT
 
 public:
-    explicit PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string& fileName);
+    explicit PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string& fileName, bool fastAccept = false);
     ~PRGLoader();
     static void openPRGFile(MainWindow *parent, C64Runner* c64Runner);
 

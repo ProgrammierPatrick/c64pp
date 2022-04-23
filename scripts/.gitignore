@@ -1,5 +1,6 @@
 functional_tests/
 release_windows/
 release_win_*/
+deployment/
 monitor_*.log
 trace_cmd.txt

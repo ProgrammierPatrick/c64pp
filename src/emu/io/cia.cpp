@@ -47,8 +47,9 @@ void CIA::write(uint16_t addr, uint8_t data) {
     addr &= 0xFF0F;
     switch (addr) {
         case 0x0000: PRA1 = data; break;
-        case 0x0002: std::cout << "Write on CIA1 DDRA ignored" << std::endl; break;
-        case 0x0003: std::cout << "Write on CIA1 DDRB ignored" << std::endl; break;
+        // do not print these, can slow down execution due to console spam
+        // case 0x0002: std::cout << "Write on CIA1 DDRA ignored" << std::endl; break;
+        // case 0x0003: std::cout << "Write on CIA1 DDRB ignored" << std::endl; break;
         case 0x0004: timerCIA1.setTALO(data); break;
         case 0x0005: timerCIA1.setTAHI(data); break;
         case 0x0006: timerCIA1.setTBLO(data); break;
@@ -62,8 +63,9 @@ void CIA::write(uint16_t addr, uint8_t data) {
         case 0x000F: timerCIA1.writeCRB(data); break;
 
         case 0x0100: PRA2 = data; break;
-        case 0x0102: std::cout << "Write on CIA2 DDRA ignored" << std::endl; break;
-        case 0x0103: std::cout << "Write on CIA2 DDRB ignored" << std::endl; break;
+        // do not print these, can slow down execution due to console spam
+        // case 0x0102: std::cout << "Write on CIA2 DDRA ignored" << std::endl; break;
+        // case 0x0103: std::cout << "Write on CIA2 DDRB ignored" << std::endl; break;
         case 0x0104: timerCIA2.setTALO(data); break;
         case 0x0105: timerCIA2.setTAHI(data); break;
         case 0x0106: timerCIA2.setTBLO(data); break;

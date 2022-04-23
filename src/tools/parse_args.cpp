@@ -10,6 +10,7 @@
 
 int help(const char *appName) {
     std::cout << appName << "                                           open GUI application\n";
+    std::cout << appName << " [filename.prg]                            open GUI application with PRG file\n";
     std::cout << appName << " args [...]                                open GUI application with Qt command line args\n";
     std::cout << appName << " help                                      show this help\n";
     std::cout << appName << " functional_test [filename] [success_addr] run functional test from https://github.com/Klaus2m5/6502_65C02_functional_tests (binary gets loaded as ram and PC starts at 0x400\n";
