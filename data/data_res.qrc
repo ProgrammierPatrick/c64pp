@@ -8,5 +8,6 @@
         <file>c64_images/joystick_cropped.jpg</file>
         <file>c64_images/c64_side_improved_cropped.png</file>
         <file>c64_images/atari_plug_cropped.png</file>
+        <file>icon-512.png</file>
     </qresource>
 </RCC>

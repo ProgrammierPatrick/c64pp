@@ -15,7 +15,7 @@ add_library(tools_lib OBJECT ${tools_src})
 target_link_libraries(tools_lib PUBLIC emu_lib)
 
 file(GLOB_RECURSE gui_src src/gui/*.cpp src/gui/*.h src/gui/*.ui)
-file(GLOB_RECURSE gui_res data/*.qrc)
+file(GLOB_RECURSE gui_res data/*.qrc data/*.rc)
 add_library(gui_lib ${gui_src})
 target_link_libraries(gui_lib PUBLIC Qt6::Widgets Qt6::Multimedia)
 set_property(TARGET gui_lib PROPERTY AUTOMOC ON)

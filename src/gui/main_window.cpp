@@ -21,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    setWindowIcon(QIcon(":/icon-512.png"));
+
     frameTimer.setTimerType(Qt::TimerType::PreciseTimer);
 
     auto tickFPSStart = [this]() {
