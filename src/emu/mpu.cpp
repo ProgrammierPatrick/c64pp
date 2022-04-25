@@ -1084,6 +1084,38 @@ OpCode createRTSOpCode() {
     return opcodeData;
 }
 
+/* =============================================================================
+ *                             ILLEGAL OPCODES
+ * =============================================================================
+ * Stable Opcodes:
+ * SLO (ASO)                  <- ASL + ORA
+ * RLA (RLN)                  <- ROL + AND
+ * SRE (LSE)                  <- LSR + EOR
+ * RRA (RRD)                  <- ROR + ADC
+ * SAX (AXS,AAX)              <- STA + STX
+ * LAX                        <- LDA + LDX
+ * DCP (DCM)                  <- DEC + CMP
+ * ISC (ISB,INS)              <- INC + SBC
+ * ANC (ANC2,ANA,ANB)         <- AND + ASL/ROL
+ * ALR (ASR)                  <- AND + LSR
+ * ARR                        <- AND + ROR
+ * SBX (AXS,SAX,XMA)          <- CMP + DEX
+ * SBC (USBC,USB)             <- SBC + NOP
+ *
+ * Unstable Opcodes:
+ * SHA (AXA,AHX,TEA)          <- Combinations of STA/STX/STY
+ * SHX (A11,SXA,XAS,TEX)      <- Combinations of STA/STX/STY
+ * SHY (A11,SYA,SAY,TEY)      <- Combinations of STA/STX/STY
+ * TAS (XAS,SHS)              <- Combinations of STA/TXS + LDA/TSX
+ * LAS (LAR)                  <- Combinations of STA/TXS + LDA/TSX
+ *
+ * Highly Unstable Opcodes:
+ * ANE (XAA,AXM)              <- Combination of immediate and an implied command
+ * LAX #imm (ATX,LXA,OAL,ANX) <- Combination of immediate and an implied command
+ *
+ * Source: https://csdb.dk/release/?id=198357
+ */
+
 std::array<OpCode, 256> createOpcodes() {
     std::array<OpCode, 256> opcodes{};
     for(auto& op : opcodes) op.handlers = { fetchOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };

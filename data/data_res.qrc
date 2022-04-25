@@ -9,5 +9,9 @@
         <file>c64_images/c64_side_improved_cropped.png</file>
         <file>c64_images/atari_plug_cropped.png</file>
         <file>icon-512.png</file>
+        <file>icons/high-vol.png</file>
+        <file>icons/low-vol.png</file>
+        <file>icons/med-vol.png</file>
+        <file>icons/mute.png</file>
     </qresource>
 </RCC>

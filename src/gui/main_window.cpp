@@ -215,6 +215,20 @@ MainWindow::MainWindow(QWidget *parent) :
             toolJoystickWindow->show();
         }
     };
+    auto volumeControl = [this]() {
+        if (toolVolumeControl) {
+            delete toolVolumeControl;
+            toolVolumeControl = nullptr;
+        } else {
+            toolVolumeControl = new VolumeControl(this, &c64Runner);
+            QObject::connect(toolVolumeControl, &QObject::destroyed, [this](QObject*) { toolVolumeControl = nullptr; });
+            toolVolumeControl->setAttribute(Qt::WA_DeleteOnClose, true);
+            toolVolumeControl->show();
+        }
+    };
+    auto mute = [this]() {
+        setVolume(0);
+    };
 
     // make shortcuts usable from other windows
     for (auto& menu : menuBar()->findChildren<QMenu*>()) {
@@ -324,6 +338,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->toolBar->addAction("Step Line", stepLine);
     ui->toolBar->addAction("Step Frame", stepFrame);
     ui->toolBar->addSeparator();
+    ui->toolBar->addAction("Volume", volumeControl);
+    ui->toolBar->addAction("Mute", mute);
+    ui->toolBar->addSeparator();
     ui->toolBar->addAction("Reset", hardReset);
     ui->toolBar->addSeparator();
     ui->toolBar->addAction("MPU..", mpuViewer);
@@ -352,6 +369,21 @@ MainWindow::MainWindow(QWidget *parent) :
     audioBuffer.resize(format.sampleRate() / 50);
     audioOutputDevice = audioOutput->start();
 
+    updateUI();
+}
+
+void MainWindow::setVolume(const double &vol) {
+    QAudioFormat format;
+    format.setSampleRate(QMediaDevices::defaultAudioOutput().preferredFormat().sampleRate());
+    format.setChannelConfig(QAudioFormat::ChannelConfigMono);
+    format.setChannelCount(1);
+    format.setSampleFormat(QAudioFormat::Float);
+    QAudioSink *audioOutput = new QAudioSink(format, this);
+    audioOutput->setVolume(vol);
+    audioOutput->setBufferSize(10 * sizeof(float) * format.sampleRate() / 50); // 200ms
+    audioBuffer.resize(format.sampleRate() / 50);
+    audioOutputDevice = audioOutput->start();
+    volumeIntensity = vol * 100;
     updateUI();
 }
 
