@@ -1,4 +1,5 @@
 #include "gui/main_window.h"
+#include "gui/style.h"
 
 #include "tools/parse_args.h"
 
@@ -6,6 +7,16 @@
 
 #include <string>
 #include <vector>
+
+int runWindow(int argc, char** argv) {
+    QApplication app(argc, argv);
+    applyStyle(app);
+
+    MainWindow win;
+    win.show();
+
+    return app.exec();
+}
 
 int main(int argc, char** argv) {
     if (argc > 1) {
@@ -30,9 +41,6 @@ int main(int argc, char** argv) {
             return parseArgs(argc, argv);
         }
     } else {
-        QApplication app(argc, argv);
-        MainWindow win;
-        win.show();
-        return app.exec();
+        return runWindow(argc, argv);
     }
 }

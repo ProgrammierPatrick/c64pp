@@ -15,6 +15,7 @@ VICViewer::VICViewer(MainWindow *parent, C64Runner *c64Runner) :
     mainWindow(parent)
 {
     ui->setupUi(this);
+    setFixedSize(size());
 
     charsetScreen.resize(8 * 8 * 16 * 16);
     charsetWidget = new VideoWidget(ui->charsetFrame, 8 * 16, 8 * 16, &charsetScreen);

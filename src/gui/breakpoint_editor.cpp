@@ -31,6 +31,7 @@ BreakpointEditor::BreakpointEditor(MainWindow *parent, C64Runner *c64Runner) :
 
     QObject::connect(ui->remove, &QPushButton::clicked, [this](bool b) {
         auto item = ui->list->currentItem();
+        if (!item) return;
         ui->list->takeItem(ui->list->row(item));
         auto breakpoint = fromHexStr16(item->text().toStdString());
         auto& vec = this->c64Runner->c64->breakPoints.instructionBreakpoints;

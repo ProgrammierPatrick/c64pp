@@ -1,6 +1,8 @@
 #include "main_window.h"
 #include "ui_main_window.h"
 
+#include "style.h"
+
 #include "file/enterhexdialog.h"
 #include "file/prg_loader.h"
 #include "file/extract_prg.h"
@@ -21,7 +23,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setWindowIcon(QIcon(":/icon-512.png"));
+    addDarkTitlebar(this);
+
+    ui->menubar->move(ui->menubar->pos() - QPoint{0,12});
+    auto sz = ui->menubar->size();
+    ui->menubar->resize(500, sz.height());
 
     frameTimer.setTimerType(Qt::TimerType::PreciseTimer);
 
@@ -231,7 +237,7 @@ MainWindow::MainWindow(QWidget *parent) :
     };
 
     // make shortcuts usable from other windows
-    for (auto& menu : menuBar()->findChildren<QMenu*>()) {
+    for (auto& menu : ui->menubar->findChildren<QMenu*>()) {
         for (auto& action : menu->actions()) {
             action->setShortcutContext(Qt::ShortcutContext::ApplicationShortcut);
         }
@@ -355,6 +361,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mainScreen = new VideoWidget(ui->mainScreenFrame, VIC::screenWidth, VIC::screenHeight, &c64Runner.c64->vic.screen);
     ui->mainScreenFrame->layout()->addWidget(mainScreen);
+
+    ui->menubar->raise();
 
     QAudioFormat format;
     format.setSampleRate(QMediaDevices::defaultAudioOutput().preferredFormat().sampleRate());
