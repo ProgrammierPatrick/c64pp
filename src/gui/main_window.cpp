@@ -24,10 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     addDarkTitlebar(this);
-
-    ui->menubar->move(ui->menubar->pos() - QPoint{0,12});
-    auto sz = ui->menubar->size();
-    ui->menubar->resize(500, sz.height());
+    ui->menubar->resize(500, ui->menubar->height());
 
     frameTimer.setTimerType(Qt::TimerType::PreciseTimer);
 
@@ -52,18 +49,17 @@ MainWindow::MainWindow(QWidget *parent) :
         setWindowTitle("C64++");
         updateUI();
     };
+
     auto start = [this]() {
         running = true;
         c64Runner.c64->breakPoints.resetBreakpoints();
         frameTimer.start();
-        ui->actionPause->setText("Pause");
-        toolbarPauseAction->setText("Pause");
+        ui->pause->setIcon(QIcon(":/icons/pause.png"));
     };
     auto stop = [this]() {
         running = false;
         frameTimer.stop();
-        ui->actionPause->setText("Continue");
-        toolbarPauseAction->setText("Continue");
+        ui->pause->setIcon(QIcon(":/icons/continue.png"));
     };
     auto pauseUnpause = [this, start, stop]() {
         if (running) {
@@ -221,20 +217,6 @@ MainWindow::MainWindow(QWidget *parent) :
             toolJoystickWindow->show();
         }
     };
-    auto volumeControl = [this]() {
-        if (toolVolumeControl) {
-            delete toolVolumeControl;
-            toolVolumeControl = nullptr;
-        } else {
-            toolVolumeControl = new VolumeControl(this, &c64Runner);
-            QObject::connect(toolVolumeControl, &QObject::destroyed, [this](QObject*) { toolVolumeControl = nullptr; });
-            toolVolumeControl->setAttribute(Qt::WA_DeleteOnClose, true);
-            toolVolumeControl->show();
-        }
-    };
-    auto mute = [this]() {
-        setVolume(0);
-    };
 
     // make shortcuts usable from other windows
     for (auto& menu : ui->menubar->findChildren<QMenu*>()) {
@@ -338,23 +320,57 @@ MainWindow::MainWindow(QWidget *parent) :
     frameTimer.start();
     running = true;
 
-    toolbarPauseAction = ui->toolBar->addAction("Pause", pauseUnpause);
-    ui->toolBar->addAction("Step", step);
-    ui->toolBar->addAction("Step Instr", stepInstruction);
-    ui->toolBar->addAction("Step Line", stepLine);
-    ui->toolBar->addAction("Step Frame", stepFrame);
-    ui->toolBar->addSeparator();
-    ui->toolBar->addAction("Volume", volumeControl);
-    ui->toolBar->addAction("Mute", mute);
-    ui->toolBar->addSeparator();
-    ui->toolBar->addAction("Reset", hardReset);
-    ui->toolBar->addSeparator();
-    ui->toolBar->addAction("MPU..", mpuViewer);
-    ui->toolBar->addAction("RAM..", ramViewer);
-    ui->toolBar->addAction("CIA..", ciaViewer);
-    ui->toolBar->addAction("VIC..", vicViewer);
-    ui->toolBar->addAction("Keyboard..", virtualKeyboard);
-    ui->toolBar->addAction("Breaks..", breakpointEditor);
+    ui->pause->setIconSize(QSize(17,17));
+    ui->pause->setIcon(QIcon(":/icons/pause.png"));
+    QObject::connect(ui->pause, &QPushButton::clicked, pauseUnpause);
+
+    ui->reset->setIconSize(QSize(17,17));
+    ui->reset->setIcon(QIcon(":/icons/reset.png"));
+    QObject::connect(ui->reset, &QPushButton::clicked, hardReset);
+
+    ui->keyboard->setIconSize(QSize(17,17));
+    ui->keyboard->setIcon(QIcon(":/icons/keyboard.png"));
+    QObject::connect(ui->keyboard, &QPushButton::clicked, virtualKeyboard);
+
+    ui->joystick->setIconSize(QSize(17,17));
+    ui->joystick->setIcon(QIcon(":/icons/joystick.png"));
+    QObject::connect(ui->joystick, &QPushButton::clicked, joystickWindow);
+
+    ui->step->setIconSize(QSize(17,17));
+    ui->step->setIcon(QIcon(":/icons/step.png"));
+    QObject::connect(ui->step, &QPushButton::clicked, step);
+
+    ui->step_instruction->setIconSize(QSize(17,17));
+    ui->step_instruction->setIcon(QIcon(":/icons/step_instruction.png"));
+    QObject::connect(ui->step_instruction, &QPushButton::clicked, stepInstruction);
+
+    ui->stepline->setIconSize(QSize(17,17));
+    ui->stepline->setIcon(QIcon(":/icons/step_line.png"));
+    QObject::connect(ui->stepline, &QPushButton::clicked, stepLine);
+
+    ui->stepframe->setIconSize(QSize(17,17));
+    ui->stepframe->setIcon(QIcon(":/icons/step_frame.png"));
+    QObject::connect(ui->stepframe, &QPushButton::clicked, stepFrame);
+
+    ui->breakpoints->setIconSize(QSize(17,17));
+    ui->breakpoints->setIcon(QIcon(":/icons/breakpoints.png"));
+    QObject::connect(ui->breakpoints, &QPushButton::clicked, breakpointEditor);
+
+    ui->mpu_viewer->setIconSize(QSize(17,17));
+    ui->mpu_viewer->setIcon(QIcon(":/icons/mpu_viewer.png"));
+    QObject::connect(ui->mpu_viewer, &QPushButton::clicked, mpuViewer);
+
+    ui->ram_viewer->setIconSize(QSize(17,17));
+    ui->ram_viewer->setIcon(QIcon(":/icons/ram_viewer.png"));
+    QObject::connect(ui->ram_viewer, &QPushButton::clicked, ramViewer);
+
+    ui->cia_viewer->setIconSize(QSize(17,17));
+    ui->cia_viewer->setIcon(QIcon(":/icons/cia_viewer.png"));
+    QObject::connect(ui->cia_viewer, &QPushButton::clicked, ciaViewer);
+
+    ui->vic_viewer->setIconSize(QSize(17,17));
+    ui->vic_viewer->setIcon(QIcon(":/icons/vic_viewer.png"));
+    QObject::connect(ui->vic_viewer, &QPushButton::clicked, vicViewer);
 
     auto tosize = [](const QPoint p) { return QSize { p.x(), p.y() }; };
     mainScreenOffset = size() - tosize(ui->mainScreenFrame->pos()) - ui->mainScreenFrame->size();
@@ -378,6 +394,46 @@ MainWindow::MainWindow(QWidget *parent) :
     audioOutputDevice = audioOutput->start();
 
     updateUI();
+
+    ui->volume->setRange(0, 100);
+    ui->volume->setSliderPosition(volumeIntensity);
+    setVolume(static_cast<double>(ui->volume->sliderPosition())/100);
+    if (ui->volume->sliderPosition() == 0) ui->mute->setIcon(QIcon(":/icons/mute.png"));
+    else if (ui->volume->sliderPosition() < 33) ui->mute->setIcon(QIcon(":/icons/low-vol.png"));
+    else if (ui->volume->sliderPosition() < 67) ui->mute->setIcon(QIcon(":/icons/med-vol.png"));
+    else ui->mute->setIcon(QIcon(":/icons/high-vol.png"));
+    ui->mute->setIconSize(QSize(17,17));
+
+    // mute button is clicked
+    QObject::connect(ui->mute, &QPushButton::clicked, [this] {
+        // mute
+        if (!isMuted) {
+            setVolume(0);
+            ui->mute->setIcon(QIcon(":/icons/mute.png"));
+            isMuted = true;
+        }
+        // unmute
+        else if (isMuted) {
+            setVolume(static_cast<double>(ui->volume->sliderPosition())/100);
+            if (ui->volume->sliderPosition() == 0) ui->mute->setIcon(QIcon(":/icons/mute.png"));
+            else if (ui->volume->sliderPosition() < 33) ui->mute->setIcon(QIcon(":/icons/low-vol.png"));
+            else if (ui->volume->sliderPosition() < 67) ui->mute->setIcon(QIcon(":/icons/med-vol.png"));
+            else ui->mute->setIcon(QIcon(":/icons/high-vol.png"));
+            isMuted = false;
+        }
+    });
+
+    // slider is moved
+    QObject::connect(ui->volume, &QSlider::valueChanged, [this] {
+        // set icons depending on slider position
+        if (ui->volume->sliderPosition() == 0) ui->mute->setIcon(QIcon(":/icons/mute.png"));
+        else if (ui->volume->sliderPosition() < 33) ui->mute->setIcon(QIcon(":/icons/low-vol.png"));
+        else if (ui->volume->sliderPosition() < 67) ui->mute->setIcon(QIcon(":/icons/med-vol.png"));
+        else ui->mute->setIcon(QIcon(":/icons/high-vol.png"));
+
+        setVolume(static_cast<double>(ui->volume->sliderPosition())/100);
+    });
+
 }
 
 void MainWindow::setVolume(const double &vol) {

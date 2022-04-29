@@ -45,8 +45,10 @@ void applyStyle(QApplication& app) {
 
 
 void addDarkTitlebar(QMainWindow* widget) {
-    const int height = 30 + 12; // px
+    const int height = 30; // px
     widget->setWindowFlags(Qt::FramelessWindowHint);
+    auto size = widget->size();
+    widget->resize(size.width(), size.height() + height);
 
     for(auto o : widget->centralWidget()->children()) {
         if (!o->isWidgetType()) continue;

@@ -6,73 +6,73 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>830</width>
-    <height>656</height>
+    <width>771</width>
+    <height>653</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>C64++</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-    <widget class="QMenuBar" name="menubar">
-   <property name="nativeMenuBar">
-    <bool>false</bool>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
+   <widget class="QMenuBar" name="menubar">
+    <property name="nativeMenuBar">
+     <bool>false</bool>
     </property>
-    <addaction name="actionOpen_PRG"/>
-    <addaction name="actionEnter_Hex_Data"/>
-    <addaction name="actionExtract_RAM_to_File"/>
+    <widget class="QMenu" name="menuFile">
+     <property name="title">
+      <string>File</string>
+     </property>
+     <addaction name="actionOpen_PRG"/>
+     <addaction name="actionEnter_Hex_Data"/>
+     <addaction name="actionExtract_RAM_to_File"/>
+    </widget>
+    <widget class="QMenu" name="menuEmulation">
+     <property name="title">
+      <string>Emulation</string>
+     </property>
+     <addaction name="actionPause"/>
+     <addaction name="actionStep"/>
+     <addaction name="actionStep_Instruction"/>
+     <addaction name="actionStep_Line"/>
+     <addaction name="actionStep_Frame"/>
+     <addaction name="separator"/>
+     <addaction name="actionHard_Reset"/>
+    </widget>
+    <widget class="QMenu" name="menuDebug">
+     <property name="title">
+      <string>Tools</string>
+     </property>
+     <addaction name="actionMPU_Viewer"/>
+     <addaction name="actionRAM_Viewer"/>
+     <addaction name="actionCIA_Viewer"/>
+     <addaction name="actionVIC_Viewer"/>
+     <addaction name="separator"/>
+     <addaction name="actionVirtual_Keyboard"/>
+     <addaction name="actionVirtual_Joysticks"/>
+     <addaction name="separator"/>
+     <addaction name="actionBreakpoint_Editor"/>
+    </widget>
+    <widget class="QMenu" name="menuInput">
+     <property name="title">
+      <string>Input</string>
+     </property>
+     <addaction name="actiondisable_joysticks"/>
+     <addaction name="actionjoystick_1"/>
+     <addaction name="actionjoystick_2"/>
+     <addaction name="actionboth_joysticks"/>
+    </widget>
+    <addaction name="menuFile"/>
+    <addaction name="menuEmulation"/>
+    <addaction name="menuInput"/>
+    <addaction name="menuDebug"/>
    </widget>
-   <widget class="QMenu" name="menuEmulation">
-    <property name="title">
-     <string>Emulation</string>
-    </property>
-    <addaction name="actionPause"/>
-    <addaction name="actionStep"/>
-    <addaction name="actionStep_Instruction"/>
-    <addaction name="actionStep_Line"/>
-    <addaction name="actionStep_Frame"/>
-    <addaction name="separator"/>
-    <addaction name="actionHard_Reset"/>
-   </widget>
-   <widget class="QMenu" name="menuDebug">
-    <property name="title">
-     <string>Tools</string>
-    </property>
-    <addaction name="actionMPU_Viewer"/>
-    <addaction name="actionRAM_Viewer"/>
-    <addaction name="actionCIA_Viewer"/>
-    <addaction name="actionVIC_Viewer"/>
-    <addaction name="separator"/>
-    <addaction name="actionVirtual_Keyboard"/>
-    <addaction name="actionVirtual_Joysticks"/>
-    <addaction name="separator"/>
-    <addaction name="actionBreakpoint_Editor"/>
-   </widget>
-   <widget class="QMenu" name="menuInput">
-    <property name="title">
-     <string>Input</string>
-    </property>
-    <addaction name="actiondisable_joysticks"/>
-    <addaction name="actionjoystick_1"/>
-    <addaction name="actionjoystick_2"/>
-    <addaction name="actionboth_joysticks"/>
-   </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuEmulation"/>
-   <addaction name="menuInput"/>
-   <addaction name="menuDebug"/>
-  </widget>
    <widget class="QFrame" name="mainScreenFrame">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>808</width>
-      <height>568</height>
+      <x>0</x>
+      <y>77</y>
+      <width>771</width>
+      <height>551</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -102,28 +102,444 @@
      </property>
     </layout>
    </widget>
+   <widget class="QPushButton" name="pause">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>29</y>
+      <width>40</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>pause/continue</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/pause.png</normaloff>:/icons/pause.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="reset">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>reset</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/reset.png</normaloff>:/icons/reset.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="keyboard">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>keyboard</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/keyboard.png</normaloff>:/icons/keyboard.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="joystick">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>joystick</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/joystick.png</normaloff>:/icons/joystick.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="mute">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>toggle mute</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/mute.png</normaloff>:/icons/mute.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QSlider" name="volume">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>40</y>
+      <width>111</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="step">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>step single cycle</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/step.png</normaloff>:/icons/step.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="step_instruction">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>step instruction</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/step_instruction.png</normaloff>:/icons/step_instruction.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stepline">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>step line</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/step_line.png</normaloff>:/icons/step_line.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stepframe">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>step frame</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/step_frame.png</normaloff>:/icons/step_frame.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="breakpoints">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>breakpoints</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/breakpoints.png</normaloff>:/icons/breakpoints.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="mpu_viewer">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>MPU viewer</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/mpu_viewer.png</normaloff>:/icons/mpu_viewer.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ram_viewer">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>RAM viewer</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/ram_viewer.png</normaloff>:/icons/ram_viewer.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="cia_viewer">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>CIA viewer</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/cia_viewer.png</normaloff>:/icons/cia_viewer.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="vic_viewer">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>30</y>
+      <width>40</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>VIC viewer</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../data/data_res.qrc">
+      <normaloff>:/icons/vic_viewer.png</normaloff>:/icons/vic_viewer.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <zorder>menubar</zorder>
+   <zorder>mainScreenFrame</zorder>
+   <zorder>pause</zorder>
+   <zorder>reset</zorder>
+   <zorder>keyboard</zorder>
+   <zorder>joystick</zorder>
+   <zorder>mute</zorder>
+   <zorder>step</zorder>
+   <zorder>step_instruction</zorder>
+   <zorder>stepline</zorder>
+   <zorder>stepframe</zorder>
+   <zorder>breakpoints</zorder>
+   <zorder>mpu_viewer</zorder>
+   <zorder>ram_viewer</zorder>
+   <zorder>cia_viewer</zorder>
+   <zorder>vic_viewer</zorder>
+   <zorder>volume</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <property name="movable">
-    <bool>false</bool>
-   </property>
-   <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonIconOnly</enum>
-   </property>
-   <property name="floatable">
-    <bool>false</bool>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
   <action name="actionStep">
    <property name="text">
     <string>Step</string>
@@ -291,6 +707,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../data/data_res.qrc"/>
+ </resources>
  <connections/>
 </ui>

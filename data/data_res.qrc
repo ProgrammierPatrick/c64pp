@@ -13,5 +13,19 @@
         <file>icons/low-vol.png</file>
         <file>icons/med-vol.png</file>
         <file>icons/mute.png</file>
+        <file>icons/continue.png</file>
+        <file>icons/pause.png</file>
+        <file>icons/reset.png</file>
+        <file>icons/step.png</file>
+        <file>icons/step_frame.png</file>
+        <file>icons/step_instruction.png</file>
+        <file>icons/step_line.png</file>
+        <file>icons/joystick.png</file>
+        <file>icons/keyboard.png</file>
+        <file>icons/cia_viewer.png</file>
+        <file>icons/mpu_viewer.png</file>
+        <file>icons/ram_viewer.png</file>
+        <file>icons/vic_viewer.png</file>
+        <file>icons/breakpoints.png</file>
     </qresource>
 </RCC>

@@ -9,7 +9,6 @@
 #include "input/joystick_window.h"
 #include "video/video_widget.h"
 #include "video/vic_viewer.h"
-#include "volume_control.h"
 
 #include <QMainWindow>
 #include <QTimer>
@@ -71,14 +70,13 @@ private:
     KeyboardWindow *toolKeyboardWindow = nullptr;
     JoystickWindow *toolJoystickWindow = nullptr;
     BreakpointEditor *toolBreakpointEditor = nullptr;
-    VolumeControl *toolVolumeControl = nullptr;
 
     QSize mainScreenOffset;
 
     QIODevice *audioOutputDevice;
     std::vector<float> audioBuffer;
 
-public:
+    bool isMuted = false;
     int volumeIntensity = 100; // sets the inital volume of the system (range 0 - 100)
 };
 
