@@ -27,5 +27,9 @@
         <file>icons/ram_viewer.png</file>
         <file>icons/vic_viewer.png</file>
         <file>icons/breakpoints.png</file>
+        <file>icons/close.png</file>
+        <file>icons/maximize.png</file>
+        <file>icons/minimize.png</file>
+        <file>icons/restore.png</file>
     </qresource>
 </RCC>

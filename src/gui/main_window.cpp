@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setWindowIcon(QIcon(":/icon-512.png"));
 
     addDarkTitlebar(this);
     ui->menubar->resize(500, ui->menubar->height());
