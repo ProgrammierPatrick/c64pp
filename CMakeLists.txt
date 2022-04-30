@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1.0)
-project(c64pp VERSION 0.0.2 LANGUAGES CXX)
+project(c64pp VERSION 0.0.3 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -24,3 +24,7 @@ set_property(TARGET gui_lib PROPERTY AUTOUIC ON)
 add_executable(C64++ src/main.cpp ${gui_res} $<TARGET_OBJECTS:emu_lib> $<TARGET_OBJECTS:tools_lib>)
 set_property(TARGET C64++ PROPERTY AUTORCC ON)
 target_link_libraries(C64++ PUBLIC gui_lib)
+
+if (WIN32)
+    target_link_options(C64++ PRIVATE -mwindows)
+endif()

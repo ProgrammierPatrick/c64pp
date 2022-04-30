@@ -33,7 +33,7 @@ echo "[*] copy main executable"
 Copy-Item "$build_path\C64++.exe" $portable_path
 
 echo "[*] run qt deployment tool to construct dependencies"
-& 'windeployqt' $portable_path '--no-translations'
+& 'windeployqt' $portable_path '--no-translations' '--verbose=1'
 
 echo "[*] copy license"
 @"

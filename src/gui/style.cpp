@@ -80,6 +80,7 @@ public:
             minimize->move(parent->width() - 3 * TitlebarHeight, 0);
             minimize->resize(TitlebarHeight, TitlebarHeight);
             minimize->setIconSize({TitlebarHeight / 2, TitlebarHeight / 2});
+            minimize->setFocusPolicy(Qt::FocusPolicy::NoFocus);
             buttons.push_back(minimize);
             QObject::connect(minimize, &QPushButton::clicked, [this]() {
                 parent->setWindowState(parent->windowState() | Qt::WindowMinimized);
@@ -90,6 +91,7 @@ public:
             maximize->move(parent->width() - 2 * TitlebarHeight, 0);
             maximize->resize(TitlebarHeight, TitlebarHeight);
             maximize->setIconSize({TitlebarHeight / 2, TitlebarHeight / 2});
+            maximize->setFocusPolicy(Qt::FocusPolicy::NoFocus);
             maximize->setFlat(true);
             buttons.push_back(maximize);
             QObject::connect(maximize, &QPushButton::clicked, [this]() {
@@ -102,6 +104,7 @@ public:
         close->move(parent->width() - TitlebarHeight, 0);
         close->resize(TitlebarHeight, TitlebarHeight);
         close->setIconSize({TitlebarHeight / 2, TitlebarHeight / 2});
+        close->setFocusPolicy(Qt::FocusPolicy::NoFocus);
         close->setFlat(true);
         buttons.push_back(close);
         QObject::connect(close, &QPushButton::clicked, [this]() {

@@ -22,6 +22,7 @@ int main(int argc, char** argv) {
     if (argc > 1) {
         if (std::string(argv[1]).ends_with(".prg") || std::string(argv[1]).ends_with(".PRG")) {
             QApplication app(argc, argv);
+            applyStyle(app);
             MainWindow win;
             win.show();
             win.tickFrames(120);

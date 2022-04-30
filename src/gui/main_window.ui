@@ -15,6 +15,14 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QMenuBar" name="menubar">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>361</width>
+      <height>25</height>
+     </rect>
+    </property>
     <property name="nativeMenuBar">
      <bool>false</bool>
     </property>
@@ -114,6 +122,9 @@
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="toolTip">
      <string>pause/continue</string>
     </property>
@@ -145,6 +156,9 @@
     </property>
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
     </property>
     <property name="toolTip">
      <string>reset</string>
@@ -178,6 +192,9 @@
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="toolTip">
      <string>keyboard</string>
     </property>
@@ -209,6 +226,9 @@
     </property>
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
     </property>
     <property name="toolTip">
      <string>joystick</string>
@@ -242,6 +262,9 @@
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="toolTip">
      <string>toggle mute</string>
     </property>
@@ -271,6 +294,9 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
     </property>
@@ -286,6 +312,9 @@
     </property>
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
     </property>
     <property name="toolTip">
      <string>step single cycle</string>
@@ -319,6 +348,9 @@
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="toolTip">
      <string>step instruction</string>
     </property>
@@ -350,6 +382,9 @@
     </property>
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
     </property>
     <property name="toolTip">
      <string>step line</string>
@@ -383,6 +418,9 @@
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="toolTip">
      <string>step frame</string>
     </property>
@@ -414,6 +452,9 @@
     </property>
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
     </property>
     <property name="toolTip">
      <string>breakpoints</string>
@@ -447,6 +488,9 @@
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="toolTip">
      <string>MPU viewer</string>
     </property>
@@ -478,6 +522,9 @@
     </property>
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
     </property>
     <property name="toolTip">
      <string>RAM viewer</string>
@@ -511,6 +558,9 @@
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
     <property name="toolTip">
      <string>CIA viewer</string>
     </property>
@@ -542,6 +592,9 @@
     </property>
     <property name="cursor">
      <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
     </property>
     <property name="toolTip">
      <string>VIC viewer</string>
