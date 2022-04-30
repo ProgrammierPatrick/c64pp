@@ -1,6 +1,7 @@
 #include "joystick_window.h"
 #include "ui_joystick_window.h"
 
+#include "../style.h"
 #include "../main_window.h"
 
 JoystickWindow::JoystickWindow(MainWindow *parent, C64Runner *c64Runner) :
@@ -11,6 +12,7 @@ JoystickWindow::JoystickWindow(MainWindow *parent, C64Runner *c64Runner) :
 {
     ui->setupUi(this);
 
+    addDarkTitlebar(this);
     setFixedSize(size());
     setWindowTitle("Joysticks");
 

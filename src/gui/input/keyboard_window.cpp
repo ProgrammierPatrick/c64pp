@@ -2,6 +2,7 @@
 #include "ui_keyboard_window.h"
 
 #include "../main_window.h"
+#include "../style.h"
 
 /*
  * Keyboard size: 849 x 236
@@ -23,10 +24,11 @@ KeyboardWindow::KeyboardWindow(QWidget *parent, C64Runner *c64Runner, MainWindow
 {
     ui->setupUi(this);
 
-    setFixedSize(size());
-
     keyboardWidget = new KeyboardWidget(centralWidget(), c64Runner, mainWindow);
     keyboardWidget->lower();
+
+    addDarkTitlebar(this);
+    setFixedSize(size());
 
     QObject::connect(ui->showMatrixButton, &QPushButton::pressed, [this]() {
         if (showMatrix) {

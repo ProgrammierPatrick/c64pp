@@ -111,6 +111,9 @@
       <height>41</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="toolTip">
      <string>pause/continue</string>
     </property>
@@ -139,6 +142,9 @@
       <width>40</width>
       <height>40</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="toolTip">
      <string>reset</string>
@@ -169,6 +175,9 @@
       <height>40</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="toolTip">
      <string>keyboard</string>
     </property>
@@ -198,6 +207,9 @@
       <height>40</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="toolTip">
      <string>joystick</string>
     </property>
@@ -226,6 +238,9 @@
       <width>40</width>
       <height>40</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="toolTip">
      <string>toggle mute</string>
@@ -269,6 +284,9 @@
       <height>40</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="toolTip">
      <string>step single cycle</string>
     </property>
@@ -297,6 +315,9 @@
       <width>40</width>
       <height>40</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="toolTip">
      <string>step instruction</string>
@@ -327,6 +348,9 @@
       <height>40</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="toolTip">
      <string>step line</string>
     </property>
@@ -355,6 +379,9 @@
       <width>40</width>
       <height>40</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="toolTip">
      <string>step frame</string>
@@ -385,6 +412,9 @@
       <height>40</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="toolTip">
      <string>breakpoints</string>
     </property>
@@ -413,6 +443,9 @@
       <width>40</width>
       <height>40</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="toolTip">
      <string>MPU viewer</string>
@@ -443,6 +476,9 @@
       <height>40</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="toolTip">
      <string>RAM viewer</string>
     </property>
@@ -472,6 +508,9 @@
       <height>40</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="toolTip">
      <string>CIA viewer</string>
     </property>
@@ -500,6 +539,9 @@
       <width>40</width>
       <height>40</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="toolTip">
      <string>VIC viewer</string>

@@ -1,6 +1,7 @@
 #include "enterhexdialog.h"
 #include "ui_enterhexdialog.h"
 
+#include "../style.h"
 #include "../../emu/text_utils.h"
 
 #include <QMessageBox>
@@ -15,6 +16,9 @@ EnterHexDialog::EnterHexDialog(QWidget *parent, C64Runner *c64Runner) :
     ui(new Ui::EnterHexDialog)
 {
     ui->setupUi(this);
+
+    addDarkTitlebar(this);
+    setFixedSize(size());
 
     ui->offsetLineEdit->setMaxLength(4);
     ui->offsetLineEdit->setInputMask("HHHH");

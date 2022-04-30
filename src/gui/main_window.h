@@ -36,6 +36,8 @@ public:
     void keyReleaseEvent(QKeyEvent* event) override;
     void resizeEvent(QResizeEvent *event) override;
 
+    void registerResizeCallback(std::function<void(QResizeEvent*)> callback) { resizeCallbacks.push_back(callback); }
+
     void tickFrames(int frameCount) {
         for(int i = 0; i < frameCount; i++)
             c64Runner.stepFrame();
@@ -78,5 +80,7 @@ private:
 
     bool isMuted = false;
     int volumeIntensity = 100; // sets the inital volume of the system (range 0 - 100)
+
+    std::vector<std::function<void(QResizeEvent*)>> resizeCallbacks;
 };
 

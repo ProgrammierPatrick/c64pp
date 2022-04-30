@@ -1,6 +1,7 @@
 #include "extract_prg.h"
 #include "ui_extract_prg.h"
 
+#include "../style.h"
 #include "../../emu/text_utils.h"
 
 #include <QFileDialog>
@@ -19,6 +20,8 @@ ExtractPRG::ExtractPRG(QWidget *parent, C64Runner *c64Runner) :
     ui->lastAddr->setInputMask("HHHH");
 
     this->setWindowTitle("Extract RAM to file");
+
+    addDarkTitlebar(this);
     this->setFixedSize(size());
 }
 

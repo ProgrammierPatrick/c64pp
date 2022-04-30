@@ -2,6 +2,7 @@
 #include "ui_cia_viewer.h"
 
 #include "main_window.h"
+#include "style.h"
 
 #include "../emu/io/cia.h"
 #include "../emu/text_utils.h"
@@ -16,6 +17,7 @@ CIAViewer::CIAViewer(MainWindow *parent, C64Runner *c64Runner) :
 {
     ui->setupUi(this);
 
+    addDarkTitlebar(this);
     setFixedSize(size());
 
     // setup line edit input masks

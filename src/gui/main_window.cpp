@@ -478,6 +478,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event) {
 void MainWindow::resizeEvent(QResizeEvent *event) {
     auto tosize = [](const QPoint p) { return QSize { p.x(), p.y() }; };
     ui->mainScreenFrame->resize(event->size() - mainScreenOffset - tosize(ui->mainScreenFrame->pos()));
+    for(auto& f : resizeCallbacks) f(event);
 
     QMainWindow::resizeEvent(event);
 }

@@ -1,20 +1,27 @@
 #include "style.h"
 
+#include "main_window.h"
+
 #include <QApplication>
 #include <QPalette>
 #include <QWidget>
 #include <QFont>
+#include <QMouseEvent>
 
 #include <iostream>
 
+const int TitlebarHeight = 25; // px
+const int TitlebarFont   = 15; // px
+
+const auto backDark   = QColor( 19,  23,  26);
+const auto backHalfDark=QColor( 26,  30,  38);
+const auto backBright = QColor( 46,  51,  54);
+const auto textBright = QColor(175, 183, 188);
+const auto accent     = QColor(255, 102,   0);
+const auto undef      = QColor(255,   0, 255);
+
 void applyStyle(QApplication& app) {
     QPalette p;
-    auto backDark   = QColor( 19,  23,  26);
-    auto backHalfDark=QColor( 26,  30,  38);
-    auto backBright = QColor( 46,  51,  54);
-    auto textBright = QColor(175, 183, 188);
-    auto accent     = QColor(255, 102,   0);
-    auto undef      = QColor(255,   0, 255);
     p.setColor(QPalette::Window, backBright);
     p.setColor(QPalette::WindowText, textBright);
     p.setColor(QPalette::ColorGroup::All, QPalette::Base, undef);
@@ -44,20 +51,99 @@ void applyStyle(QApplication& app) {
 }
 
 
-void addDarkTitlebar(QMainWindow* widget) {
-    const int height = 30; // px
-    widget->setWindowFlags(Qt::FramelessWindowHint);
-    auto size = widget->size();
-    widget->resize(size.width(), size.height() + height);
+class Style : public QWidget {
+    Q_OBJECT
+public:
+    Style(QMainWindow *parent) : parent(parent), QWidget(parent->centralWidget()) {
+        init();
+    }
+    Style (QWidget *parent) : parent(parent), QWidget(parent) {
+        init();
+    }
 
-    for(auto o : widget->centralWidget()->children()) {
+    void init() {
+        setMouseTracking(true);
+        QObject::connect(parent, &QWidget::windowTitleChanged, [this](const QString& title) {
+            titleText->setText(title);
+        });
+        auto mainWindow = dynamic_cast<MainWindow*>(parent);
+        if (mainWindow) {
+            mainWindow->registerResizeCallback([this](QResizeEvent* event) {
+                resize(event->size());
+                titleText->resize(event->size().width(), TitlebarHeight);
+                lower();
+            });
+        }
+        auto icon = new QLabel(parent);
+        icon->setPixmap(QPixmap(":/icon-512.png"));
+        icon->setScaledContents(true);
+        icon->move(2, 2);
+        icon->resize(TitlebarHeight - 4, TitlebarHeight - 4);
+        icon->lower();
+        titleText = new QLabel(parent);
+        titleText->setStyleSheet("QLabel { font-size: " + QString::fromStdString(std::to_string(TitlebarFont)) + "px; color: " + accent.name() + "; background-color: " + backDark.name() + "; }");
+        titleText->setAlignment(Qt::AlignmentFlag::AlignCenter);
+        titleText->move(0, 0);
+        titleText->resize(parent->width(), TitlebarHeight);
+        titleText->lower();
+        titleText->setText(parent->windowTitle());
+    }
+
+    void mousePressEvent(QMouseEvent *event) override {
+        if (event->button() == Qt::LeftButton) {
+            mouseDown = true;
+            mousePos = (event->globalPosition() - parent->pos());
+        }
+        return QWidget::mousePressEvent(event);
+    }
+    void mouseReleaseEvent(QMouseEvent *event) override {
+        if (event->button() == Qt::LeftButton) {
+            mouseDown = false;
+        }
+        return QWidget::mouseReleaseEvent(event);
+    }
+    void mouseMoveEvent(QMouseEvent *event) override {
+        if (mouseDown) {
+            std::cout << "move!\n";
+            if (dynamic_cast<MainWindow*>(parent)) {
+                mousePos = {mousePos.x() / parent->width(), mousePos.y() / parent->height()};
+                parent->setWindowState(parent->windowState() & ~Qt::WindowFullScreen);
+                mousePos = {mousePos.x() * parent->width(), mousePos.y() * parent->height()};
+            }
+            auto newPos = event->globalPosition() - mousePos;
+            parent->move(newPos.toPoint()); // ignore clang warning, dynamic_cast in fact returns null, even if pointer is not null
+        }
+        return QWidget::mouseMoveEvent(event);
+    }
+    void mouseDoubleClickEvent(QMouseEvent *event) override {
+        if (event->button() == Qt::LeftButton && dynamic_cast<MainWindow*>(parent))
+            parent->setWindowState(parent->windowState() ^ Qt::WindowFullScreen);
+    }
+public:
+    bool mouseDown = false;
+    QPointF mousePos = {};
+    QWidget *parent;
+    QLabel *titleText;
+};
+
+void addDarkTitlebar(QWidget *window) {
+    window->setWindowFlags(window->windowFlags() | Qt::Widget | Qt::FramelessWindowHint);
+    auto size = window->size();
+    window->resize(size.width(), size.height() + TitlebarHeight);
+
+    auto mainWindow = dynamic_cast<QMainWindow*>(window);
+    for(auto o : (mainWindow ? mainWindow->centralWidget() : window)->children()) {
         if (!o->isWidgetType()) continue;
         auto& c = *static_cast<QWidget*>(o);
-        std::cout << "move " << c.objectName().toStdString() << std::endl;
-        c.move(c.pos() + QPoint{0, height});
+        c.move(c.pos() + QPoint{0, TitlebarHeight});
     }
+
+    Style *titlebar;
+    if (mainWindow) titlebar = new Style(mainWindow);
+    else            titlebar = new Style(window);
+    titlebar->move(0, 0);
+    titlebar->resize(size);
+    titlebar->lower();
 }
 
-
-
-
+#include "style.moc"

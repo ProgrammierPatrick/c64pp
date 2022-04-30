@@ -2,6 +2,7 @@
 #include "ui_mpu_viewer.h"
 
 #include "main_window.h"
+#include "style.h"
 
 #include "../emu/text_utils.h"
 
@@ -15,7 +16,7 @@ MPUViewer::MPUViewer(MainWindow *parent, C64Runner *c64Runner) :
 {
     ui->setupUi(this);
 
-    // disable resizing
+    addDarkTitlebar(this);
     setFixedSize(size());
 
     auto setupLineEdit8 = [](QLineEdit* edit) {

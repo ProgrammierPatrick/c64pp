@@ -6,4 +6,4 @@ class QApplication;
 
 void applyStyle(QApplication& app);
 
-void addDarkTitlebar(QMainWindow* widget);
+void addDarkTitlebar(QWidget *window);

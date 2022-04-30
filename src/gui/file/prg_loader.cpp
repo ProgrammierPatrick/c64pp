@@ -2,6 +2,7 @@
 #include "ui_prg_loader.h"
 #include "../main_window.h"
 
+#include "../style.h"
 #include "../../emu/text_utils.h"
 
 #include <QPushButton>
@@ -34,6 +35,7 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
     std::cout << fileSize << " bytes loaded." << std::endl;
 
     // disable resizing
+    addDarkTitlebar(this);
     setFixedSize(size());
 
     ui->targetNumber->setMaxLength(4);

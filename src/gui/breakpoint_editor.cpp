@@ -1,6 +1,8 @@
 #include "breakpoint_editor.h"
 #include "ui_breakpoint_editor.h"
+
 #include "main_window.h"
+#include "style.h"
 
 #include "../emu/text_utils.h"
 
@@ -13,8 +15,10 @@ BreakpointEditor::BreakpointEditor(MainWindow *parent, C64Runner *c64Runner) :
     mainWindow(parent)
 {
     ui->setupUi(this);
-    // disable resizing
+
+    addDarkTitlebar(this);
     setFixedSize(size());
+
     ui->inputLine->setFocus();
     ui->inputLine->setMaxLength(4);
     bool enabledOld = false;

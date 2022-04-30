@@ -2,6 +2,8 @@
 #include "ui_vic_viewer.h"
 
 #include "video_widget.h"
+
+#include "../style.h"
 #include "../main_window.h"
 
 #include "../../emu/text_utils.h"
@@ -15,6 +17,7 @@ VICViewer::VICViewer(MainWindow *parent, C64Runner *c64Runner) :
     mainWindow(parent)
 {
     ui->setupUi(this);
+    addDarkTitlebar(this);
     setFixedSize(size());
 
     charsetScreen.resize(8 * 8 * 16 * 16);

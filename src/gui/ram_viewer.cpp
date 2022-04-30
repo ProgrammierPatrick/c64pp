@@ -2,6 +2,7 @@
 #include "ui_ram_viewer.h"
 
 #include "main_window.h"
+#include "style.h"
 
 #include "../emu/text_utils.h"
 
@@ -15,6 +16,7 @@ RAMViewer::RAMViewer(MainWindow *parent, C64Runner *c64Runner) :
 {
     ui->setupUi(this);
 
+    addDarkTitlebar(this);
     setFixedSize(size());
 
     itemDelegate.view = ui->tableView;
