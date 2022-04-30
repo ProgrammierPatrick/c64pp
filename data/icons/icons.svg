@@ -28,9 +28,9 @@
      showgrid="false"
      inkscape:snap-smooth-nodes="false"
      inkscape:snap-global="true"
-     inkscape:zoom="0.35355339"
-     inkscape:cx="-24.041631"
-     inkscape:cy="366.28131"
+     inkscape:zoom="0.125"
+     inkscape:cx="-516"
+     inkscape:cy="372"
      inkscape:window-width="1366"
      inkscape:window-height="745"
      inkscape:window-x="-8"
@@ -421,6 +421,44 @@
          inkscape:export-filename="D:\Uni\Master\2. Semester\C64 Emulator\c64pp\data\icons\breakpoints.png"
          inkscape:export-xdpi="88.212471"
          inkscape:export-ydpi="88.212471" />
+      <rect
+         style="fill:#ffffff;fill-opacity:1;stroke:#ff6600;stroke-width:16.7939;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1886-8"
+         width="210.28218"
+         height="210.28218"
+         x="-780.73285"
+         y="198.38438" />
+      <g
+         id="g3821"
+         transform="matrix(1.5138405,0,0,1.5138405,-453.99794,-43.317002)">
+        <rect
+           style="fill:#ffffff;fill-opacity:1;stroke:#ff6600;stroke-width:11.0936;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect1886"
+           width="138.90643"
+           height="138.90643"
+           x="-217.08182"
+           y="-11.303241" />
+        <path
+           style="fill:none;stroke:#ff6600;stroke-width:11.0831;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M -200.62857,-33.30845 H -56.170111 V 111.15"
+           id="path2889" />
+      </g>
+      <path
+         style="fill:none;stroke:#ff6600;stroke-width:16.9727;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m -1067.3953,143.4018 h 227.0761"
+         id="path3158" />
+      <g
+         id="g3825"
+         transform="matrix(1.5138405,0,0,1.5138405,-494.26712,-46.175552)">
+        <path
+           style="fill:none;stroke:#ff6600;stroke-width:12.5752;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M 31.046681,156.24092 180.95332,6.3342812"
+           id="path3471" />
+        <path
+           style="fill:none;stroke:#ff6600;stroke-width:12.5752;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M 180.95332,156.24092 31.046681,6.3342811"
+           id="path3817" />
+      </g>
     </g>
     <g
        id="g39019"
