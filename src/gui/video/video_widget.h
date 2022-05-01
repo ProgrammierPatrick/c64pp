@@ -13,6 +13,7 @@ public:
     ~VideoWidget();
 
     void setVideoBuffer(std::vector<uint8_t> *videoBuffer);
+    QRgb getColor(int i) const;
 
     void paintEvent(QPaintEvent *event) override;
 

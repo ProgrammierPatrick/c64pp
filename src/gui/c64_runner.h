@@ -22,33 +22,10 @@ public:
 
     void hardReset();
 
-    void singleStepMPU() {
-        c64->tick();
-    }
-    int stepInstruction() {
-        int numTicks = 0;
-        do {
-            c64->tick();
-            numTicks++;
-        } while (c64->mpu.T != 0);
-        return numTicks;
-    }
-    int stepLine() {
-        int numTicks = 0;
-        do {
-            c64->tick();
-            numTicks++;
-        } while(c64->vic.cycleInLine != 1);
-        return numTicks;
-    }
-    int stepFrame() {
-        int numTicks = 0;
-        do {
-            c64->tick();
-            numTicks++;
-        } while(c64->vic.y != 0 || c64->vic.cycleInLine != 1);
-        return numTicks;
-    }
+    void singleStepMPU();
+    int stepInstruction();
+    int stepLine();
+    int stepFrame();
 
     std::unique_ptr<C64> c64;
     std::unique_ptr<KeyboardState> keyboard;

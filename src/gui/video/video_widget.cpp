@@ -35,6 +35,10 @@ VideoWidget::VideoWidget(QWidget *parent, int width, int height, std::vector<uin
     }
 }
 
+QRgb VideoWidget::getColor(int i) const {
+    return colorPalette[i];
+}
+
 VideoWidget::~VideoWidget() { }
 
 void VideoWidget::setVideoBuffer(std::vector<uint8_t> *videoBuffer) {

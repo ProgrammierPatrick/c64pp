@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowIcon(QIcon(":/icon-512.png"));
 
     addDarkTitlebar(this);
-    ui->menubar->resize(500, ui->menubar->height());
+    ui->menubar->resize(200, ui->menubar->height());
 
     frameTimer.setTimerType(Qt::TimerType::PreciseTimer);
 

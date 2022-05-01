@@ -34,4 +34,32 @@ void C64Runner::hardReset() {
     c64 = std::make_unique<C64>(basic, kernal, chargen, keyboard.get());
 }
 
+void C64Runner::singleStepMPU() {
+    c64->tick();
+}
+int C64Runner::stepInstruction() {
+    int numTicks = 0;
+    do {
+        c64->tick();
+        numTicks++;
+    } while (c64->mpu.T != 0);
+    return numTicks;
+}
+int C64Runner::stepLine() {
+    for (int i = 0; i < 63; i++)
+        c64->tick();
+    return 63;
+}
+int C64Runner::stepFrame() {
+    for (int i = 0; i < 19593; i++)
+        c64->tick();
+    return 19593;
+
+    //int numTicks = 0;
+    //do {
+    //    c64->tick();
+    //    numTicks++;
+    //} while(c64->vic.y != 0 || c64->vic.cycleInLine != 1);
+    //return numTicks;
+}
 

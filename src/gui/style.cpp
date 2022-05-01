@@ -26,6 +26,8 @@ void applyStyle(QApplication& app) {
     p.setColor(QPalette::WindowText, textBright);
     p.setColor(QPalette::ColorGroup::All, QPalette::Base, undef);
     p.setColor(QPalette::ColorGroup::Active, QPalette::Base, backDark);
+    p.setColor(QPalette::ColorGroup::Inactive, QPalette::Base, backDark);
+    p.setColor(QPalette::ColorGroup::Disabled, QPalette::Base, backHalfDark);
     p.setColor(QPalette::AlternateBase, undef);
     p.setColor(QPalette::ToolTipBase, backDark);
     p.setColor(QPalette::ToolTipText, textBright);
@@ -43,6 +45,7 @@ void applyStyle(QApplication& app) {
     QString qss;
     qss += "QMenuBar:item:selected { background: " + backDark.name() + "; }\n";
     qss += "QLineEdit,QPlainTextEdit,QListWidget { font-family: '" + mono.defaultFamily() + "'; color: " + accent.name() + "; }\n";
+    qss += "QLineEdit:read-only { color: " + textBright.name() + "; }\n";
     qss += "QSpinBox { color: " + accent.name() + "; }\n";
     qss += "QGroupBox { border: 1px solid " + backDark.name() + "; border-radius: 2.5px; margin-top: 1em; }\n";
     qss += "QGroupBox:title { margin-top: 0.4em; subcontrol-origin: margin; subcontrol-position: top center; background-color: " + backBright.name() + "; }\n";

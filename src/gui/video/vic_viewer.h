@@ -30,5 +30,6 @@ private:
     std::vector<uint8_t> charsetScreen;
     VideoWidget *matrixWidget;
     std::vector<uint8_t> matrixScreen;
+    std::array<std::pair<VideoWidget*, std::vector<uint8_t>>,8> spriteScreens;
 };
 
