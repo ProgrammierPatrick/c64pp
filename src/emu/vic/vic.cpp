@@ -8,7 +8,7 @@ void VIC::tick() {
     OutputPixels graphicPixels = tickBackground();
     OutputPixels spritePixels = tickSprites(graphicPixels.isForeground);
 
-    uint8_t spriteDataPrioReg = read(0x1B, false);
+    uint8_t spriteDataPrioReg = read(0x1B);
     pixels = graphicPixels.pixels;
 
     for (int i = 0; i < 8; i++) {
@@ -45,7 +45,7 @@ void VIC::tick() {
     if (cycleInLine == 64) {
         cycleInLine = 1;
         y++;
-        if (y >= lastY) {
+        if (y > lastY) {
             y = 0;
             // for(int i = 0; i < screenWidth * screenHeight; i++) screen[i] = 0;
         }

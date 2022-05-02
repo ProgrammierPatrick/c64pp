@@ -51,9 +51,10 @@ int C64Runner::stepLine() {
     return 63;
 }
 int C64Runner::stepFrame() {
-    for (int i = 0; i < 19593; i++)
+    // should be 19656: https://www.c64-wiki.com/wiki/raster_time
+    for (int i = 0; i < 19656; i++)
         c64->tick();
-    return 19593;
+    return 19656;
 
     //int numTicks = 0;
     //do {
