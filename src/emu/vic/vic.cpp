@@ -8,19 +8,16 @@ void VIC::tick() {
     OutputPixels graphicPixels = tickBackground();
     OutputPixels spritePixels = tickSprites(graphicPixels.isForeground);
 
-    uint8_t spriteDataPrioReg = read(0x1B);
     pixels = graphicPixels.pixels;
 
     for (int i = 0; i < 8; i++) {
-        if ((!graphicPixels.isForeground[i]
-             || ((spriteDataPrioReg >> spritePixels.spriteNr[i]) & 0x1) == 0)
-             && spritePixels.pixels[i] != 0xFF) {
-
+        auto spriteNr = spritePixels.spriteNr[i];
+        if ((!graphicPixels.isForeground[i] || !sprites.spriteData[spriteNr].spriteDataPriority) && spritePixels.pixels[i] != 0xFF) {
             pixels[i] = spritePixels.pixels[i];
 
             // set MxD bits (sprite-data collision) in register $d01f
             if (graphicPixels.isForeground[i])
-                sprites.spriteData[spritePixels.spriteNr[i]].spriteDataCollision = true;
+                sprites.spriteData[spriteNr].spriteDataCollision = true;
         }
     }
 
@@ -234,13 +231,10 @@ OutputPixels VIC::tickSprites(std::array<bool,8> isForeground) {
                             sprites.spriteData[outputPixels.spriteNr[j]].spriteSpriteCollision = true;
                             sprites.spriteData[i].spriteSpriteCollision = true;
                         } else {
-                            bool inFrontOfForeground = (spriteDataPrioReg & (1 << j)) == 0;
-                            if (inFrontOfForeground || !isForeground[j]) {
-                                outputPixels.pixels[j] = pixelColor;
-                                outputPixels.spriteNr[j] = i;
-                            }
+                            outputPixels.pixels[j] = pixelColor;
+                            outputPixels.spriteNr[j] = i;
+                            pixelOccupied[j] = true;
                         }
-                        pixelOccupied[j] = true;
                     }
                     if (!sprite.spriteXExpansion || sprite.xExpansionFF) {
                         sprite.drawIndexPixel++;
