@@ -2,13 +2,6 @@
 
 #include <array>
 #include <stdexcept>
-/**
- * (Moritz)
- *
- * To Dos:
- *  - BCD Variants
- */
-
 
 uint8_t readMem(MPU& mpu, uint16_t addr) {
     mpu.lastMemWritten = false;
@@ -25,7 +18,7 @@ void dataHandlerNop(MPU& mpu, uint8_t data) {
 
 struct OpCode {
     // int numBytes; // length of istruction including opcode
-    std::array<void (*)(MPU&), 7> handlers;
+    std::array<void (*)(MPU&), 8> handlers;
     void (*dataHandler)(MPU& mpu, uint8_t data) = dataHandlerNop;
 };
 extern const std::array<OpCode, 256> opcodes;
@@ -1116,6 +1109,123 @@ OpCode createRTSOpCode() {
  * Source: https://csdb.dk/release/?id=198357
  */
 
+void setEffectiveAbsYNoCarry(MPU& mpu) {
+    mpu.effectiveAddr = mpu.effectiveAddr & 0xFF00 | (mpu.effectiveAddr + mpu.Y) & 0x00FF;
+    readMem(mpu, mpu.effectiveAddr);
+    mpu.T++;
+}
+void setEffectiveAbsY(MPU& mpu) {
+    mpu.effectiveAddr = mpu.effectiveAddr + mpu.Y;
+    mpu.modVal = readMem(mpu, mpu.effectiveAddr);
+    mpu.T++;
+}
+void setEffectiveAbsXNoCarry(MPU& mpu) {
+    mpu.effectiveAddr = mpu.effectiveAddr & 0xFF00 | (mpu.effectiveAddr + mpu.X) & 0x00FF;
+    readMem(mpu, mpu.effectiveAddr);
+    mpu.T++;
+}
+void setEffectiveAbsX(MPU& mpu) {
+    mpu.effectiveAddr = mpu.effectiveAddr + mpu.X;
+    mpu.modVal = readMem(mpu, mpu.effectiveAddr);
+    mpu.T++;
+}
+
+void opDCPMod(MPU& mpu) {
+    writeMem(mpu, mpu.effectiveAddr, mpu.modVal); // ghost write
+    mpu.modVal--;
+    opCMP(mpu, mpu.modVal);
+}
+void opISCMod(MPU& mpu) {
+    writeMem(mpu, mpu.effectiveAddr, mpu.modVal); // ghost write
+    mpu.modVal++;
+    opSBC(mpu, mpu.modVal);
+}
+void opRRAMod(MPU& mpu) {
+    opRORMod(mpu);
+    mpu.T--; // reverse effect from op*Mod()
+    opADC(mpu, mpu.modVal);
+}
+void opRLAMod(MPU& mpu) {
+    opROLMod(mpu);
+    mpu.T--; // reverse effect from op*Mod()
+    opAND(mpu, mpu.modVal);
+}
+void opSLOMod(MPU& mpu) {
+    opASLMod(mpu);
+    mpu.T--; // reverse effect from op*Mod()
+    opORA(mpu, mpu.modVal);
+}
+void opSREMod(MPU& mpu) {
+    opLSRMod(mpu);
+    mpu.T--; // reverse effect from op*Mod()
+    opEOR(mpu, mpu.modVal);
+}
+
+OpCode createIllegalAbsYIndexed(void (*handler)(MPU&)) {
+    return { .handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr,
+                           setEffectiveAbsYNoCarry, setEffectiveAbsY, handler, storeModValLen3 } };
+}
+OpCode createIllegalAbsXIndexed(void (*handler)(MPU&)) {
+    return { .handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr,
+                           setEffectiveAbsXNoCarry, setEffectiveAbsX, handler, storeModValLen3 } };
+}
+
+void fetchIndirectGhostRead(MPU& mpu) {
+    readMem(mpu, mpu.baseAddr);
+    mpu.T++;
+}
+void fetchIllegalIndirectData(MPU& mpu) {
+    mpu.modVal = readMem(mpu, mpu.effectiveAddr);
+    mpu.T++;
+}
+void fetchIllegalZeropageIndirectYsetEffectiveAbsYNoCarry(MPU& mpu) {
+    mpu.effectiveAddr = mpu.baseAddr & 0xFF00 | (mpu.baseAddr + mpu.Y) & 0x00FF;
+    readMem(mpu, mpu.effectiveAddr);
+    mpu.T++;
+}
+void fetchIllegalZeropageIndirectYsetEffectiveAbsY(MPU& mpu) {
+    mpu.effectiveAddr = mpu.baseAddr + mpu.Y;
+    mpu.modVal = readMem(mpu, mpu.effectiveAddr);
+    mpu.T++;
+}
+OpCode createIllegalZeropageXIndexedIndirect(void (*handler)(MPU&)) {
+    return { .handlers = { fetchOpCode, fetchIndirectXBase, fetchIndirectGhostRead, fetchIndirectXAddrLow, fetchIndirectXAddrHigh,
+                           fetchIllegalIndirectData, handler, storeModValLen2 } };
+}
+OpCode createIllegalZeropageIndirectYIndexed(void (*handler)(MPU&)) {
+    return { .handlers = { fetchOpCode, fetchIndirectYIndirectAddr, fetchIndirectYAddrLow, fetchIndirectYAddrHigh,
+                           fetchIllegalZeropageIndirectYsetEffectiveAbsYNoCarry, fetchIllegalZeropageIndirectYsetEffectiveAbsY,
+                           handler, storeModValLen2 } };
+}
+
+void opANC(MPU& mpu, uint8_t value) {
+    opAND(mpu, value);
+    bool carry = mpu.A & 0x80;
+    mpu.P &= ~MPU::Flag::C;
+    mpu.P |= carry ? MPU::Flag::C : 0;
+}
+void opALR(MPU& mpu, uint8_t value) {
+    opAND(mpu, value);
+    mpu.modVal = mpu.A;
+    opLSRMod(mpu);
+    mpu.T--; // reverse effect of op*Mod()
+    mpu.A = mpu.modVal;
+}
+void opARR(MPU& mpu, uint8_t value) {
+    opAND(mpu, value);
+    mpu.modVal = mpu.A;
+    uint8_t beforeRotate = mpu.modVal;
+    opROR(mpu);
+    mpu.T--; // reverse effect of op*Mod()
+
+    bool carry = mpu.modVal & 0x40;
+    bool overflow = (beforeRotate ^ mpu.modVal) & 0x40;
+    mpu.P &= ~MPU::Flag::C & ~MPU::Flag::V;
+    mpu.P |= (carry ? MPU::Flag::C : 0) | (overflow ? MPU::Flag::V : 0);
+    mpu.A = mpu.modVal;
+}
+
+
 std::array<OpCode, 256> createOpcodes() {
     std::array<OpCode, 256> opcodes{};
     for(auto& op : opcodes) op.handlers = { fetchOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
@@ -1195,6 +1305,12 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0xF9] = absoluteYMode(opSBC);
     opcodes[0xF5] = zeroPageXMode(opSBC);
     opcodes[0xF1] = indirectYMode(opSBC);
+    // ILLEGAL INSTR
+    opcodes[0x0B] = immediateMode(opANC);
+    opcodes[0x2B] = immediateMode(opANC);
+    opcodes[0x4B] = immediateMode(opALR);
+    opcodes[0x6B] = immediateMode(opARR);
+    // TODO: continue
 
     // Single Byte Instructions
     opcodes[0x0A] = impliedSingleByte(opASL);
@@ -1286,6 +1402,38 @@ std::array<OpCode, 256> createOpcodes() {
     // misc operations
     opcodes[0x00] = createBRKOpCode();
     opcodes[0x40] = createRTIOpCode();
+
+    // ILLEGAL: NEW ADDR MODE: Absolute Y indexed RMW
+    opcodes[0xDB] = createIllegalAbsYIndexed(opDCPMod);
+    opcodes[0xFB] = createIllegalAbsYIndexed(opISCMod);
+    opcodes[0x7B] = createIllegalAbsYIndexed(opRRAMod);
+    opcodes[0x3B] = createIllegalAbsYIndexed(opRLAMod);
+    opcodes[0x1B] = createIllegalAbsYIndexed(opSLOMod);
+    opcodes[0x5B] = createIllegalAbsYIndexed(opSREMod);
+
+    // ILLEGAL: NEW ADDR MODE: Absolute X indexed RMW
+    opcodes[0xDF] = createIllegalAbsXIndexed(opDCPMod);
+    opcodes[0xFF] = createIllegalAbsXIndexed(opISCMod);
+    opcodes[0x7F] = createIllegalAbsXIndexed(opRRAMod);
+    opcodes[0x3F] = createIllegalAbsXIndexed(opRLAMod);
+    opcodes[0x1F] = createIllegalAbsXIndexed(opSLOMod);
+    opcodes[0x5F] = createIllegalAbsXIndexed(opSREMod);
+
+    // ILLEGAL: NEW ADDR MODE: Zeropage X indexed indirect RMW
+    opcodes[0xC3] = createIllegalZeropageXIndexedIndirect(opDCPMod);
+    opcodes[0xE3] = createIllegalZeropageXIndexedIndirect(opISCMod);
+    opcodes[0x23] = createIllegalZeropageXIndexedIndirect(opRRAMod);
+    opcodes[0x63] = createIllegalZeropageXIndexedIndirect(opRLAMod);
+    opcodes[0x03] = createIllegalZeropageXIndexedIndirect(opSLOMod);
+    opcodes[0x43] = createIllegalZeropageXIndexedIndirect(opSREMod);
+
+    // ILLEGAL: NEW ADDR MODE: Zeropage indirect Y indexed RMW
+    opcodes[0xD3] = createIllegalZeropageIndirectYIndexed(opDCPMod);
+    opcodes[0xF3] = createIllegalZeropageIndirectYIndexed(opISCMod);
+    opcodes[0x33] = createIllegalZeropageIndirectYIndexed(opRRAMod);
+    opcodes[0x73] = createIllegalZeropageIndirectYIndexed(opRLAMod);
+    opcodes[0x13] = createIllegalZeropageIndirectYIndexed(opSLOMod);
+    opcodes[0x53] = createIllegalZeropageIndirectYIndexed(opSREMod);
 
     return opcodes;
 }
