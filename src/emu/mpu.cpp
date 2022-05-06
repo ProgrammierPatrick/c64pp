@@ -46,7 +46,7 @@ void fetchImmediate(MPU& mpu) {
 OpCode immediateMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
     // opcodeData.numBytes = 2;
-    opcodeData.handlers = { fetchOpCode, fetchImmediate, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchImmediate, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -67,7 +67,7 @@ void fetchAbsoluteData(MPU& mpu) {
 }
 OpCode absoluteMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, fetchAbsoluteData, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, fetchAbsoluteData, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -84,7 +84,7 @@ void fetchZeroPageData(MPU& mpu) {
 }
 OpCode zeroPageMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, fetchZeroPageData, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, fetchZeroPageData, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -109,7 +109,7 @@ void fetchIndirectXData(MPU& mpu) {
 }
 OpCode indirectXMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchIndirectXBase, handlerNop, fetchIndirectXAddrLow, fetchIndirectXAddrHigh, fetchIndirectXData, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchIndirectXBase, handlerNop, fetchIndirectXAddrLow, fetchIndirectXAddrHigh, fetchIndirectXData, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -141,7 +141,7 @@ void fetchAbsoluteXDataNextPage(MPU& mpu) {
 }
 OpCode absoluteXMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteXAddrLow, fetchAbsoluteXAddrHigh, fetchAbsoluteXData, fetchAbsoluteXDataNextPage, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteXAddrLow, fetchAbsoluteXAddrHigh, fetchAbsoluteXData, fetchAbsoluteXDataNextPage, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -173,7 +173,7 @@ void fetchAbsoluteYDataNextPage(MPU& mpu) {
 }
 OpCode absoluteYMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteYAddrLow, fetchAbsoluteYAddrHigh, fetchAbsoluteYData, fetchAbsoluteYDataNextPage, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteYAddrLow, fetchAbsoluteYAddrHigh, fetchAbsoluteYData, fetchAbsoluteYDataNextPage, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -190,7 +190,7 @@ void fetchZeroPageXData(MPU& mpu) {
 }
 OpCode zeroPageXMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, fetchZeroPageXData, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, fetchZeroPageXData, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -207,7 +207,7 @@ void fetchZeroPageYData(MPU& mpu) {
 }
 OpCode zeroPageYMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageYBase, handlerNop, fetchZeroPageYData, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageYBase, handlerNop, fetchZeroPageYData, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
@@ -243,14 +243,14 @@ void fetchIndirectYDataNextPage(MPU& mpu) {
 }
 OpCode indirectYMode(void (*handler)(MPU&,uint8_t)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchIndirectYIndirectAddr, fetchIndirectYAddrLow, fetchIndirectYAddrHigh, fetchIndirectYData, fetchIndirectYDataNextPage, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchIndirectYIndirectAddr, fetchIndirectYAddrLow, fetchIndirectYAddrHigh, fetchIndirectYData, fetchIndirectYDataNextPage, undefinedOpcode, undefinedOpcode };
     opcodeData.dataHandler = handler;
     return opcodeData;
 }
 
 OpCode impliedSingleByte(void (*handler)(MPU&)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, handler, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, handler, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 
@@ -626,72 +626,72 @@ void setEffectiveAddrIndY(MPU& mpu) {
 }
 OpCode createSTAZeroPageOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, storeALen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, storeALen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTXZeroPageOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, storeXLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, storeXLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTYZeroPageOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, storeYLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, storeYLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTAAbsoluteOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeALen3, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeALen3, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTXAbsoluteOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeXLen3, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeXLen3, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTYAbsoluteOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeYLen3, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeYLen3, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTAIndirectXOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchIndirectXBase, handlerNop, fetchIndirectXAddrLow, fetchIndirectXAddrHigh, storeALen2, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchIndirectXBase, handlerNop, fetchIndirectXAddrLow, fetchIndirectXAddrHigh, storeALen2, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTAAbsoluteXOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteXAddrLow, fetchAbsoluteXAddrHigh, setEffectiveAddrAbsX, storeALen3, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteXAddrLow, fetchAbsoluteXAddrHigh, setEffectiveAddrAbsX, storeALen3, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTAAbsoluteYOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteYAddrLow, fetchAbsoluteYAddrHigh, setEffectiveAddrAbsY, storeALen3, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteYAddrLow, fetchAbsoluteYAddrHigh, setEffectiveAddrAbsY, storeALen3, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTAZeroPageXOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeAZeroPageX, undefinedOpcode, undefinedOpcode, undefinedOpcode  };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeAZeroPageX, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTYZeroPageXOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeYZeroPageX, undefinedOpcode, undefinedOpcode, undefinedOpcode  };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeYZeroPageX, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTAZeroPageYOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeAZeroPageY, undefinedOpcode, undefinedOpcode, undefinedOpcode  };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeAZeroPageY, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTXZeroPageYOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeXZeroPageY, undefinedOpcode, undefinedOpcode, undefinedOpcode  };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, storeXZeroPageY, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createSTAIndirectYOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchIndirectYIndirectAddr, fetchIndirectYAddrLow, fetchIndirectYAddrHigh, setEffectiveAddrIndY, storeALen2, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchIndirectYIndirectAddr, fetchIndirectYAddrLow, fetchIndirectYAddrHigh, setEffectiveAddrIndY, storeALen2, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 
@@ -780,7 +780,7 @@ void storeModValLen2(MPU& mpu) {
 }
 OpCode bitShiftZeroPage(void (*handler)(MPU&)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, fetchModValZeroPage, handler, storeModValLen2, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageAddr, fetchModValZeroPage, handler, storeModValLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 void fetchModValAbsolute(MPU& mpu) {
@@ -794,7 +794,7 @@ void storeModValLen3(MPU& mpu) {
 }
 OpCode bitShiftAbsolute(void (*handler)(MPU& mpu)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, fetchModValAbsolute, handler, storeModValLen3, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, fetchModValAbsolute, handler, storeModValLen3, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 void fetchModValZeroPageX(MPU& mpu) {
@@ -804,7 +804,7 @@ void fetchModValZeroPageX(MPU& mpu) {
 }
 OpCode bitShiftZeroPageX(void (*handler)(MPU& mpu)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, fetchModValZeroPageX, handler, storeModValLen2, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchZeroPageXBase, handlerNop, fetchModValZeroPageX, handler, storeModValLen2, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 void fetchModValAbsoluteX(MPU& mpu) {
@@ -814,7 +814,7 @@ void fetchModValAbsoluteX(MPU& mpu) {
 }
 OpCode bitShiftAbsoluteX(void (*handler)(MPU& mpu)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteXAddrLow, fetchAbsoluteXAddrHigh, handlerNop, fetchModValAbsoluteX, handler, storeModValLen3 };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteXAddrLow, fetchAbsoluteXAddrHigh, handlerNop, fetchModValAbsoluteX, handler, storeModValLen3, undefinedOpcode };
     return opcodeData;
 }
 
@@ -914,7 +914,7 @@ void readBranchBoundCrossOpCode(MPU& mpu) {
 }
 OpCode branchOps(void (*handler)(MPU& mpu)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, handler, readBranchOpCode, readBranchBoundCrossOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, handler, readBranchOpCode, readBranchBoundCrossOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 
@@ -933,7 +933,7 @@ void opPHP(MPU& mpu) {
 }
 OpCode pushOperation(void (*handler)(MPU& mpu)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, handlerNop, handler, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, handlerNop, handler, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 void opPLA(MPU& mpu) {
@@ -954,7 +954,7 @@ void opPLP(MPU& mpu) {
 }
 OpCode pullOperation(void (*handler)(MPU& mpu)) {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, handlerNop, handler, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, handlerNop, handler, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 
@@ -987,7 +987,7 @@ void brkFetchAddrHigh(MPU& mpu) {
 }
 OpCode createBRKOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, handlerNop, brkPushPCH, brkPushPCL, brkPushP, brkFetchAddrLow, brkFetchAddrHigh };
+    opcodeData.handlers = { fetchOpCode, handlerNop, brkPushPCH, brkPushPCL, brkPushP, brkFetchAddrLow, brkFetchAddrHigh, undefinedOpcode };
     return opcodeData;
 }
 
@@ -1009,12 +1009,12 @@ void fetchJSRHighAddr(MPU& mpu) {
 }
 OpCode createJSROpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, handlerNop, jsrPushPCH, jsrPushPCL, fetchJSRHighAddr, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, handlerNop, jsrPushPCH, jsrPushPCL, fetchJSRHighAddr, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 OpCode createJMPAbsolute() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchJSRHighAddr, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchJSRHighAddr, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 void fetchJMPIndirAddrLow(MPU& mpu) {
@@ -1037,7 +1037,7 @@ void fetchJMPEffAddrHigh(MPU& mpu) {
 }
 OpCode createJMPIndirect() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, fetchJMPIndirAddrLow, fetchJMPIndirAddrHigh, fetchJMPEffAddrLow, fetchJMPEffAddrHigh, undefinedOpcode, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, fetchJMPIndirAddrLow, fetchJMPIndirAddrHigh, fetchJMPEffAddrLow, fetchJMPEffAddrHigh, undefinedOpcode, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 
@@ -1059,7 +1059,7 @@ void rtiPullPCH(MPU& mpu) {
 }
 OpCode createRTIOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullP, rtiPullPCL, rtiPullPCH, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullP, rtiPullPCL, rtiPullPCH, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 void rtsPullPCH(MPU& mpu) {
@@ -1073,7 +1073,7 @@ void rtsLastCycle(MPU& mpu) {
 }
 OpCode createRTSOpCode() {
     OpCode opcodeData;
-    opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullPCL, rtsPullPCH, rtsLastCycle, undefinedOpcode };
+    opcodeData.handlers = { fetchOpCode, handlerNop, handlerNop, rtiPullPCL, rtsPullPCH, rtsLastCycle, undefinedOpcode, undefinedOpcode };
     return opcodeData;
 }
 
@@ -1134,31 +1134,37 @@ void opDCPMod(MPU& mpu) {
     writeMem(mpu, mpu.effectiveAddr, mpu.modVal); // ghost write
     mpu.modVal--;
     opCMP(mpu, mpu.modVal);
+    mpu.T++;
 }
 void opISCMod(MPU& mpu) {
     writeMem(mpu, mpu.effectiveAddr, mpu.modVal); // ghost write
     mpu.modVal++;
     opSBC(mpu, mpu.modVal);
+    mpu.T++;
 }
 void opRRAMod(MPU& mpu) {
     opRORMod(mpu);
     mpu.T--; // reverse effect from op*Mod()
     opADC(mpu, mpu.modVal);
+    mpu.T++;
 }
 void opRLAMod(MPU& mpu) {
     opROLMod(mpu);
     mpu.T--; // reverse effect from op*Mod()
     opAND(mpu, mpu.modVal);
+    mpu.T++;
 }
 void opSLOMod(MPU& mpu) {
     opASLMod(mpu);
     mpu.T--; // reverse effect from op*Mod()
     opORA(mpu, mpu.modVal);
+    mpu.T++;
 }
 void opSREMod(MPU& mpu) {
     opLSRMod(mpu);
     mpu.T--; // reverse effect from op*Mod()
     opEOR(mpu, mpu.modVal);
+    mpu.T++;
 }
 
 OpCode createIllegalAbsYIndexed(void (*handler)(MPU&)) {
@@ -1224,11 +1230,27 @@ void opARR(MPU& mpu, uint8_t value) {
     mpu.P |= (carry ? MPU::Flag::C : 0) | (overflow ? MPU::Flag::V : 0);
     mpu.A = mpu.modVal;
 }
+void opSBX(MPU& mpu, uint8_t value) {
+    uint8_t oldVal = mpu.A & mpu.X;
+    uint8_t sub = oldVal - value;
+    mpu.X = sub;
+
+    bool neg = static_cast<int8_t>(sub) < 0;
+    bool zero = sub == 0;
+    bool carry = static_cast<int16_t>(oldVal) - static_cast<int16_t>(value) - 0x01 >= 0;
+    mpu.P &= ~MPU::Flag::N & ~MPU::Flag::Z & ~MPU::Flag::C;
+    mpu.P |= (neg ? MPU::Flag::N : 0) | (zero ? MPU::Flag::Z : 0) | (carry ? MPU::Flag::C : 0);
+}
+
+void opLAX(MPU& mpu, uint8_t value) {
+    opLDA(mpu, value);
+    mpu.X = value;
+}
 
 
 std::array<OpCode, 256> createOpcodes() {
     std::array<OpCode, 256> opcodes{};
-    for(auto& op : opcodes) op.handlers = { fetchOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
+    for(auto& op : opcodes) op.handlers = { fetchOpCode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode };
 
     // Internal Execution On Memory Data
     opcodes[0x69] = immediateMode(opADC);
@@ -1305,12 +1327,47 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0xF9] = absoluteYMode(opSBC);
     opcodes[0xF5] = zeroPageXMode(opSBC);
     opcodes[0xF1] = indirectYMode(opSBC);
-    // ILLEGAL INSTR
+    // ILLEGAL INSTR: immediate
     opcodes[0x0B] = immediateMode(opANC);
     opcodes[0x2B] = immediateMode(opANC);
     opcodes[0x4B] = immediateMode(opALR);
     opcodes[0x6B] = immediateMode(opARR);
-    // TODO: continue
+    opcodes[0xCB] = immediateMode(opSBX);
+    opcodes[0xEB] = immediateMode(opSBC);
+    // ILLEGAL INSTR: block 1
+    opcodes[0x07] = zeroPageMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opSLOMod(mpu); mpu.T--; });
+    opcodes[0x17] = zeroPageXMode([](MPU& mpu, uint8_t val) { mpu.modVal = val; opSLOMod(mpu); mpu.T--; });
+    opcodes[0x0F] = absoluteMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opSLOMod(mpu); mpu.T--; });
+    opcodes[0x27] = zeroPageMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opRLAMod(mpu); mpu.T--; });
+    opcodes[0x37] = zeroPageXMode([](MPU& mpu, uint8_t val) { mpu.modVal = val; opRLAMod(mpu); mpu.T--; });
+    opcodes[0x2F] = absoluteMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opRLAMod(mpu); mpu.T--; });
+    opcodes[0x47] = zeroPageMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opSREMod(mpu); mpu.T--; });
+    opcodes[0x57] = zeroPageXMode([](MPU& mpu, uint8_t val) { mpu.modVal = val; opSREMod(mpu); mpu.T--; });
+    opcodes[0x4F] = absoluteMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opSREMod(mpu); mpu.T--; });
+    opcodes[0x67] = zeroPageMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opRRAMod(mpu); mpu.T--; });
+    opcodes[0x77] = zeroPageXMode([](MPU& mpu, uint8_t val) { mpu.modVal = val; opRRAMod(mpu); mpu.T--; });
+    opcodes[0x6F] = absoluteMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opRRAMod(mpu); mpu.T--; });
+    // ILLEGA INSTR: block 2
+    auto storeAXLen2     = [](MPU& mpu) { writeMem(mpu, mpu.effectiveAddr,               mpu.A & mpu.X); mpu.T = 0; mpu.PC += 2; };
+    auto storeAXLen3     = [](MPU& mpu) { writeMem(mpu, mpu.effectiveAddr,               mpu.A & mpu.X); mpu.T = 0; mpu.PC += 3; };
+    auto storeAbsXAXLen2 = [](MPU& mpu) { writeMem(mpu, (mpu.baseAddr + mpu.Y) & 0x00FF, mpu.A & mpu.X); mpu.T = 0; mpu.PC += 2; };
+    opcodes[0x87] = {.handlers = { fetchOpCode, fetchZeroPageAddr, storeAXLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode }};
+    opcodes[0x97] = {.handlers = { fetchOpCode, fetchZeroPageYBase, handlerNop, storeAbsXAXLen2, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode }};
+    opcodes[0x83] = {.handlers = { fetchOpCode, fetchIndirectXBase, handlerNop, fetchIndirectXAddrLow, fetchIndirectXAddrHigh, storeAXLen2, undefinedOpcode, undefinedOpcode }};
+    opcodes[0x8F] = {.handlers = { fetchOpCode, fetchAbsoluteLowAddr, fetchAbsoluteHighAddr, storeAXLen3, undefinedOpcode, undefinedOpcode, undefinedOpcode, undefinedOpcode }};
+    opcodes[0xA7] = zeroPageMode(opLAX);
+    opcodes[0xB7] = zeroPageYMode(opLAX);
+    opcodes[0xA3] = indirectXMode(opLAX);
+    opcodes[0xB3] = indirectYMode(opLAX);
+    opcodes[0xAF] = absoluteMode(opLAX);
+    opcodes[0xBF] = absoluteYMode(opLAX);
+    // ILLEGA INSTR: block 3
+    opcodes[0xC7] = zeroPageMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opDCPMod(mpu); mpu.T--; });
+    opcodes[0xD7] = zeroPageXMode([](MPU& mpu, uint8_t val) { mpu.modVal = val; opDCPMod(mpu); mpu.T--; });
+    opcodes[0xCF] = absoluteMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opDCPMod(mpu); mpu.T--; });
+    opcodes[0xE7] = zeroPageMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opISCMod(mpu); mpu.T--; });
+    opcodes[0xF7] = zeroPageXMode([](MPU& mpu, uint8_t val) { mpu.modVal = val; opISCMod(mpu); mpu.T--; });
+    opcodes[0xEF] = absoluteMode( [](MPU& mpu, uint8_t val) { mpu.modVal = val; opISCMod(mpu); mpu.T--; });
 
     // Single Byte Instructions
     opcodes[0x0A] = impliedSingleByte(opASL);
@@ -1335,6 +1392,34 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x8A] = impliedSingleByte(opTXA);
     opcodes[0x9A] = impliedSingleByte(opTXS);
     opcodes[0x98] = impliedSingleByte(opTYA);
+    // ILLEGAL INSTR: NOPs
+    opcodes[0x1A] = impliedSingleByte(opNOP);
+    opcodes[0x3A] = impliedSingleByte(opNOP);
+    opcodes[0x5A] = impliedSingleByte(opNOP);
+    opcodes[0x7A] = impliedSingleByte(opNOP);
+    opcodes[0xDA] = impliedSingleByte(opNOP);
+    opcodes[0xFA] = impliedSingleByte(opNOP);
+    opcodes[0x80] = immediateMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x82] = immediateMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0xC2] = immediateMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0xE2] = immediateMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x89] = immediateMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x04] = zeroPageMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x44] = zeroPageMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x64] = zeroPageMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x14] = zeroPageXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x34] = zeroPageXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x54] = zeroPageXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x74] = zeroPageXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0xD4] = zeroPageXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0xF4] = zeroPageXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x0C] = absoluteMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x1C] = absoluteXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x3C] = absoluteXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x5C] = absoluteXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0x7C] = absoluteXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0xDC] = absoluteXMode([](MPU& mpu, uint8_t val) {});
+    opcodes[0xFC] = absoluteXMode([](MPU& mpu, uint8_t val) {});
 
     // store operations
     opcodes[0x8D] = createSTAAbsoluteOpCode();
@@ -1434,6 +1519,13 @@ std::array<OpCode, 256> createOpcodes() {
     opcodes[0x73] = createIllegalZeropageIndirectYIndexed(opRLAMod);
     opcodes[0x13] = createIllegalZeropageIndirectYIndexed(opSLOMod);
     opcodes[0x53] = createIllegalZeropageIndirectYIndexed(opSREMod);
+
+    // ILLEGAL unstable
+    opcodes[0x93] = {.handlers = { fetchOpCode, fetchIndirectYIndirectAddr, fetchIndirectYAddrLow, fetchIndirectYAddrHigh, setEffectiveAddrIndY, [](MPU& mpu) { writeMem(mpu, mpu.effectiveAddr, mpu.A & mpu.X & ((mpu.effectiveAddr >> 8) + 1)); mpu.T = 0; mpu.PC += 2; }, undefinedOpcode, undefinedOpcode }};
+    opcodes[0x9F] = {.handlers = { fetchOpCode, fetchAbsoluteYAddrLow, fetchAbsoluteYAddrHigh, setEffectiveAddrAbsY, [](MPU& mpu) { writeMem(mpu, mpu.effectiveAddr, mpu.A & mpu.X & ((mpu.effectiveAddr >> 8) + 1)); mpu.T = 0; mpu.PC += 3; }, undefinedOpcode, undefinedOpcode, undefinedOpcode }};
+    opcodes[0x9E] = {.handlers = { fetchOpCode, fetchAbsoluteYAddrLow, fetchAbsoluteYAddrHigh, setEffectiveAddrAbsY, [](MPU& mpu) { writeMem(mpu, mpu.effectiveAddr, mpu.X & ((mpu.effectiveAddr >> 8) + 1)); mpu.T = 0; mpu.PC += 3; }, undefinedOpcode, undefinedOpcode, undefinedOpcode }};
+    opcodes[0x9C] = {.handlers = { fetchOpCode, fetchAbsoluteXAddrLow, fetchAbsoluteXAddrHigh, setEffectiveAddrAbsX, [](MPU& mpu) { writeMem(mpu, mpu.effectiveAddr, mpu.Y & ((mpu.effectiveAddr >> 8) + 1)); mpu.T = 0; mpu.PC += 3; }, undefinedOpcode, undefinedOpcode, undefinedOpcode }};
+    opcodes[0x9B] = {.handlers = { fetchOpCode, fetchAbsoluteYAddrLow, fetchAbsoluteYAddrHigh, setEffectiveAddrAbsY, [](MPU& mpu) { writeMem(mpu, mpu.effectiveAddr, mpu.X & ((mpu.effectiveAddr >> 8) + 1)); mpu.T = 0; mpu.S = mpu.A & mpu.X; mpu.PC += 3; }, undefinedOpcode, undefinedOpcode, undefinedOpcode }};
 
     return opcodes;
 }
