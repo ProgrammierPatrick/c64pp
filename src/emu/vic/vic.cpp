@@ -21,9 +21,17 @@ void VIC::tick() {
         }
     }
 
+    // show badlines
+    // uint8_t col = 2;
+    // if (!BA) pixels = {col,col,col,col,col,col,col,col};
+
     for (int i = 0; i < 8; i++) {
         int sy = y - firstVisibleY;
         int sx = (cycleInLine - firstVisibleCycle) * 8 + i + 4;
+
+        // scroll screen to HBLANK for badline debugging
+        //sx += maxX / 2;
+        //sx %= maxX;
         if (pixels[i] != 0xFF && sx >= 0 && sx < screenWidth && sy >= 0 && sy < screenHeight)
             screen[sy * screenWidth + sx] = pixels[i];
     }
@@ -61,7 +69,10 @@ OutputPixels VIC::tickBackground() {
     if (cycleInLine == 11) {
         VC = VCBASE;
     }
-    BA = !(cycleInLine >= 13 && cycleInLine <= 54 && badLine);
+
+    if (cycleInLine == 13 && badLine) BA = false;
+    if (cycleInLine == 55 && badLine) BA = true;
+
     if (cycleInLine == 14 && inDisplayState && badLine) {
         RC = 0;
     }
@@ -173,22 +184,28 @@ OutputPixels VIC::tickSprites(std::array<bool,8> isForeground) {
         }
     }
 
-    if (cycleInLine == 55 && sprites.spriteData[0].spriteEnabled) BA = false;
-    if (cycleInLine == 57 && sprites.spriteData[1].spriteEnabled) BA = false;
-    if (cycleInLine == 59 && sprites.spriteData[2].spriteEnabled) BA = false;
-    if (cycleInLine == 61 && sprites.spriteData[3].spriteEnabled) BA = false;
-    if (cycleInLine == 63 && sprites.spriteData[4].spriteEnabled) BA = false;
-    if (cycleInLine ==  2 && sprites.spriteData[5].spriteEnabled) BA = false;
-    if (cycleInLine ==  4 && sprites.spriteData[6].spriteEnabled) BA = false;
-    if (cycleInLine ==  6 && sprites.spriteData[7].spriteEnabled) BA = false;
-    if (cycleInLine == 58 && !sprites.spriteData[1].spriteEnabled && !sprites.spriteData[2].spriteEnabled) BA = true;
-    if (cycleInLine == 60 && !sprites.spriteData[2].spriteEnabled && !sprites.spriteData[3].spriteEnabled) BA = true;
-    if (cycleInLine == 62 && !sprites.spriteData[3].spriteEnabled && !sprites.spriteData[4].spriteEnabled) BA = true;
-    if (cycleInLine ==  1 && !sprites.spriteData[4].spriteEnabled && !sprites.spriteData[5].spriteEnabled) BA = true;
-    if (cycleInLine ==  3 && !sprites.spriteData[5].spriteEnabled && !sprites.spriteData[6].spriteEnabled) BA = true;
-    if (cycleInLine ==  5 && !sprites.spriteData[6].spriteEnabled && !sprites.spriteData[7].spriteEnabled) BA = true;
-    if (cycleInLine ==  7 && !sprites.spriteData[7].spriteEnabled) BA = true;
-    if (cycleInLine ==  9) BA = true;
+    std::array<bool, 8> spriteCondition;
+    for (int i = 0; i < 8; i++) {
+        spriteCondition[i] = sprites.spriteData[i].spriteEnabled &&
+                ((sprites.spriteData[i].yCoord & 0x00FF) == (y & 0x00FF) || sprites.spriteData[i].currentlyDisplayed);
+    }
+
+    if (cycleInLine == 55 && spriteCondition[0]) BA = false;
+    if (cycleInLine == 57 && spriteCondition[1]) BA = false;
+    if (cycleInLine == 59 && spriteCondition[2]) BA = false;
+    if (cycleInLine == 61 && spriteCondition[3]) BA = false;
+    if (cycleInLine == 63 && spriteCondition[4]) BA = false;
+    if (cycleInLine ==  2 && spriteCondition[5]) BA = false;
+    if (cycleInLine ==  4 && spriteCondition[6]) BA = false;
+    if (cycleInLine ==  6 && spriteCondition[7]) BA = false;
+    if (cycleInLine == 60 && !spriteCondition[1] && !spriteCondition[2]) BA = true;
+    if (cycleInLine == 62 && !spriteCondition[2] && !spriteCondition[3]) BA = true;
+    if (cycleInLine ==  1 && !spriteCondition[3] && !spriteCondition[4]) BA = true;
+    if (cycleInLine ==  3 && !spriteCondition[4] && !spriteCondition[5]) BA = true;
+    if (cycleInLine ==  5 && !spriteCondition[5] && !spriteCondition[6]) BA = true;
+    if (cycleInLine ==  7 && !spriteCondition[6] && !spriteCondition[7]) BA = true;
+    if (cycleInLine ==  9 && !spriteCondition[7]) BA = true;
+    if (cycleInLine == 11) BA = true;
 
     // every line
     for (int i = 0; i < 8; i++) {
@@ -252,6 +269,7 @@ OutputPixels VIC::tickSprites(std::array<bool,8> isForeground) {
             }
         }
     }
+
     return outputPixels;
 }
 

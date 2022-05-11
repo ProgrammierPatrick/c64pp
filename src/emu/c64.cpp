@@ -15,14 +15,27 @@ void C64::tick() {
     try {
         vic.tick();
 
+        /*if (vic.cycleInLine == 1) {
+            std::cout << "\n";
+            if (vic.y == 0) {
+                std::cout << "\n";
+                std::cout << "\n";
+                std::cout << "000000000111111111122222222223333333333444444444455555555556666\n";
+                std::cout << "123456789012345678901234567890123456789012345678901234567890123\n";
+            }
+        }
+        std::cout << (mpuStunned ? "_" : "-");*/
 
-        if (!mpuStunned)
+        if (!mpuStunned) {
             mpu.tick(cia.IRQ || vic.IRQ , cia.NMI || keyboard->queryRestore());
+        }
+
+        cia.tick();
 
         // mpu is stunned at first read
         // the condition (BA && !lastMemWritten) is not quite correct as the MPU is stunned before! the first read access.
         // This is not possible here, so we will just wait this one cycle after the MPU is allowed to continue
-        if (vic.BA && !mpu.lastMemWritten)
+        if (!vic.BA && !mpu.lastMemWritten)
             mpuStunned = true;
 
         // mpu can only be stunned while BA is low
@@ -30,7 +43,6 @@ void C64::tick() {
         if (vic.BA)
             mpuStunned = false;
 
-        cia.tick();
     }
     catch (std::runtime_error& e) {
         if constexpr (traceMPU) {
