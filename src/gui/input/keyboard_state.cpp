@@ -4,8 +4,22 @@
 
 #include <sstream>
 #include <iostream>
+#include <set>
+
+bool KeyboardState::isSuitableBinding(const KeyboardState::Mapping& mapping, bool osCtrl, bool osShift, bool osAltGr) {
+    return mapping.mode == 0 && !osShift
+        || (mapping.mode & (ShiftMode::SHIFT_OR_NOT | ShiftMode::IS_LEFT_SHIFT | ShiftMode::IS_LEFT_CBM | ShiftMode::IS_LEFT_CTRL | ShiftMode::IS_RIGHT_SHIFT))
+        || (mapping.mode & ShiftMode::CTRL_REQUIRED) && osCtrl
+        || (mapping.mode & (ShiftMode::SHIFT_REQUIRED | ShiftMode::DESHIFT)) && osShift
+        || (mapping.mode & ShiftMode::COMBINED_WITH_SHIFT)
+        || (mapping.mode & ShiftMode::ALT_GR_REQUIRED) && osAltGr;
+}
 
 void KeyboardState::processKeyEvent(QKeyEvent* event, bool pressed) {
+    // TODO: keys get stuck when modifier key gets changed when pressing button which is not SHIFT_OR_NOT.
+    //       In this case, the key will not get released because its shifting requirements are not satisfied with new modifier keys.
+    //       Possible fix: track currently held down Qt keys in separate datastraucture and compute C64 keys from scratch each update.
+
     QKeyCombination comb = event->keyCombination();
     auto key = comb.key();
     int dir = pressed ? 1 : -1;
@@ -14,6 +28,27 @@ void KeyboardState::processKeyEvent(QKeyEvent* event, bool pressed) {
         if (pressed) reg &= ~(1 << bit);
         else         reg |=   1 << bit;
     };
+
+    // update modifier keys. They can change if modifiers change or if dedicated key event is processed.
+    bool newOSCtrl = comb.keyboardModifiers().testFlag(Qt::KeyboardModifier::ControlModifier);
+    bool newOSShift = comb.keyboardModifiers().testFlag(Qt::KeyboardModifier::ShiftModifier);
+    bool newOSAlt = comb.keyboardModifiers().testFlag(Qt::KeyboardModifier::AltModifier);
+    if (comb.key() == Qt::Key_Control) newOSCtrl = pressed;
+    if (comb.key() == Qt::Key_Shift) newOSShift = pressed;
+    if (comb.key() == Qt::Key_Alt) newOSAlt = pressed;
+    if (!currentOSCtrl && newOSCtrl) matrixKeyCount[ctrlPos]++;
+    if (currentOSCtrl && !newOSCtrl) matrixKeyCount[ctrlPos]--;
+    if (!currentOSShift && newOSShift) matrixKeyCount[shiftPos]++;
+    if (currentOSShift && !newOSShift) matrixKeyCount[shiftPos]--;
+    if (!currentOSAlt && newOSAlt) matrixKeyCount[ctrlPos] -= 100; // disable ctrl while alt is pressed. This fixes the weird handling of AltGr by Qt where AltGr is Ctrl + Alt
+    if (currentOSAlt && !newOSAlt) matrixKeyCount[ctrlPos] += 100;
+    currentOSCtrl = newOSCtrl;
+    currentOSShift = newOSShift;
+    currentOSAlt = newOSAlt;
+
+    // this key is a shortcut, do not process it
+    if (currentOSAlt && !currentOSCtrl)
+        return;
 
     // joystick keymap: (1) WASD+Space, (2) WASD+Space + Arrows+Enter
     if (joystick1Enabled && joystick2Enabled) {
@@ -26,7 +61,7 @@ void KeyboardState::processKeyEvent(QKeyEvent* event, bool pressed) {
         if (key == Qt::Key_Down)  { setJoystick(false, 1); return; }
         if (key == Qt::Key_Left)  { setJoystick(false, 2); return; }
         if (key == Qt::Key_Right) { setJoystick(false, 3); return; }
-        if (key == Qt::Key_Return) { setJoystick(false, 4); return; }
+        if (key == Qt::Key_Return){ setJoystick(false, 4); return; }
     }
     else if (joystick1Enabled || joystick2Enabled) {
         bool joy = joystick1Enabled;
@@ -37,16 +72,28 @@ void KeyboardState::processKeyEvent(QKeyEvent* event, bool pressed) {
         if (key == Qt::Key_Space) { setJoystick(joy, 4); return; }
     }
 
-    for (auto& mapping : keymap) {
-        if (mapping.key == comb.key()) {
-            if (mapping.mode & ShiftMode::COMBINED_WITH_SHIFT)
-                matrixKeyCount[shiftPos] += dir;
-            if (mapping.mode & ShiftMode::COMBINED_WITH_CBM)
-                matrixKeyCount[cbmPos] += dir;
-            if (mapping.mode & ShiftMode::COMBINED_WITH_CTRL)
-                matrixKeyCount[ctrlPos] += dir;
+    for (const auto& mapping : keymap) {
+        // modifier keys are handled separately above
+        if (mapping.matrixPos == shiftPos || mapping.matrixPos == rightShiftPos || mapping.matrixPos == ctrlPos)
+            continue;
 
-            matrixKeyCount[mapping.matrixPos] += dir;
+        if (mapping.key == comb.key()) {
+            if (isSuitableBinding(mapping, currentOSCtrl, currentOSShift, currentOSAlt)) {
+
+                if (mapping.mode & ShiftMode::COMBINED_WITH_SHIFT) {
+                    matrixKeyCount[shiftPos] += dir;
+                    matrixKeyCount[rightShiftPos] += dir;
+                } if (mapping.mode & ShiftMode::COMBINED_WITH_CBM)
+                    matrixKeyCount[cbmPos] += dir;
+                if (mapping.mode & ShiftMode::COMBINED_WITH_CTRL)
+                    matrixKeyCount[ctrlPos] += dir;
+                if (mapping.mode & ShiftMode::DESHIFT) {
+                    matrixKeyCount[shiftPos] -= 100 * dir; // very high number to ensure priority
+                    matrixKeyCount[rightShiftPos] -= 100 * dir;
+                }
+
+                matrixKeyCount[mapping.matrixPos] += dir;
+            }
         }
     }
     for (auto& key : restoreKeymap) {
@@ -127,6 +174,7 @@ void KeyboardState::loadKeymap(const std::string &viceKeymapText) {
             else if(keyname == "comma") key = Qt::Key_Comma;
             else if(keyname == "less") key = Qt::Key_Less;
             else if(keyname == "bar") key = Qt::Key_Bar;
+            else if(keyname == "brokenbar") key = Qt::Key_brokenbar;
             else if(keyname == "acute") key = Qt::Key_acute;
             else if(keyname == "asterisk") key = Qt::Key_Asterisk;
             else if(keyname == "semicolon") key = Qt::Key_Semicolon;
@@ -148,6 +196,7 @@ void KeyboardState::loadKeymap(const std::string &viceKeymapText) {
             else if(keyname == "quotedbl") key = Qt::Key_QuoteDbl;
             else if(keyname == "space") key = Qt::Key_Space;
             else if(keyname == "Tab") key = Qt::Key_Tab;
+            else if(keyname == "ISO_Left_Tab") key = Qt::Key_Backtab;
             else if(keyname == "Escape") key = Qt::Key_Escape;
             else if(keyname == "dead_acute") key = Qt::Key_Dead_Acute;
             else if(keyname == "dead_grave") key = Qt::Key_Dead_Grave;
@@ -166,23 +215,31 @@ void KeyboardState::loadKeymap(const std::string &viceKeymapText) {
 }
 
 std::string KeyboardState::getBindingName(int row, int col, bool shifted) {
+    std::set<std::string> result;
     QMetaEnum metaEnum = QMetaEnum::fromType<Qt::Key>();
 
-    for(auto& binding : this->keymap) {
+    for(const auto& binding : this->keymap) {
         if (binding.matrixPos == row * 8 + col) {
-            if (binding.mode == ShiftMode::SHIFT_OR_NOT
-                    || binding.mode == ShiftMode::NOT_SHIFTED && !shifted
-                    || binding.mode == ShiftMode::SHIFT_REQUIRED && shifted
-                    || binding.mode == ShiftMode::IS_LEFT_CBM
-                    || binding.mode == ShiftMode::IS_LEFT_CTRL
-                    || binding.mode == ShiftMode::IS_LEFT_SHIFT)
-                return std::string(metaEnum.valueToKey(binding.key)).substr(4); // Key_Space to Space
+            bool ctrl = matrixKeyCount[ctrlPos] > 0;
+            bool shift = matrixKeyCount[shiftPos] > 0;
+            if (false
+                || (binding.mode & (ShiftMode::SHIFT_OR_NOT | ShiftMode::IS_LEFT_SHIFT | ShiftMode::IS_LEFT_CBM | ShiftMode::IS_LEFT_CTRL | ShiftMode::IS_RIGHT_SHIFT))
+                || (binding.mode & ShiftMode::CTRL_REQUIRED) && ctrl
+                || (binding.mode & (ShiftMode::SHIFT_REQUIRED | ShiftMode::DESHIFT) && shift)) {
+
+                result.insert(std::string(metaEnum.valueToKey(binding.key)).substr(4)); // substr(4): Key_Space to Space
+            }
         }
     }
-    return "";
+    std::string str = "";
+    for (int i = 0; const auto& s : result) {
+        str += s + (i == result.size() - 1 ? "" : "\n");
+        i++;
+    }
+    return str;
 }
 
 std::string KeyboardState::getRestoreBindingName() {
     QMetaEnum metaEnum = QMetaEnum::fromType<Qt::Key>();
-    return std::string(metaEnum.valueToKey(restoreKeymap.front()));
+    return std::string(metaEnum.valueToKey(restoreKeymap.front())).substr(4);
 }

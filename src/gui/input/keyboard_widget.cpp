@@ -26,6 +26,7 @@ KeyboardWidget::KeyboardWidget(QWidget *parent, C64Runner *c64Runner, MainWindow
         });
         button->setFocusPolicy(Qt::FocusPolicy::NoFocus);
         button->setFlat(true);
+        button->setStyleSheet("QPushButton:pressed { border: 2px solid rgb(255, 102, 0); }");
     }
 
     // setup restore
@@ -39,6 +40,7 @@ KeyboardWidget::KeyboardWidget(QWidget *parent, C64Runner *c64Runner, MainWindow
     });
     ui->keyRestore->setFocusPolicy(Qt::FocusPolicy::NoFocus);
     ui->keyRestore->setFlat(true);
+    ui->keyRestore->setStyleSheet("QPushButton:pressed { border: 2px solid rgb(255, 102, 0); }");
 
     // setup reset key
     QObject::connect(ui->resetKeysButton, &QPushButton::pressed,  [this](){
