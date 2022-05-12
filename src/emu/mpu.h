@@ -2,6 +2,7 @@
 
 #include "mem/memory.h"
 
+/** This is a 6502. In reality, the C64 contains a 6510, which is a 6502 with an additional 8bit IO port. This is implemented in MPUMemoryView. */
 class MPU {
 public:
     MPU(Memory* memory) : mem(memory) { }
