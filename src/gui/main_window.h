@@ -47,6 +47,8 @@ public:
 
     void setVolume(const double& vol);
 
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+
 private:
     Ui::MainWindow *ui;
 

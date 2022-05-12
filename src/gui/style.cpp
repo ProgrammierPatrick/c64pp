@@ -10,9 +10,6 @@
 
 #include <iostream>
 
-const int TitlebarHeight = 25; // px
-const int TitlebarFont   = 15; // px
-
 const auto backDark   = QColor( 19,  23,  26);
 const auto backHalfDark=QColor( 26,  30,  38);
 const auto backBright = QColor( 46,  51,  54);
@@ -54,131 +51,129 @@ void applyStyle(QApplication& app) {
 }
 
 
-class TitlebarWidget : public QWidget {
-    Q_OBJECT
-public:
-    TitlebarWidget(QMainWindow *parent) : parent(parent), QWidget(parent->centralWidget()) {
-        init();
-    }
-    TitlebarWidget(QWidget *parent) : parent(parent), QWidget(parent) {
-        init();
-    }
 
-    void init() {
-        setMouseTracking(true);
-        QObject::connect(parent, &QWidget::windowTitleChanged, [this](const QString& title) {
-            titleText->setText(title);
+TitlebarWidget::TitlebarWidget(QMainWindow *parent) : parent(parent), QWidget(parent->centralWidget()) {
+    init();
+}
+TitlebarWidget::TitlebarWidget(QWidget *parent) : parent(parent), QWidget(parent) {
+    init();
+}
+
+void TitlebarWidget::init() {
+    setMouseTracking(true);
+    QObject::connect(parent, &QWidget::windowTitleChanged, [this](const QString& title) {
+        titleText->setText(title);
+    });
+    auto mainWindow = dynamic_cast<MainWindow*>(parent);
+    auto icon = new QLabel(parent);
+    icon->setPixmap(QPixmap(":/icon-512.png"));
+    icon->setScaledContents(true);
+    icon->move(2, 2);
+    icon->resize(TitlebarHeight - 4, TitlebarHeight - 4);
+    icon->lower();
+
+    if (mainWindow) {
+        minimize = new QPushButton(parent);
+        minimize->setIcon(QIcon(":/icons/minimize.png"));
+        minimize->move(parent->width() - 3 * TitlebarHeight, 0);
+        minimize->resize(TitlebarHeight, TitlebarHeight);
+        minimize->setIconSize({TitlebarHeight / 2, TitlebarHeight / 2});
+        minimize->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+        buttons.push_back(minimize);
+        QObject::connect(minimize, &QPushButton::clicked, [this]() {
+            parent->setWindowState(parent->windowState() | Qt::WindowMinimized);
         });
-        auto mainWindow = dynamic_cast<MainWindow*>(parent);
-        auto icon = new QLabel(parent);
-        icon->setPixmap(QPixmap(":/icon-512.png"));
-        icon->setScaledContents(true);
-        icon->move(2, 2);
-        icon->resize(TitlebarHeight - 4, TitlebarHeight - 4);
-        icon->lower();
-
-        if (mainWindow) {
-            auto minimize = new QPushButton(parent);
-            minimize->setIcon(QIcon(":/icons/minimize.png"));
-            minimize->move(parent->width() - 3 * TitlebarHeight, 0);
-            minimize->resize(TitlebarHeight, TitlebarHeight);
-            minimize->setIconSize({TitlebarHeight / 2, TitlebarHeight / 2});
-            minimize->setFocusPolicy(Qt::FocusPolicy::NoFocus);
-            buttons.push_back(minimize);
-            QObject::connect(minimize, &QPushButton::clicked, [this]() {
-                parent->setWindowState(parent->windowState() | Qt::WindowMinimized);
-            });
-            minimize->setFlat(true);
-            maximize = new QPushButton(parent);
-            maximize->setIcon(QIcon(":/icons/maximize.png"));
-            maximize->move(parent->width() - 2 * TitlebarHeight, 0);
-            maximize->resize(TitlebarHeight, TitlebarHeight);
-            maximize->setIconSize({TitlebarHeight / 2, TitlebarHeight / 2});
-            maximize->setFocusPolicy(Qt::FocusPolicy::NoFocus);
-            maximize->setFlat(true);
-            buttons.push_back(maximize);
-            QObject::connect(maximize, &QPushButton::clicked, [this]() {
-                parent->setWindowState(parent->windowState() ^ Qt::WindowFullScreen);
-                maximize->setIcon(QIcon(parent->windowState() & Qt::WindowFullScreen ? ":/icons/restore.png" : ":/icons/maximize.png"));
-            });
-        }
-        auto close = new QPushButton(parent);
-        close->setIcon(QIcon(":/icons/close.png"));
-        close->move(parent->width() - TitlebarHeight, 0);
-        close->resize(TitlebarHeight, TitlebarHeight);
-        close->setIconSize({TitlebarHeight / 2, TitlebarHeight / 2});
-        close->setFocusPolicy(Qt::FocusPolicy::NoFocus);
-        close->setFlat(true);
-        buttons.push_back(close);
-        QObject::connect(close, &QPushButton::clicked, [this]() {
-            parent->close();
-        });
-
-        titleText = new QLabel(parent);
-        titleText->setStyleSheet("QLabel { font-size: " + QString::fromStdString(std::to_string(TitlebarFont)) + "px; color: " + accent.name() + "; background-color: " + backDark.name() + "; }");
-        titleText->setAlignment(Qt::AlignmentFlag::AlignCenter);
-        titleText->move(0, 0);
-        titleText->resize(parent->width(), TitlebarHeight);
-        titleText->lower();
-        titleText->setText(parent->windowTitle());
-
-        if (mainWindow) {
-            mainWindow->registerResizeCallback([this](QResizeEvent* event) {
-                resize(event->size());
-                titleText->resize(event->size().width(), TitlebarHeight);
-                lower();
-                if (!firstResize) {
-                    for(auto b : buttons) {
-                        b->move(b->pos() + QPoint{event->size().width() - event->oldSize().width(), 0});
-                    }
-                } else firstResize = false;
-            });
-        }
-    }
-
-    void mousePressEvent(QMouseEvent *event) override {
-        if (event->button() == Qt::LeftButton) {
-            mouseDown = true;
-            mousePos = (event->globalPosition() - parent->pos());
-        }
-        return QWidget::mousePressEvent(event);
-    }
-    void mouseReleaseEvent(QMouseEvent *event) override {
-        if (event->button() == Qt::LeftButton) {
-            mouseDown = false;
-        }
-        return QWidget::mouseReleaseEvent(event);
-    }
-    void mouseMoveEvent(QMouseEvent *event) override {
-        if (mouseDown) {
-            if (dynamic_cast<MainWindow*>(parent)) {
-                mousePos = {mousePos.x() / parent->width(), mousePos.y() / parent->height()};
-                parent->setWindowState(parent->windowState() & ~Qt::WindowFullScreen);
-                mousePos = {mousePos.x() * parent->width(), mousePos.y() * parent->height()};
-                if (maximize) maximize->setIcon(QIcon(parent->windowState() & Qt::WindowFullScreen ? ":/icons/restore.png" : ":/icons/maximize.png"));
-            }
-            auto newPos = event->globalPosition() - mousePos;
-            parent->move(newPos.toPoint()); // ignore clang warning, dynamic_cast in fact returns null, even if pointer is not null
-        }
-        return QWidget::mouseMoveEvent(event);
-    }
-    void mouseDoubleClickEvent(QMouseEvent *event) override {
-        if (event->button() == Qt::LeftButton && dynamic_cast<MainWindow*>(parent)) {
+        minimize->setFlat(true);
+        maximize = new QPushButton(parent);
+        maximize->setIcon(QIcon(":/icons/maximize.png"));
+        maximize->move(parent->width() - 2 * TitlebarHeight, 0);
+        maximize->resize(TitlebarHeight, TitlebarHeight);
+        maximize->setIconSize({TitlebarHeight / 2, TitlebarHeight / 2});
+        maximize->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+        maximize->setFlat(true);
+        buttons.push_back(maximize);
+        QObject::connect(maximize, &QPushButton::clicked, [this]() {
             parent->setWindowState(parent->windowState() ^ Qt::WindowFullScreen);
+            maximize->setIcon(QIcon(parent->windowState() & Qt::WindowFullScreen ? ":/icons/restore.png" : ":/icons/maximize.png"));
+        });
+    }
+    close = new QPushButton(parent);
+    close->setIcon(QIcon(":/icons/close.png"));
+    close->move(parent->width() - TitlebarHeight, 0);
+    close->resize(TitlebarHeight, TitlebarHeight);
+    close->setIconSize({TitlebarHeight / 2, TitlebarHeight / 2});
+    close->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+    close->setFlat(true);
+    buttons.push_back(close);
+    QObject::connect(close, &QPushButton::clicked, [this]() {
+        parent->close();
+    });
+
+    titleText = new QLabel(parent);
+    titleText->setStyleSheet("QLabel { font-size: " + QString::fromStdString(std::to_string(TitlebarFont)) + "px; color: " + accent.name() + "; background-color: " + backDark.name() + "; }");
+    titleText->setAlignment(Qt::AlignmentFlag::AlignCenter);
+    titleText->move(0, 0);
+    titleText->resize(parent->width(), TitlebarHeight);
+    titleText->lower();
+    titleText->setText(parent->windowTitle());
+
+    if (mainWindow) {
+        mainWindow->registerResizeCallback([this](QResizeEvent* event) {
+            resize(event->size());
+            titleText->resize(event->size().width(), TitlebarHeight);
+            lower();
+            if (!firstResize) {
+                for(auto b : buttons) {
+                    b->move(b->pos() + QPoint{event->size().width() - event->oldSize().width(), 0});
+                }
+            } else firstResize = false;
+        });
+    }
+}
+
+void TitlebarWidget::mousePressEvent(QMouseEvent *event) {
+    if (event->button() == Qt::LeftButton) {
+        mouseDown = true;
+        mousePos = (event->globalPosition() - parent->pos());
+    }
+    return QWidget::mousePressEvent(event);
+}
+void TitlebarWidget::mouseReleaseEvent(QMouseEvent *event) {
+    if (event->button() == Qt::LeftButton) {
+        mouseDown = false;
+    }
+    return QWidget::mouseReleaseEvent(event);
+}
+void TitlebarWidget::mouseMoveEvent(QMouseEvent *event) {
+    if (mouseDown) {
+        if (dynamic_cast<MainWindow*>(parent)) {
+            mousePos = {mousePos.x() / parent->width(), mousePos.y() / parent->height()};
+            parent->setWindowState(parent->windowState() & ~Qt::WindowFullScreen);
+            mousePos = {mousePos.x() * parent->width(), mousePos.y() * parent->height()};
             if (maximize) maximize->setIcon(QIcon(parent->windowState() & Qt::WindowFullScreen ? ":/icons/restore.png" : ":/icons/maximize.png"));
         }
+        auto newPos = event->globalPosition() - mousePos;
+        parent->move(newPos.toPoint()); // ignore clang warning, dynamic_cast in fact returns null, even if pointer is not null
     }
-public:
-    bool mouseDown = false;
-    QPointF mousePos = {};
-    QWidget *parent;
-    QLabel *titleText;
-    std::vector<QPushButton*> buttons = {};
-    QPushButton *maximize = nullptr;
-    bool firstResize = true;
-};
+    return QWidget::mouseMoveEvent(event);
+}
+void TitlebarWidget::mouseDoubleClickEvent(QMouseEvent *event) {
+    if (event->button() == Qt::LeftButton && dynamic_cast<MainWindow*>(parent)) {
+        parent->setWindowState(parent->windowState() ^ Qt::WindowFullScreen);
+        if (maximize) maximize->setIcon(QIcon(parent->windowState() & Qt::WindowFullScreen ? ":/icons/restore.png" : ":/icons/maximize.png"));
+    }
+}
 
-void addDarkTitlebar(QWidget *window) {
+void TitlebarWidget::resizeEvent(QResizeEvent *event) {
+    QWidget::resizeEvent(event);
+
+    if (minimize) minimize->move(event->size().width() - 3 * TitlebarHeight, 0);
+    if (maximize) maximize->move(event->size().width() - 2 * TitlebarHeight, 0);
+    if (close) close->move(event->size().width() - TitlebarHeight, 0);
+    titleText->resize(event->size().width(), TitlebarHeight);
+}
+
+TitlebarWidget* addDarkTitlebar(QWidget *window) {
     window->setWindowFlags(window->windowFlags() | Qt::Widget | Qt::FramelessWindowHint);
     auto size = window->size();
     window->resize(size.width(), size.height() + TitlebarHeight);
@@ -196,6 +191,8 @@ void addDarkTitlebar(QWidget *window) {
     titlebar->move(0, 0);
     titlebar->resize(size);
     titlebar->lower();
+
+    return titlebar;
 }
 
 #include "style.moc"

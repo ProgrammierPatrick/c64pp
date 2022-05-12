@@ -2,7 +2,7 @@
 #include "ui_keyboard_window.h"
 
 #include "../main_window.h"
-#include "../style.h"
+
 
 /*
  * Keyboard size: 849 x 236
@@ -27,20 +27,26 @@ KeyboardWindow::KeyboardWindow(QWidget *parent, C64Runner *c64Runner, MainWindow
     keyboardWidget = new KeyboardWidget(centralWidget(), c64Runner, mainWindow);
     keyboardWidget->lower();
 
-    addDarkTitlebar(this);
+    titlebar = addDarkTitlebar(this);
     setFixedSize(size());
 
     QObject::connect(ui->showMatrixButton, &QPushButton::pressed, [this]() {
         if (showMatrix) {
             delete keyboardMatrix;
+            titlebar->resize(849, TitlebarHeight);
             showMatrix = false;
-            this->resize(849, 236);
+            setMaximumSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
+            setMinimumSize(0,0);
+            this->resize(849, 236 + TitlebarHeight);
             ui->showMatrixButton->setText("show matrix");
         } else {
             keyboardMatrix = new KeyboardMatrixWidget(centralWidget(), this->c64Runner);
+            titlebar->resize(1080, TitlebarHeight);
             showMatrix = true;
-            this->resize(1080, 236);
-            keyboardMatrix->move(859, 2);
+            setMaximumSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
+            setMinimumSize(0,0);
+            this->resize(1080, 236 + TitlebarHeight);
+            keyboardMatrix->move(859, 2 + TitlebarHeight);
             keyboardMatrix->raise();
             keyboardMatrix->show();
             ui->showMatrixButton->setText("hide matrix");

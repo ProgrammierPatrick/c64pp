@@ -4,6 +4,7 @@
 
 #include "keyboard_widget.h"
 #include "keyboard_matrix_widget.h"
+#include "../style.h"
 
 namespace Ui {
 class KeyboardWindow;
@@ -32,6 +33,8 @@ private:
 
     KeyboardWidget *keyboardWidget;
     KeyboardMatrixWidget *keyboardMatrix;
+
+    TitlebarWidget *titlebar = nullptr;
 
     bool showMatrix = false;
 };
