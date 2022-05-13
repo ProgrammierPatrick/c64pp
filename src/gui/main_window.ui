@@ -45,6 +45,8 @@
      <addaction name="actionStep_Frame"/>
      <addaction name="separator"/>
      <addaction name="actionHard_Reset"/>
+     <addaction name="separator"/>
+     <addaction name="actionMute"/>
     </widget>
     <widget class="QMenu" name="menuDebug">
      <property name="title">
@@ -672,7 +674,7 @@
     <string>MPU Viewer</string>
    </property>
    <property name="shortcut">
-    <string>Alt+M</string>
+    <string>Alt+Shift+M</string>
    </property>
   </action>
   <action name="actionEnter_Hex_Data">
@@ -703,13 +705,16 @@
    <property name="text">
     <string>CIA Viewer</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+Shift+C</string>
+   </property>
   </action>
   <action name="actionRAM_Viewer">
    <property name="text">
     <string>RAM Viewer</string>
    </property>
    <property name="shortcut">
-    <string>Alt+R</string>
+    <string>Alt+Shift+R</string>
    </property>
   </action>
   <action name="actionOpen_PRG">
@@ -733,7 +738,7 @@
     <string>VIC Viewer</string>
    </property>
    <property name="shortcut">
-    <string>Alt+V</string>
+    <string>Alt+Shift+V</string>
    </property>
   </action>
   <action name="actionStep_Line">
@@ -799,6 +804,14 @@
    </property>
    <property name="shortcut">
     <string>Alt+J</string>
+   </property>
+  </action>
+  <action name="actionMute">
+   <property name="text">
+    <string>Mute</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+M</string>
    </property>
   </action>
  </widget>

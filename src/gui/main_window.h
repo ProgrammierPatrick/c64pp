@@ -74,6 +74,7 @@ private:
     KeyboardWindow *toolKeyboardWindow = nullptr;
     JoystickWindow *toolJoystickWindow = nullptr;
     BreakpointEditor *toolBreakpointEditor = nullptr;
+    TitlebarWidget *titlebar = nullptr;
 
     QSize mainScreenOffset;
 
@@ -82,6 +83,9 @@ private:
 
     bool isMuted = false;
     int volumeIntensity = 100; // sets the inital volume of the system (range 0 - 100)
+
+    QPoint framePos;
+    QSize windowSize;
 
     std::vector<std::function<void(QResizeEvent*)>> resizeCallbacks;
 };

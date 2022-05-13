@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     setWindowIcon(QIcon(":/icon-512.png"));
 
-    addDarkTitlebar(this);
+    titlebar = addDarkTitlebar(this);
     ui->menubar->resize(200, ui->menubar->height());
 
     frameTimer.setTimerType(Qt::TimerType::PreciseTimer);
@@ -219,6 +219,24 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     };
 
+    auto muteShortcut = [this]() {
+        // mute
+        if (!isMuted) {
+            setVolume(0);
+            ui->mute->setIcon(QIcon(":/icons/mute.png"));
+            isMuted = true;
+        }
+        // unmute
+        else if (isMuted) {
+            setVolume(static_cast<double>(ui->volume->sliderPosition())/100);
+            if (ui->volume->sliderPosition() == 0) ui->mute->setIcon(QIcon(":/icons/mute.png"));
+            else if (ui->volume->sliderPosition() < 33) ui->mute->setIcon(QIcon(":/icons/low-vol.png"));
+            else if (ui->volume->sliderPosition() < 67) ui->mute->setIcon(QIcon(":/icons/med-vol.png"));
+            else ui->mute->setIcon(QIcon(":/icons/high-vol.png"));
+            isMuted = false;
+        }
+    };
+
     // make shortcuts usable from other windows
     for (auto& menu : ui->menubar->findChildren<QMenu*>()) {
         for (auto& action : menu->actions()) {
@@ -232,6 +250,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionStep_Instruction, &QAction::triggered, stepInstruction);
     QObject::connect(ui->actionStep_Line, &QAction::triggered, stepLine);
     QObject::connect(ui->actionStep_Frame, &QAction::triggered, stepFrame);
+
+    QObject::connect(ui->actionMute, &QAction::triggered, muteShortcut);
 
     QObject::connect(ui->actionMPU_Viewer, &QAction::triggered, mpuViewer);
     QObject::connect(ui->actionRAM_Viewer, &QAction::triggered, ramViewer);
@@ -375,9 +395,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     auto tosize = [](const QPoint p) { return QSize { p.x(), p.y() }; };
     mainScreenOffset = size() - tosize(ui->mainScreenFrame->pos()) - ui->mainScreenFrame->size();
+    framePos = ui->mainScreenFrame->pos();
 
     mainScreen = new VideoWidget(ui->mainScreenFrame, VIC::screenWidth, VIC::screenHeight, &c64Runner.c64->vic.screen);
     ui->mainScreenFrame->layout()->addWidget(mainScreen);
+    ui->mainScreenFrame->setStyleSheet("QFrame { background-color: rgb(46,  51,  54); }");
+    mainScreen->setStyleSheet("QFrame { background-color: rgb(46,  51,  54); }");
 
     ui->menubar->raise();
 
@@ -477,11 +500,65 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event) {
 
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
+    QMainWindow::resizeEvent(event);
+
     auto tosize = [](const QPoint p) { return QSize { p.x(), p.y() }; };
     ui->mainScreenFrame->resize(event->size() - mainScreenOffset - tosize(ui->mainScreenFrame->pos()));
     for(auto& f : resizeCallbacks) f(event);
 
-    QMainWindow::resizeEvent(event);
+    ui->mainScreenFrame->move(framePos);
+}
+// TODO: Fullscreen
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *event) {
+    if (isFullScreen()) {
+        ui->statusbar->show();
+        ui->pause->show();
+        ui->reset->show();
+        ui->keyboard->show();
+        ui->joystick->show();
+        ui->mute->show();
+        ui->volume->show();
+        ui->step->show();
+        ui->step_instruction->show();
+        ui->stepframe->show();
+        ui->stepline->show();
+        ui->breakpoints->show();
+        ui->mpu_viewer->show();
+        ui->ram_viewer->show();
+        ui->cia_viewer->show();
+        ui->vic_viewer->show();
+        showNormal();
+        auto tosize = [](const QPoint p) { return QSize { p.x(), p.y() }; };
+        auto topoint = [](const QSize p) { return QPoint { p.width(), p.height() }; };
+        ui->mainScreenFrame->resize(windowSize - mainScreenOffset - tosize(ui->mainScreenFrame->pos()));
+        ui->menubar->raise();
+        titlebar->setHideButtons(false);
+    }
+    else {
+        windowSize = this->size();
+        ui->statusbar->hide();
+        ui->pause->hide();
+        ui->reset->hide();
+        ui->keyboard->hide();
+        ui->joystick->hide();
+        ui->mute->hide();
+        ui->volume->hide();
+        ui->step->hide();
+        ui->step_instruction->hide();
+        ui->stepframe->hide();
+        ui->stepline->hide();
+        ui->breakpoints->hide();
+        ui->mpu_viewer->hide();
+        ui->ram_viewer->hide();
+        ui->cia_viewer->hide();
+        ui->vic_viewer->hide();
+        showFullScreen();
+        ui->mainScreenFrame->move(0,0);
+        ui->mainScreenFrame->resize(size());
+        ui->menubar->lower();
+        titlebar->setHideButtons(true);
+    }
+    updateUI();
 }
 
 

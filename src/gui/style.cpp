@@ -93,8 +93,9 @@ void TitlebarWidget::init() {
         maximize->setFlat(true);
         buttons.push_back(maximize);
         QObject::connect(maximize, &QPushButton::clicked, [this]() {
-            parent->setWindowState(parent->windowState() ^ Qt::WindowFullScreen);
-            maximize->setIcon(QIcon(parent->windowState() & Qt::WindowFullScreen ? ":/icons/restore.png" : ":/icons/maximize.png"));
+            if (parent->isMaximized()) parent->showNormal();
+            else  parent->showMaximized();
+            maximize->setIcon(QIcon(parent->isMaximized() ? ":/icons/restore.png" : ":/icons/maximize.png"));
         });
     }
     close = new QPushButton(parent);
@@ -122,7 +123,7 @@ void TitlebarWidget::init() {
             resize(event->size());
             titleText->resize(event->size().width(), TitlebarHeight);
             lower();
-            if (!firstResize) {
+            if (!firstResize && !isFullScreen()) {
                 for(auto b : buttons) {
                     b->move(b->pos() + QPoint{event->size().width() - event->oldSize().width(), 0});
                 }
@@ -159,18 +160,22 @@ void TitlebarWidget::mouseMoveEvent(QMouseEvent *event) {
 }
 void TitlebarWidget::mouseDoubleClickEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton && dynamic_cast<MainWindow*>(parent)) {
-        parent->setWindowState(parent->windowState() ^ Qt::WindowFullScreen);
-        if (maximize) maximize->setIcon(QIcon(parent->windowState() & Qt::WindowFullScreen ? ":/icons/restore.png" : ":/icons/maximize.png"));
+        if (parent->isMaximized()) parent->showNormal();
+        else  parent->showMaximized();
+        maximize->setIcon(QIcon(parent->isMaximized() ? ":/icons/restore.png" : ":/icons/maximize.png"));
     }
 }
 
 void TitlebarWidget::resizeEvent(QResizeEvent *event) {
     QWidget::resizeEvent(event);
 
-    if (minimize) minimize->move(event->size().width() - 3 * TitlebarHeight, 0);
-    if (maximize) maximize->move(event->size().width() - 2 * TitlebarHeight, 0);
-    if (close) close->move(event->size().width() - TitlebarHeight, 0);
-    titleText->resize(event->size().width(), TitlebarHeight);
+    auto mainWindow = dynamic_cast<MainWindow*>(parent);
+    if(!mainWindow) {
+        if (minimize) minimize->move(event->size().width() - 3 * TitlebarHeight, 0);
+        if (maximize) maximize->move(event->size().width() - 2 * TitlebarHeight, 0);
+        if (close) close->move(event->size().width() - TitlebarHeight, 0);
+        titleText->resize(event->size().width(), TitlebarHeight);
+    }
 }
 
 TitlebarWidget* addDarkTitlebar(QWidget *window) {

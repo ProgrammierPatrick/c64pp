@@ -27,6 +27,14 @@ public:
 
     void resizeEvent(QResizeEvent *event) override;
 
+    void setHideButtons(bool hide) {
+        if (hide) {
+            for (auto b : buttons) b->hide();
+        } else {
+            for (auto b: buttons) b->show();
+        }
+    }
+
 private:
     bool mouseDown = false;
     QPointF mousePos = {};
@@ -37,6 +45,7 @@ private:
     QPushButton *minimize = nullptr;
     QPushButton *close = nullptr;
     bool firstResize = true;
+    QRect windowSize;
 
 
 };
