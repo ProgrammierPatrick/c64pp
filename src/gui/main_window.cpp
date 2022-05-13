@@ -517,6 +517,7 @@ void MainWindow::updateUI() {
     ss << '-' << (mpu.P & 0x10 ? 'B' : '-') << (mpu.P & 0x08 ? 'D' : '-');
     ss << (mpu.P & 0x04 ? 'I' : '-') << (mpu.P & 0x02 ? 'Z' : '-') << (mpu.P & 0x01 ? 'C' : '-');
     ss << " PC:" << toHexStr(mpu.PC);
+    ss << " | floppy PC:" << toHexStr(c64Runner.floppyDrive->mpu.PC) << " T:" << c64Runner.floppyDrive->mpu.T;
 
     ui->statusbar->showMessage(QString::fromStdString(ss.str()));
 

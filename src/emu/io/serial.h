@@ -2,12 +2,14 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 class SerialDevice {
 public:
     bool pullAttention = false;
     bool pullClock = false;
     bool pullData = false;
+    std::string serialDeviceName = "";
 };
 
 class SerialBus {
@@ -18,6 +20,5 @@ public:
     bool getClock()     { for(auto d : devices) if (d->pullClock)     return false; return true; }
     bool getData()      { for(auto d : devices) if (d->pullData)      return false; return true; }
 
-private:
     std::vector<SerialDevice*> devices;
 };

@@ -11,7 +11,10 @@
 
 class CIA : public Memory, public SerialDevice {
 public:
-    CIA(Keyboard *keyboard, SerialBus *serialBus) : keyboard(keyboard), serialBus(serialBus) { }
+    CIA(Keyboard *keyboard, SerialBus *serialBus) : keyboard(keyboard), serialBus(serialBus) {
+        serialBus->addDevice(this);
+        serialDeviceName = "c64";
+    }
 
     uint8_t read(uint16_t addr, bool nonDestructive = false) override;
     void write(uint16_t addr, uint8_t data) override;

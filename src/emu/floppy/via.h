@@ -23,6 +23,7 @@ public:
 
     VIA(SerialBus *serialBus) : serialBus(serialBus) {
         serialBus->addDevice(this);
+        serialDeviceName = "floppy";
     }
 
     void tick();
@@ -34,6 +35,7 @@ public:
 
     bool getIRQ();
 
+    bool serialATNLastTick = false;
     bool serialATNIRQ = false;
     bool serialATNIRQEnable = false;
     bool serialATNAutoACK = false; // called ATNA in schematic

@@ -38,7 +38,7 @@ public:
     }
 
     void tick();
-private:
+
     MPU mpu;
     RAMMemory ram;
     ROMMemory dos;

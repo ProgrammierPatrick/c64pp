@@ -26,7 +26,7 @@ uint8_t CIA::read(uint16_t addr, bool nonDestructive) {
         case 0x000E: return timerCIA1.readCRA();
         case 0x000F: return timerCIA1.readCRB();
 
-        case 0x0100: return ~vicBank & 0x03 | 0x04 | (pullAttention ? 0x08 : 0) | (pullClock ? 0x10 : 0) | (pullData ? 0x20 : 0) | (!serialBus->getClock() ? 0x40 : 0) | (!serialBus->getData() ? 0x80 : 0);
+        case 0x0100: return ~vicBank & 0x03 | 0x04 | (pullAttention ? 0x08 : 0) | (pullClock ? 0x10 : 0) | (pullData ? 0x20 : 0) | (serialBus->getClock() ? 0x40 : 0) | (serialBus->getData() ? 0x80 : 0);
         case 0x0104: return static_cast<uint8_t>(timerCIA2.counterA & 0xFF);
         case 0x0105: return static_cast<uint8_t>(timerCIA2.counterA >> 8);
         case 0x0106: return static_cast<uint8_t>(timerCIA2.counterB & 0xFF);
