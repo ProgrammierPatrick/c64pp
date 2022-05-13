@@ -18,7 +18,7 @@ public:
           mainRAM(64 * 1024), colorRAM(1024),
           mpuMemoryView(&mpu, &mainRAM, &colorRAM, &this->basicROM, &this->kernalROM, &this->chargenROM, &cia, &vic, &sid),
           basicROM(basicROM), kernalROM(kernalROM), chargenROM(chargenROM),
-          cia(keyboard),
+          cia(keyboard, &serialBus),
           vic(&mainRAM, &this->chargenROM, &colorRAM, &cia),
           sid(44'000.0, 985'248.0),
           mpuTrace(&mpu), kernalTrace(&mpu),
@@ -40,6 +40,7 @@ public:
     ROMMemory kernalROM;
     ROMMemory chargenROM;
     MPUMemoryView mpuMemoryView;
+    SerialBus serialBus;
     CIA cia;
     VIC vic;
     SID sid;

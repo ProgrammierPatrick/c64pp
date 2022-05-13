@@ -3,13 +3,15 @@
 #include <vector>
 #include <cstdint>
 
-#include "../mem/memory.h"
 #include "keyboard.h"
 #include "timer.h"
+#include "serial.h"
 
-class CIA : public Memory {
+#include "../mem/memory.h"
+
+class CIA : public Memory, public SerialDevice {
 public:
-    CIA(Keyboard *keyboard) : keyboard(keyboard) { }
+    CIA(Keyboard *keyboard, SerialBus *serialBus) : keyboard(keyboard), serialBus(serialBus) { }
 
     uint8_t read(uint16_t addr, bool nonDestructive = false) override;
     void write(uint16_t addr, uint8_t data) override;
@@ -18,9 +20,11 @@ public:
     Timer timerCIA1;
     Timer timerCIA2;
 
+    uint8_t vicBank = 0x0; // 2bit: upper 2 bits for VIC addresses
+
     //registers
     uint8_t PRA1 = 0xFF; // Peripheral Data Reg A (CIA 1)
-    uint8_t PRA2 = 0xFF; // Peripheral Data Reg A (CIA 2)
+    //uint8_t PRA2 = 0xFF; // Peripheral Data Reg A (CIA 2)
     const uint8_t DDRA = 0xFF; // Data Direction Reg A
     const uint8_t DDRB = 0x00; // Data Direction Reg B
     //uint8_t TODTNTH; // 10ths Of Second Reg
@@ -39,4 +43,5 @@ public:
     bool NMI = false;
 
     Keyboard *keyboard;
+    SerialBus *serialBus;
 };

@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../emu/c64.h"
 #include "input/keyboard_state.h"
+
+#include "../emu/c64.h"
+#include "../emu/floppy/floppy_drive.h"
 
 #include <memory>
 
@@ -28,5 +30,6 @@ public:
     int stepFrame();
 
     std::unique_ptr<C64> c64;
+    std::unique_ptr<FloppyDrive> floppyDrive;
     std::unique_ptr<KeyboardState> keyboard;
 };

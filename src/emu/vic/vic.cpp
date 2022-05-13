@@ -308,13 +308,11 @@ void VIC::tickBorder() {
 }
 
 ColoredVal VIC::accessMem(uint16_t addr) {
-    uint8_t bankSetting = ~cia->PRA2 & 0x03;
-
     uint8_t val;
-    if (((bankSetting % 2) == 0) && addr >= 0x1000 && addr <= 0x1FFF)
+    if (((cia->vicBank % 2) == 0) && addr >= 0x1000 && addr <= 0x1FFF)
         val = charROM->read(addr & 0x0FFF);
     else {
-        uint16_t absAddr = (bankSetting << 14) | addr;
+        uint16_t absAddr = (cia->vicBank << 14) | addr;
         val = mainRAM->read(absAddr);
     }
     return ColoredVal(val, colorRAM->read(addr & 0x03FF));

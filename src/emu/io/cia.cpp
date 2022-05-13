@@ -1,6 +1,8 @@
 #include "cia.h"
 
-#include<iostream>
+#include "../text_utils.h"
+
+#include <iostream>
 
 uint8_t CIA::read(uint16_t addr, bool nonDestructive) {
     addr &= 0xFF0F;
@@ -24,7 +26,7 @@ uint8_t CIA::read(uint16_t addr, bool nonDestructive) {
         case 0x000E: return timerCIA1.readCRA();
         case 0x000F: return timerCIA1.readCRB();
 
-        case 0x0100: return PRA2;
+        case 0x0100: return ~vicBank & 0x03 | 0x04 | (pullAttention ? 0x08 : 0) | (pullClock ? 0x10 : 0) | (pullData ? 0x20 : 0) | (!serialBus->getClock() ? 0x40 : 0) | (!serialBus->getData() ? 0x80 : 0);
         case 0x0104: return static_cast<uint8_t>(timerCIA2.counterA & 0xFF);
         case 0x0105: return static_cast<uint8_t>(timerCIA2.counterA >> 8);
         case 0x0106: return static_cast<uint8_t>(timerCIA2.counterB & 0xFF);
@@ -62,7 +64,13 @@ void CIA::write(uint16_t addr, uint8_t data) {
         case 0x000E: timerCIA1.writeCRA(data); break;
         case 0x000F: timerCIA1.writeCRB(data); break;
 
-        case 0x0100: PRA2 = data; break;
+        case 0x0100: {
+            vicBank = ~data & 0x03;
+            pullAttention = data & 0x08;
+            pullClock = data & 0x10;
+            pullData = data & 0x20;
+            break;
+        }
         // do not print these, can slow down execution due to console spam
         // case 0x0102: std::cout << "Write on CIA2 DDRA ignored" << std::endl; break;
         // case 0x0103: std::cout << "Write on CIA2 DDRB ignored" << std::endl; break;

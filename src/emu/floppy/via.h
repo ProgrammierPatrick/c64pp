@@ -14,6 +14,13 @@
  */
 class VIA : public SerialDevice {
 public:
+    enum ShiftRegMode {
+        Disabled,
+        Timer2,
+        SystemClock,
+        External
+    };
+
     VIA(SerialBus *serialBus) : serialBus(serialBus) {
         serialBus->addDevice(this);
     }
@@ -29,7 +36,12 @@ public:
 
     bool serialATNIRQ = false;
     bool serialATNIRQEnable = false;
+    bool serialATNAutoACK = false; // called ATNA in schematic
+
+    ShiftRegMode shiftRegMode1;
 
 private:
     SerialBus *serialBus = nullptr;
+
+
 };

@@ -105,27 +105,25 @@ VICViewer::VICViewer(MainWindow *parent, C64Runner *c64Runner) :
 
     setupLineEdit16(ui->vmAddr, [this](uint16_t v) {
         this->c64Runner->c64->vic.videoMatrixMemoryPosition = (v >> 10) & 0xF;
-        this->c64Runner->c64->cia.PRA2 &= ~0x3;
-        this->c64Runner->c64->cia.PRA2 |= (~v >> 14) & 0x3;
+        this->c64Runner->c64->cia.vicBank = (v >> 14) & 0x03;
     });
     setupLineEdit16(ui->cbAddr, [this](uint16_t v) {
         this->c64Runner->c64->vic.charGenMemoryPosition = (v >> 11) & 0x7;
-        this->c64Runner->c64->cia.PRA2 &= ~0x3;
-        this->c64Runner->c64->cia.PRA2 |= (~v >> 14) & 0x3;
+        this->c64Runner->c64->cia.vicBank = (v >> 14) & 0x03;
     });
 
     QObject::connect(ui->bank15, &QCheckBox::stateChanged, [this]() {
         if (ui->bank15->isChecked())
-            this->c64Runner->c64->cia.PRA2 &= ~0x02;
+            this->c64Runner->c64->cia.vicBank |= 0x02;
         else
-            this->c64Runner->c64->cia.PRA2 |= 0x02;
+            this->c64Runner->c64->cia.vicBank &= ~0x02;
         mainWindow->updateUI();
     });
     QObject::connect(ui->bank14, &QCheckBox::stateChanged, [this]() {
         if (ui->bank14->isChecked())
-            this->c64Runner->c64->cia.PRA2 &= ~0x01;
+            this->c64Runner->c64->cia.vicBank |= 0x01;
         else
-            this->c64Runner->c64->cia.PRA2 |= 0x01;
+            this->c64Runner->c64->cia.vicBank &= ~0x01;
         mainWindow->updateUI();
     });
     QObject::connect(ui->vm13, &QCheckBox::stateChanged, [this]() {
@@ -287,11 +285,11 @@ void VICViewer::updateC64() {
             edit->setCursorPosition(cursorPos);
         }
     };
-    lineEditSet16(ui->vmAddr, ((vic.videoMatrixMemoryPosition & 0xF) << 10) | ((~cia.PRA2 & 0x3) << 14));
-    lineEditSet16(ui->cbAddr, ((vic.charGenMemoryPosition & 0x7) << 11) | ((~cia.PRA2 & 0x3) << 14));
+    lineEditSet16(ui->vmAddr, ((vic.videoMatrixMemoryPosition & 0xF) << 10) | ((cia.vicBank & 0x3) << 14));
+    lineEditSet16(ui->cbAddr, ((vic.charGenMemoryPosition & 0x7) << 11) | ((cia.vicBank & 0x3) << 14));
 
-    ui->bank15->setChecked(~cia.PRA2 & 0x02);
-    ui->bank14->setChecked(~cia.PRA2 & 0x01);
+    ui->bank15->setChecked(cia.vicBank & 0x02);
+    ui->bank14->setChecked(cia.vicBank & 0x01);
     ui->vm13->setChecked(vic.videoMatrixMemoryPosition & 0x08);
     ui->vm12->setChecked(vic.videoMatrixMemoryPosition & 0x04);
     ui->vm11->setChecked(vic.videoMatrixMemoryPosition & 0x02);

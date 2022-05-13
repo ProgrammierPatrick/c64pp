@@ -33,7 +33,9 @@ class FloppyDrive {
 public:
     FloppyDrive(SerialBus *serialBus, const std::vector<uint8_t>& dosROM)
         : via(serialBus), mpu(&memoryView), ram(0x800), dos(dosROM),
-          memoryView(&ram, &dos, &via) { }
+          memoryView(&ram, &dos, &via) {
+        mpu.reset();
+    }
 
     void tick();
 private:

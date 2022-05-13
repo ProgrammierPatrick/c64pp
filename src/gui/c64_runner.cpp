@@ -27,33 +27,36 @@ void C64Runner::hardReset() {
     auto basic = loadRes(":/roms/basic");
     auto kernal = loadRes(":/roms/kernal");
     auto chargen = loadRes(":/roms/chargen");
+    auto dos = loadRes(":/roms/dos1541");
 
     auto keymap = loadResAsStr(":/keymaps/gtk3_sym_de.vkm");
     keyboard = std::make_unique<KeyboardState>(keymap);
 
     c64 = std::make_unique<C64>(basic, kernal, chargen, keyboard.get());
+    floppyDrive = std::make_unique<FloppyDrive>(&c64->serialBus, dos);
 }
 
 void C64Runner::singleStepMPU() {
     c64->tick();
+    floppyDrive->tick();
 }
 int C64Runner::stepInstruction() {
     int numTicks = 0;
     do {
-        c64->tick();
+        singleStepMPU();
         numTicks++;
     } while (c64->mpu.T != 0);
     return numTicks;
 }
 int C64Runner::stepLine() {
     for (int i = 0; i < 63; i++)
-        c64->tick();
+        singleStepMPU();
     return 63;
 }
 int C64Runner::stepFrame() {
     // should be 19656: https://www.c64-wiki.com/wiki/raster_time
     for (int i = 0; i < 19656; i++)
-        c64->tick();
+        singleStepMPU();
     return 19656;
 
     //int numTicks = 0;

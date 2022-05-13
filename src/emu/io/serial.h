@@ -8,7 +8,6 @@ public:
     bool pullAttention = false;
     bool pullClock = false;
     bool pullData = false;
-    bool pullReset = false;
 };
 
 class SerialBus {
@@ -18,7 +17,6 @@ public:
     bool getAttention() { for(auto d : devices) if (d->pullAttention) return false; return true; }
     bool getClock()     { for(auto d : devices) if (d->pullClock)     return false; return true; }
     bool getData()      { for(auto d : devices) if (d->pullData)      return false; return true; }
-    bool getReset()     { for(auto d : devices) if (d->pullReset)     return false; return true; }
 
 private:
     std::vector<SerialDevice*> devices;
