@@ -14,12 +14,6 @@
  */
 class VIA : public SerialDevice {
 public:
-    enum ShiftRegMode {
-        Disabled,
-        Timer2,
-        SystemClock,
-        External
-    };
 
     VIA(SerialBus *serialBus) : serialBus(serialBus) {
         serialBus->addDevice(this);
@@ -35,12 +29,27 @@ public:
 
     bool getIRQ();
 
+    // VIA 1 variables: serial interface
     bool serialATNLastTick = false;
     bool serialATNIRQ = false;
     bool serialATNIRQEnable = false;
     bool serialATNAutoACK = false; // called ATNA in schematic
 
-    ShiftRegMode shiftRegMode1;
+    // VIA 2 variables: mechanical control
+    uint8_t stepperMotorState = 0x00; // 2-bit stepper moter value. increasing: move head "upwards", decreasing: move head "downwards"
+    bool spinMotorRunning = false;
+    bool driveLED = false;
+    bool driveSync = false; // 0 = Data bytes are being currently read from disk; 1 = SYNC marks are being read.
+    uint8_t diskData = 0xAA; // TODO: repace with drive
+    bool driveDDRAWriting = false; // 0: DDRA=00, 1: DDRA=FF
+    bool driveHeadControlWrite = false; // from memorymap. 0:cause interrupts on negative CB2 transision 1:constant high output at CB2, no interrupts
+
+    // VIA 2 timer
+    bool timerRunning = false;
+
+    // floppy disk stuff. TODO: split out into separate class
+    bool diskWriteProtection = false;
+    uint8_t diskDensity = 0x00; // 2-bit density. %00 = Lowest; %11 = Highest
 
 private:
     SerialBus *serialBus = nullptr;
