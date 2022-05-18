@@ -405,22 +405,36 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->menubar->raise();
 
     QAudioFormat format;
-    format.setSampleRate(QMediaDevices::defaultAudioOutput().preferredFormat().sampleRate());
+    const int sampleRate = 44'000;
+    format.setSampleRate(sampleRate);
     format.setChannelConfig(QAudioFormat::ChannelConfigMono);
     format.setChannelCount(1);
     format.setSampleFormat(QAudioFormat::Float);
-    QAudioSink *audioOutput = new QAudioSink(format, this);
-    QObject::connect(audioOutput, &QAudioSink::stateChanged, [audioOutput](QAudio::State state) {
-        qDebug() << "state is now: " << state << " volume: " << audioOutput->volume();
-    });
-    audioOutput->setBufferSize(10 * sizeof(float) * format.sampleRate() / 50); // 200ms
-    audioBuffer.resize(format.sampleRate() / 50);
-    audioOutputDevice = audioOutput->start();
+    audioOutput = new QAudioSink(format, this);
+    if (audioOutput->error() != QAudio::Error::NoError) {
+        std::cout << "QAudioSink Error: " << audioOutput->error() << std::endl;
+    }
+    QObject::connect(audioOutput, &QAudioSink::stateChanged, [this](QAudio::State state) {
+        // disable due to console spam
+        // qDebug() << "state is now:" << state << "error:" << audioOutput->error() << "volume:" << audioOutput->volume();
 
+        // fix linux audio issues
+        if (audioOutput->error() == QAudio::Error::UnderrunError) {
+            const float value[1] = {0};
+            audioOutputDevice->write(reinterpret_cast<const char*>(&value), sizeof(value));
+        }
+    });
+    audioOutput->setBufferSize(10 * sizeof(float) * sampleRate / 50); // 200ms
+    audioBuffer.resize(sampleRate / 50, 0);
+    audioOutputDevice = audioOutput->start();
+    if (!audioOutputDevice->isOpen()) {
+        std::cout << "audio device not open!" << std::endl;
+    }
+    
     updateUI();
 
     ui->volume->setRange(0, 100);
-    ui->volume->setSliderPosition(volumeIntensity);
+    ui->volume->setSliderPosition(50);
     setVolume(static_cast<double>(ui->volume->sliderPosition())/100);
     if (ui->volume->sliderPosition() == 0) ui->mute->setIcon(QIcon(":/icons/mute.png"));
     else if (ui->volume->sliderPosition() < 33) ui->mute->setIcon(QIcon(":/icons/low-vol.png"));
@@ -461,17 +475,7 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 void MainWindow::setVolume(const double &vol) {
-    QAudioFormat format;
-    format.setSampleRate(QMediaDevices::defaultAudioOutput().preferredFormat().sampleRate());
-    format.setChannelConfig(QAudioFormat::ChannelConfigMono);
-    format.setChannelCount(1);
-    format.setSampleFormat(QAudioFormat::Float);
-    QAudioSink *audioOutput = new QAudioSink(format, this);
     audioOutput->setVolume(vol);
-    audioOutput->setBufferSize(10 * sizeof(float) * format.sampleRate() / 50); // 200ms
-    audioBuffer.resize(format.sampleRate() / 50);
-    audioOutputDevice = audioOutput->start();
-    volumeIntensity = vol * 100;
     updateUI();
 }
 
@@ -508,7 +512,7 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
 
     ui->mainScreenFrame->move(framePos);
 }
-// TODO: Fullscreen
+
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event) {
     if (isFullScreen()) {
         ui->statusbar->show();

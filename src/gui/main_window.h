@@ -17,6 +17,7 @@
 #include <chrono>
 
 class QIODevice;
+class QAudioSink;
 
 namespace Ui {
 class MainWindow;
@@ -78,12 +79,12 @@ private:
 
     QSize mainScreenOffset;
 
+    QAudioSink *audioOutput;
     QIODevice *audioOutputDevice;
     std::vector<float> audioBuffer;
 
     bool isMuted = false;
-    int volumeIntensity = 100; // sets the inital volume of the system (range 0 - 100)
-
+    
     QPoint framePos;
     QSize windowSize;
 
