@@ -4,55 +4,46 @@
 
 #include <cstdint>
 
-/** emulates both VIA chips for the 1541-II Disk Drive
- *  Serial Data <- 6522U6 PB1, 251828 ATNE
- *  Serial Data -> 6522U6 PB0
- *  Serial Clock-> 6522U6 PB2
- *  Serial Clock<- 6522U6 PB3
- *  Serial ATN  -> 6522U6 PB4, CA1, 251828 ATN1
- *
- */
-class VIA : public SerialDevice {
+class VIA {
 public:
-
-    VIA(SerialBus *serialBus) : serialBus(serialBus) {
-        serialBus->addDevice(this);
-        serialDeviceName = "floppy";
-    }
-
     void tick();
 
-    uint8_t readVIA1(uint16_t addr, bool nonDestructive = false);
-    uint8_t readVIA2(uint16_t addr, bool nonDestructive = false);
-    void writeVIA1(uint16_t addr, uint8_t value);
-    void writeVIA2(uint16_t addr, uint8_t value);
+    uint8_t read(uint8_t addr, bool nonDestructive = false);
+    void write(uint16_t addr, uint8_t data);
 
-    bool getIRQ();
+    bool getIRQ() { return enableT1Interrupt && t1IRQ || enableCA1Interrupt && ca1IRQ; }
 
-    // VIA 1 variables: serial interface
-    bool serialATNLastTick = false;
-    bool serialATNIRQ = false;
-    bool serialATNIRQEnable = false;
-    bool serialATNAutoACK = false; // called ATNA in schematic
+    uint8_t paIn = 0x00;
+    uint8_t pbIn = 0x00;
 
-    // VIA 2 variables: mechanical control
-    uint8_t stepperMotorState = 0x00; // 2-bit stepper moter value. increasing: move head "upwards", decreasing: move head "downwards"
-    bool spinMotorRunning = false;
-    bool driveLED = false;
-    bool driveSync = false; // 0 = Data bytes are being currently read from disk; 1 = SYNC marks are being read.
-    uint8_t diskData = 0xAA; // TODO: repace with drive
-    bool driveDDRAWriting = false; // 0: DDRA=00, 1: DDRA=FF
-    bool driveHeadControlWrite = false; // from memorymap. 0:cause interrupts on negative CB2 transision 1:constant high output at CB2, no interrupts
+    bool ca1In = false; // CA1 input. Will fire a CA1 interrupt on positive edge
 
-    // VIA 2 timer
-    bool timerRunning = false;
+    uint8_t paOut = 0x00;
+    uint8_t pbOut = 0x00;
 
-    // floppy disk stuff. TODO: split out into separate class
-    bool diskWriteProtection = false;
-    uint8_t diskDensity = 0x00; // 2-bit density. %00 = Lowest; %11 = Highest
+    bool lastCA1In = false;
+    uint8_t paLatchValue = 0x00;
+    uint16_t t1Counter = 0xFFFF;
 
-private:
-    SerialBus *serialBus = nullptr;
+    bool ca1IRQ = false;
+    bool t1IRQ = false;
 
+    // DDRB/DDRA 0:in, 1:out
+    uint8_t ddrb = 0x00;
+    uint8_t ddra = 0x00;
 
+    // T1L-L/H
+    uint16_t t1Latch = 0x0000;
+
+    // ACR (auxiliary control register)
+    bool paLatchingEnabled = false;
+    bool t1FreeRunning = false; // 0:00 one-shot, 1:01 free running
+
+    // PCR (peripheral control register): assume CA1 interrupt on positive edge (bit 0)
+    bool ca2OutputHigh = false; // only support modes 0:000, 1:111. Since CA2 interrupts are not implemented, this is just a normal output pin
+    bool cb2OutputHigh = false; // only support modes 0:000, 1:111. Since CB2 interrupts are not implemented, this is just a normal output pin
+
+    // IRE (interrupt enable): only support CA1 and T1
+    bool enableCA1Interrupt = false;
+    bool enableT1Interrupt = false;
 };

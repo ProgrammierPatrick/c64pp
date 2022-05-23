@@ -5,162 +5,129 @@
 #include <iostream>
 
 void VIA::tick() {
+    if (!ca1IRQ || !paLatchingEnabled)
+        paLatchValue = paIn & ~ddra | paLatchValue & ddra;
+    paOut = paLatchValue;
 
-    static bool lastATN = false, lastCLK = false, lastDATA = false;
-    bool ATN = !serialBus->getAttention();
-    bool CLK = !serialBus->getClock();
-    bool DATA = !serialBus->getData();
-    if (ATN != lastATN || CLK != lastCLK || DATA != lastDATA) {
-        std::cout << "serial: ";
-        if (ATN) {
-            std::cout << "ATN[";
-            for (auto d : serialBus->devices)
-                if (d->pullAttention) std::cout << d->serialDeviceName;
-            std::cout << "] ";
-        }
-        if (CLK) {
-            std::cout << "CLK[";
-            for (auto d : serialBus->devices)
-                if (d->pullClock) std::cout << d->serialDeviceName;
-            std::cout << "] ";
-        }
-        if (DATA) {
-            std::cout << "DATA[";
-            for (auto d : serialBus->devices)
-                if (d->pullData) std::cout << d->serialDeviceName;
-            std::cout << "] ";
-        }
-        std::cout << std::endl;
+    pbOut = pbIn & ~ddrb | pbOut & ddrb;
+
+    // check for rising edge at CA1
+    if (!lastCA1In && ca1In)
+        ca1IRQ = true;
+    lastCA1In = ca1In;
+
+    // Timer 1 does not handle interrupts in one-shot mode correctly. In one-shot, the interrupt
+    // is not fired the next time around. This should not matter for 1541, because T1 interrupts are not enabled in free running mode.
+    // TODO: remove this check if 1541 is working without triggering this
+    if (!t1FreeRunning && enableT1Interrupt)
+        std::cout << "VIA: timer 1 running in one-shot mode while T1 interrupts are enabled. This is not supported." << std::endl;
+
+    t1Counter--;
+    if (t1Counter == 0x0000) {
+        t1IRQ = true;
+        if (t1FreeRunning)
+            t1Counter = t1Latch;
     }
-    lastATN = ATN; lastCLK = CLK; lastDATA = DATA;
-
-    if (!serialBus->getAttention() && serialATNLastTick) {
-        serialATNIRQ = true;
-        std::cout << "ATN received! enabled:" << (serialATNIRQEnable ? "true" : "false") << std::endl;
-    }
-    serialATNLastTick = serialBus->getAttention();
-
-    // auto ATN acks
-    pullData = !serialBus->getAttention() != serialATNAutoACK;
 }
 
-bool VIA::getIRQ() {
-    return serialATNIRQEnable && serialATNIRQ;
-}
-
-uint8_t VIA::readVIA1(uint16_t addr, bool nonDestructive) {
-    if (!nonDestructive) std::cout << "VIA1: read " << toHexStr(addr) << std::endl;
-    switch (addr) {
+uint8_t VIA::read(uint8_t addr, bool nonDestructive) {
+    // if (!nonDestructive && addr != 0) std::cout << "VIA: read " << toHexStr(addr) << std::endl;
+    switch(addr) {
     case 0x0: // ORB
-        return ((serialBus->getData()) ? 0x03 : 0x00) | ((serialBus->getClock()) ? 0x0C : 0x00) | (serialATNAutoACK ? 0x10 : 0x00) | ((serialBus->getAttention()) ? 0x80 : 0x00);
+        return pbOut;
     case 0x1: // ORA
         if (!nonDestructive)
-            serialATNIRQ = false; // ACK IRQ by reading from ORA
-        return 0x00; // bit0: GND, others are not connected
+            ca1IRQ = false;
+        return paLatchValue;
     case 0x2: // DDRB
-        return 0x1A;
+        return ddrb;
     case 0x3: // DDRA
-        return 0xFF;
+        return ddra;
+    case 0x4: // TIC-L
+        t1IRQ = false;
+        return t1Counter & 0x00FF;
+    case 0x5: // TIC-H
+        return t1Counter >> 8;
+    case 0x06: // T1L-L
+        return t1Latch & 0x00FF;
+    case 0x7: // T1L-H
+        return t1Latch >> 8;
+    case 0xB: // ACR (auxiliary control register)
+        return (t1FreeRunning ? 0x40 : 0) | (paLatchingEnabled ? 0x01 : 0);
     case 0xC: // PCR (peripheral control register)
-        return 0x01;
+        return (cb2OutputHigh ? 0xE0 : 0) | (ca2OutputHigh ? 0x0E : 0);
     case 0xD: // IFR (interrupt flag register)
-        return (serialATNIRQ && serialATNIRQEnable) ? 0x82 : 0x00;
-    case 0xE: // IRE (interrupt enable)
-        if (!nonDestructive) std::cout << "VIA1: read " << toHexStr(addr) << std::endl;
-        return serialATNIRQEnable ? 0x02 : 0x00;
+        return (getIRQ() ? 0x80 : 0) | (t1IRQ ? 0x40 : 0) | (ca1IRQ ? 0x02 : 0);
+    case 0xE: // IER (interrupt enable register)
+        return (enableT1Interrupt ? 0x40 : 0) | (enableCA1Interrupt ? 0x02 : 0);
     }
-    if (!nonDestructive) std::cout << "VIA1: undefined read at " << toHexStr(addr) << std::endl;
+    if (!nonDestructive) std::cout << "VIA: undefined read at " << toHexStr(addr) << std::endl;
     return 0x00;
 }
 
-void VIA::writeVIA1(uint16_t addr, uint8_t value) {
-    std::cout << "VIA1: write [" << toHexStr(addr) << "] = " << toHexStr(value) << std::endl;
-    switch (addr) {
+void VIA::write(uint16_t addr, uint8_t data) {
+    // if (addr != 0) std::cout << "VIA: write [" << toHexStr(addr) << "] = " << toHexStr(data) << std::endl;
+    switch(addr) {
     case 0x0: // ORB
-        pullData = value & 0x02; // PB1
-        pullClock = value & 0x08; // PB3
-        serialATNAutoACK = value & 0x10; // PB4
+        pbOut &= ~ddrb;
+        pbOut |= ddrb & data;
         return;
     case 0x1: // ORA
-        serialATNIRQ = false; // ACK IRQ by writing to ORA
+        paLatchValue &= ~ddra;
+        paLatchValue |= ddra & data;
+        ca1IRQ = false;
         return;
     case 0x2: // DDRB
-        if (value != 0x1A) std::cout << "VIA1: ignore setting DDRB to non-default value: "<< toHexStr(value) << std::endl;
+        ddrb = data;
         return;
-    case 0x03: // DDRA
-        if (value != 0xFF) std::cout << "VIA1: ignore setting DDRA to non-default value: "<< toHexStr(value) << std::endl;
+    case 0x3: // DDRA
+        ddra = data;
+        return;
+    case 0x4: // T1L-L
+        t1Latch = t1Latch & 0xFF00 | data;
+        return;
+    case 0x5: // T1C-H
+        t1Latch = t1Latch & 0x00FF | (data << 8);
+        t1Counter = t1Latch;
+        t1IRQ = false;
+        return;
+    case 0x6: // T1L-L
+        t1Latch = t1Latch & 0xFF00 | data;
+        return;
+    case 0x7: // T1L-H
+        t1Latch = t1Latch & 0x00FF | (data << 8);
+        t1IRQ = false;
+        return;
+    case 0xB: // ACR (auxiliary control register)
+        if (data & 0x3E) std::cout << "VIA: write to ACR sets unimplemented features." << std::endl;
+        if ((data >> 6) != 0 && (data >> 6) != 1) std::cout << "VIA: write to ACR sets T1 to unknown mode. Supported are only: 00,01" << std::endl;
+        t1FreeRunning = data >> 6;
+        paLatchingEnabled = data & 0x01;
         return;
     case 0xC: // PCR (peripheral control register)
-        if (value != 0x01) std::cout << "VIA1: expected 0x01 for PCR write, but got " << toHexStr(value) << std::endl;
-        // bit0: select rising or falling edge for CA1 interrupt. 1 = falling edge, hardcoded here
+        if (((data >> 1) & 0x7) != 0 && ((data >> 1) & 0x7) != 0x2 && ((data >> 1) & 0x7) != 0x6 && ((data >> 1) & 0x7) != 0x7) std::cout << "VIA: write to PCR sets CA2 to unknown mode. Supported are only: 000,010,110,111. data:" << toHexStr(data) << std::endl;
+        if (((data >> 5) & 0x7) != 0 && ((data >> 5) & 0x7) != 0x2 && ((data >> 5) & 0x7) != 0x6 && ((data >> 5) & 0x7) != 0x7) std::cout << "VIA: write to PCR sets CB2 to unknown mode. Supported are only: 000,010,110,111. data:" << toHexStr(data) << std::endl;
+        ca2OutputHigh = ((data >> 1) & 0x7) == 0x7;
+        cb2OutputHigh = ((data >> 5) & 0x7) == 0x7;
         return;
     case 0xD: // IFR (interrupt flag register)
-        if (value & 0x02) serialATNIRQ = false;
+        if (data & 0x3D) std::cout << "VIA: write to IFR contains unimplemented interrupt flags. Support are: 02, 40" << std::endl;
+        if (data & 0x02) ca1IRQ = false;
+        if (data & 0x40) t1IRQ = false;
         return;
-    case 0xE: // IRE (interrupt enable)
-        bool set = value & 0x80;
-        if (set && (value & 0x02))
-            serialATNIRQEnable = true;
-        if (!set && (value & 0x02))
-            serialATNIRQEnable = false;
-        return;
-    }
-    std::cout << "VIA1: undefied write! [" << toHexStr(addr) << "] = " << toHexStr(value) << std::endl;
-}
-
-uint8_t VIA::readVIA2(uint16_t addr, bool nonDestructive) {
-    if (!nonDestructive && addr != 0) std::cout << "VIA2: read " << toHexStr(addr) << std::endl;
-    switch(addr) {
-    case 0x0: // ORB
-        return stepperMotorState | (spinMotorRunning ? 0x04 : 0) | (driveLED ? 0x08 : 0) | (!diskWriteProtection ? 0x10 : 0) | (diskDensity << 5) | (driveSync ? 0x80 : 0);
-    case 0x1: // ORA
-        // a new value is latched here whenever CA1 interrupt is fired.
-        return diskData;
-    case 0x2: // DDRB
-        return 0x6F;
-    case 0x3: // DDRA
-        return driveDDRAWriting ? 0xFF : 0x00;
-    case 0x0B: // ACR (auxiliary control register)
-        return timerRunning ? 0x40 : 0x00;
-    case 0x0C: // PCR (peripheral control register)
-        return !driveHeadControlWrite ? 0x00 : 0xE0;
-    }
-    if (!nonDestructive) std::cout << "VIA2: undefined read at " << toHexStr(addr) << std::endl;
-    return 0x00;
-}
-
-void VIA::writeVIA2(uint16_t addr, uint8_t value) {
-    if (addr != 0) std::cout << "VIA2: write [" << toHexStr(addr) << "] = " << toHexStr(value) << std::endl;
-    switch(addr) {
-    case 0x0: // ORB
-        stepperMotorState = value & 0x03;
-        spinMotorRunning = value & 0x04;
-        if (static_cast<bool>(value & 0x08) != driveLED)
-            std::cout << "Drive LED: " << (value & 0x08 ? "ON" : "OFF") << std::endl;
-        driveLED = value & 0x08;
-        diskDensity = (value >> 5) & 0x03;
-        return;
-    case 0x1: // ORA
-        if (driveDDRAWriting) diskData = value;
-        return;
-    case 0x2: // DDRB
-        if (value != 0x6F) std::cout << "VIA2: ignore setting DDRB to non-default value: "<< toHexStr(value) << std::endl;
-        return;
-    case 0x3: // DDRA
-        if (value != 0xFF && value != 0x00) std::cout << "VIA2: ignore setting DDRA to unknown value (known are: 00,FF): "<< toHexStr(value) << std::endl;
-        driveDDRAWriting = value == 0xFF;
-        return;
-    case 0x0B: // ACR (auxiliary control register)
-        if ((value & 0xFE) != 0x40) std::cout << "VIA2: expected 40,41 for ACR write, but got " << toHexStr(value) << std::endl;
-        timerRunning = value & 0x40;
-        return;
-    case 0x0C: // PCR (peripheral control register)
-        if (value >> 5 == 0) driveHeadControlWrite = false;
-        else if (value >> 5 == 0x7) driveHeadControlWrite = true;
-        else std::cout << "VIA2: write to VIA2 PCR sets unknown CB2 mode (write:" << toHexStr(value) << ", cb2 mode:" << toHexStr(static_cast<uint8_t>(value >> 5)) << ")" << std::endl;
-        // driveCA2Enabled = false;
-        std::cout << "write to VIA2 PCR: " << toHexStr(value) << std::endl;
+    case 0xE: // IER (interrupt enable register)
+        if (data & 0x80 && data & 0x3D)
+            std::cout << "VIA: write to IRE contains unimplemented interrupt flags. Support are: 02, 40. data:" << toHexStr(data) << std::endl;
+        bool set = data & 0x80;
+        if (set && (data & 0x02))
+            enableCA1Interrupt = true;
+        if (set && (data & 0x40))
+            enableT1Interrupt = true;
+        if (!set && (data & 0x02))
+            enableCA1Interrupt = false;
+        if (!set && (data & 0x40))
+            enableT1Interrupt = false;
         return;
     }
-    std::cout << "VIA2: undefied write! [" << toHexStr(addr) << "] = " << toHexStr(value) << std::endl;
+    std::cout << "VIA: undefied write! [" << toHexStr(addr) << "] = " << toHexStr(data) << std::endl;
 }
