@@ -6,7 +6,7 @@ void VIC::tick() {
     std::array<uint8_t, 8> pixels = { 0xFF };
 
     OutputPixels graphicPixels = tickBackground();
-    OutputPixels spritePixels = tickSprites(graphicPixels.isForeground);
+    OutputPixels spritePixels = tickSprites();
 
     pixels = graphicPixels.pixels;
 
@@ -128,10 +128,9 @@ OutputPixels VIC::tickBackground() {
     return outPixels;
 }
 
-OutputPixels VIC::tickSprites(std::array<bool,8> isForeground) {
+OutputPixels VIC::tickSprites() {
     OutputPixels outputPixels;
 
-    uint8_t spriteDataPrioReg = read(0x1B, false);
     std::array<bool,8> pixelOccupied { false };
 
     //cond. 2 toggle y expansion FF at end of line
@@ -149,7 +148,7 @@ OutputPixels VIC::tickSprites(std::array<bool,8> isForeground) {
                  && (sprites.spriteData[i].yCoord & 0x00FF) == (y & 0x00FF)) {
                 sprites.spriteData[i].enableDMA = true;
                 sprites.spriteData[i].spriteDataCounterBase = 0;
-                if (sprites.spriteData[i].spriteYExpansion) sprites.spriteData[i].expansionFlipFlop = true;
+                if (sprites.spriteData[i].spriteYExpansion) sprites.spriteData[i].expansionFlipFlop = false;
             }
         }
     }
@@ -176,13 +175,18 @@ OutputPixels VIC::tickSprites(std::array<bool,8> isForeground) {
         for (int i = 0; i < 8; i++) {
             if (sprites.spriteData[i].expansionFlipFlop) {
                 sprites.spriteData[i].spriteDataCounterBase++;
-                if (sprites.spriteData[i].spriteDataCounterBase > 63) {
-                    sprites.spriteData[i].currentlyDisplayed = false;
-                    sprites.spriteData[i].enableDMA = false;
-                }
+            }
+            if (sprites.spriteData[i].spriteDataCounterBase >= 63) {
+                sprites.spriteData[i].enableDMA = false;
             }
         }
     }
+
+    // second part of cond. 8: disable currentlyDisplayed after the last line has been displayed
+    if (cycleInLine == 60)
+        for (int i = 0; i < 8; i++)
+            if (!sprites.spriteData[i].enableDMA)
+                sprites.spriteData[i].currentlyDisplayed = false;
 
     std::array<bool, 8> spriteCondition;
     for (int i = 0; i < 8; i++) {
@@ -252,6 +256,13 @@ OutputPixels VIC::tickSprites(std::array<bool,8> isForeground) {
                             outputPixels.spriteNr[j] = i;
                             pixelOccupied[j] = true;
                         }
+                    } else {
+                        // DEBUG: draw background with expansionFF data and read frame in top left side of sprite
+                        // outputPixels.pixels[j] = sprites.spriteData[i].expansionFlipFlop ? 4 : 5;
+                        // if (pixelX == sprite.xCoord || ((sprites.spriteData[i].yCoord + 1) & 0x00FF) == (y & 0x00FF))
+                        //     outputPixels.pixels[j] = 2;
+                        // outputPixels.spriteNr[j] = i;
+                        // pixelOccupied[j] = true;
                     }
                     if (!sprite.spriteXExpansion || sprite.xExpansionFF) {
                         sprite.drawIndexPixel++;

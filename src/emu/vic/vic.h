@@ -37,7 +37,7 @@ public:
 
 private:
     OutputPixels tickBackground();
-    OutputPixels tickSprites(std::array<bool,8> isForeground);
+    OutputPixels tickSprites();
     void tickBorder();
 
     void checkIRQ();
