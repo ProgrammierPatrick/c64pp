@@ -55,14 +55,15 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
     auto rd16 = [&data,offset](uint16_t addr) {
         return static_cast<uint16_t>(data[addr - offset + 2] | (data[addr - offset + 3] << 8));
     };
-    uint16_t nextLine = rd16(offset);
-    bool singleLine = rd16(nextLine) == 0x0000 || rd16(nextLine) == 0x00A0; // 00A0 seems to terminate as well. maybe all 00xx work?
-    bool isSYS = data[6] == 0x9E;
+    uint16_t nextLine = rd16(0x0801);
+
+    bool singleLine = rd8(nextLine+1) == 0x00; // 00A0 seems to terminate as well. maybe all 00xx work?
+    bool isSYS = rd8(0x0805) == 0x9E;
 
     QPushButton *openAndRun = ui->buttonBox->addButton("Open And Run", QDialogButtonBox::AcceptRole);
     QPushButton *open = ui->buttonBox->addButton("Open", QDialogButtonBox::AcceptRole);
 
-    bool openAndRunSupported = startAddr == "0801" && singleLine && isSYS;
+    bool openAndRunSupported = (startAddr == "0801" || startAddr == "0800") && singleLine && isSYS;
 
     if (openAndRunSupported) {
         ui->fileTypeLabel->setText("Machine language with BASIC header");
@@ -81,15 +82,15 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
         }
         ui->targetNumber->setText(QString::fromStdString(toHexStr(targetNum)));
     }
-    else if (startAddr == "0801") {
+    else if (startAddr == "0800" || startAddr == "0801") {
         ui->fileTypeLabel->setText("BASIC");
         open->setDefault(true);
-        ui->targetNumber->setText(QString::fromStdString(toHexStr(offset)));
+        ui->targetNumber->setText(QString::fromStdString(startAddr));
     }
     else {
         ui->fileTypeLabel->setText("Generic");
         open->setDefault(true);
-        ui->targetNumber->setText(QString::fromStdString(toHexStr(offset)));
+        ui->targetNumber->setText(QString::fromStdString(startAddr));
     }
 
     QObject::connect(open, &QAbstractButton::clicked, [dataPtr, fileName, this](bool b){
@@ -107,6 +108,11 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
         for (int i = 2; i < dataPtr->size(); i++) {
             this->c64Runner->c64->mpu.mem->write(fromHexStr16(ui->offset->text().toStdString()) + i - 2, (*dataPtr)[i]);
         }
+
+        // some games (Hard'n'Heavy) use SYS2051, which translates to a jump to 0x803, which disassembles to BNE 080D.
+        // This requires that the zero-flag is cleared.
+        this->c64Runner->c64->mpu.P &= ~MPU::Flag::Z;
+
         this->c64Runner->c64->mpu.PC = fromHexStr16(ui->targetNumber->text().toStdString());
         this->c64Runner->c64->mpu.T = 0;
 
