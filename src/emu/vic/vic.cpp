@@ -283,7 +283,7 @@ void VIC::tickBorder() {
     int right = cSel ? 344 : 335;
 
     for(int i = 0; i < 8; i++) {
-        int xx = firstCycleX + (cycleInLine - 1) * 8 + i;
+        int xx = firstCycleX + (cycleInLine - 1) * 8 + i + 4;
         if (xx > maxX) xx -= maxX + 1;
 
         if (xx == right)
@@ -300,7 +300,7 @@ void VIC::tickBorder() {
             mainBorderFlipFlop = false;
 
         int sy = y - firstVisibleY;
-        int sx = (cycleInLine - firstVisibleCycle) * 8 + i;
+        int sx = (cycleInLine - firstVisibleCycle) * 8 + i + 4;
         if (mainBorderFlipFlop && sy >= 0 && sy < screenHeight && sx >= 0  && sx < screenWidth) {
             screen[sy * screenWidth + sx] = borderColor;
         }
