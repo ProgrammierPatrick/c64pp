@@ -80,7 +80,6 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
                 return;
             }
         }
-        if (targetNum == 2051) targetNum = 2061; // we found sys 2051 in hard n heavy, which is a jump to 0x0803, which doesn't make sense but still works
         ui->targetNumber->setText(QString::fromStdString(toHexStr(targetNum)));
     }
     else if (startAddr == "0800" || startAddr == "0801") {
@@ -109,6 +108,11 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
         for (int i = 2; i < dataPtr->size(); i++) {
             this->c64Runner->c64->mpu.mem->write(fromHexStr16(ui->offset->text().toStdString()) + i - 2, (*dataPtr)[i]);
         }
+
+        // some games (Hard'n'Heavy) use SYS2051, which translates to a jump to 0x803, which disassembles to BNE 080D.
+        // This requires that the zero-flag is cleared.
+        this->c64Runner->c64->mpu.P &= ~MPU::Flag::Z;
+
         this->c64Runner->c64->mpu.PC = fromHexStr16(ui->targetNumber->text().toStdString());
         this->c64Runner->c64->mpu.T = 0;
 
