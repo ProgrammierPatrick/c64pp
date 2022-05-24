@@ -55,14 +55,15 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
     auto rd16 = [&data,offset](uint16_t addr) {
         return static_cast<uint16_t>(data[addr - offset + 2] | (data[addr - offset + 3] << 8));
     };
-    uint16_t nextLine = rd16(offset);
-    bool singleLine = rd16(nextLine) == 0x0000 || rd16(nextLine) == 0x00A0; // 00A0 seems to terminate as well. maybe all 00xx work?
-    bool isSYS = data[6] == 0x9E;
+    uint16_t nextLine = rd16(0x0801);
+
+    bool singleLine = rd8(nextLine+1) == 0x00; // 00A0 seems to terminate as well. maybe all 00xx work?
+    bool isSYS = rd8(0x0805) == 0x9E;
 
     QPushButton *openAndRun = ui->buttonBox->addButton("Open And Run", QDialogButtonBox::AcceptRole);
     QPushButton *open = ui->buttonBox->addButton("Open", QDialogButtonBox::AcceptRole);
 
-    bool openAndRunSupported = startAddr == "0801" && singleLine && isSYS;
+    bool openAndRunSupported = (startAddr == "0801" || startAddr == "0800") && singleLine && isSYS;
 
     if (openAndRunSupported) {
         ui->fileTypeLabel->setText("Machine language with BASIC header");
@@ -79,17 +80,18 @@ PRGLoader::PRGLoader(MainWindow *parent, C64Runner* c64Runner, const std::string
                 return;
             }
         }
+        if (targetNum == 2051) targetNum = 2061; // we found sys 2051 in hard n heavy, which is a jump to 0x0803, which doesn't make sense but still works
         ui->targetNumber->setText(QString::fromStdString(toHexStr(targetNum)));
     }
-    else if (startAddr == "0801") {
+    else if (startAddr == "0800" || startAddr == "0801") {
         ui->fileTypeLabel->setText("BASIC");
         open->setDefault(true);
-        ui->targetNumber->setText(QString::fromStdString(toHexStr(offset)));
+        ui->targetNumber->setText(QString::fromStdString(startAddr));
     }
     else {
         ui->fileTypeLabel->setText("Generic");
         open->setDefault(true);
-        ui->targetNumber->setText(QString::fromStdString(toHexStr(offset)));
+        ui->targetNumber->setText(QString::fromStdString(startAddr));
     }
 
     QObject::connect(open, &QAbstractButton::clicked, [dataPtr, fileName, this](bool b){
