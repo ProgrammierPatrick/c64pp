@@ -35,6 +35,11 @@ public:
 
     void tick();
 
+    uint8_t stepperMotorState = 0; // 0, 1, 2 or 3. Counting up / down causes headPosition to move accordingly
+    int headPosition = 24 * 20; // raw stepper motor steps. 0 is outside, high values are inside
+    uint8_t getTrack() { return headPosition / 24 + 1; };
+    int sector = 0;
+
     MPU mpu;
     RAMMemory ram;
     ROMMemory dos;
