@@ -1,18 +1,17 @@
 #pragma once
 
 #include "voice.h"
+#include "filter.h"
 
+#include <memory>
 #include <array>
 #include <vector>
 #include <cstdint>
 
 class SID {
 public:
-    SID(float sampleRate, float phiRate) :
-        sampleRate(sampleRate), phiRate(phiRate),
-        voices({{Voice(&voices[2], sampleRate, phiRate),Voice(&voices[0], sampleRate, phiRate),Voice(&voices[1], sampleRate, phiRate)}}) {
-
-    }
+    SID(float sampleRate, float phiRate);
+    ~SID();
 
     void process(size_t sampleCount, float* buffer);
 
@@ -24,6 +23,8 @@ private:
 
 public:
     std::array<Voice, 3> voices;
+    Filter filter;
+
     uint16_t cutoff = 0; // 11 bit value: linear between 30Hz and 10kHz TODO: verify, denpending on used caps
     uint8_t resonance = 0; // 4 bit value: linear from no res to max res
     std::array<bool, 3> filterVoice = {false, false, false};
@@ -36,9 +37,6 @@ public:
 
 private:
     std::array<std::vector<float>, 3> tempVoiceBuffers;
-    float aaTempValue = 0;
-    std::array<float, 200> aaBuffer;
-    size_t aaIndex = 0;
 
     float sampleRate;
     float phiRate;
