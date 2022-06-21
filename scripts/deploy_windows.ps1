@@ -36,10 +36,7 @@ echo "[*] run qt deployment tool to construct dependencies"
 & 'windeployqt' $portable_path '--no-translations' '--verbose=1'
 
 echo "[*] copy license"
-@"
-blablabla bla bla blub
-TODO: add license
-"@ | Out-File -FilePath "$portable_path\license.txt" -Encoding utf8
+Copy-Item "..\LICENSE" "$portable_path\LICENSE"
 
 echo "[*] zip portable release"
 Compress-Archive -Path "$portable_path\*" -DestinationPath "$package_path\$package_name.zip"
@@ -148,7 +145,7 @@ InstallDir "`$PROGRAMFILES\C64++"
 !define MUI_ABORTWARNING
 !define MUI_UNABORTWARNING
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "$portable_path\license.txt"
+!insertmacro MUI_PAGE_LICENSE "$portable_path\LICENSE"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !define MUI_STARTMENUPAGE_DEFAULTFOLDER "C64++"
