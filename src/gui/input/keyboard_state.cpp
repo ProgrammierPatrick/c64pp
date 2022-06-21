@@ -56,12 +56,12 @@ void KeyboardState::processKeyEvent(QKeyEvent* event, bool pressed) {
         if (key == Qt::Key_S)     { setJoystick(true, 1); return; }
         if (key == Qt::Key_A)     { setJoystick(true, 2); return; }
         if (key == Qt::Key_D)     { setJoystick(true, 3); return; }
-        if (key == Qt::Key_Space) { setJoystick(true, 4); return; }
+        if (key == Qt::Key_C) { setJoystick(true, 4); return; }
         if (key == Qt::Key_Up)    { setJoystick(false, 0); return; }
         if (key == Qt::Key_Down)  { setJoystick(false, 1); return; }
         if (key == Qt::Key_Left)  { setJoystick(false, 2); return; }
         if (key == Qt::Key_Right) { setJoystick(false, 3); return; }
-        if (key == Qt::Key_Return){ setJoystick(false, 4); return; }
+        if (key == Qt::Key_M){ setJoystick(false, 4); return; }
     }
     else if (joystick1Enabled || joystick2Enabled) {
         bool joy = joystick1Enabled;
@@ -69,7 +69,7 @@ void KeyboardState::processKeyEvent(QKeyEvent* event, bool pressed) {
         if (key == Qt::Key_S)     { setJoystick(joy, 1); return; }
         if (key == Qt::Key_A)     { setJoystick(joy, 2); return; }
         if (key == Qt::Key_D)     { setJoystick(joy, 3); return; }
-        if (key == Qt::Key_Space) { setJoystick(joy, 4); return; }
+        if (key == Qt::Key_C) { setJoystick(joy, 4); return; }
     }
 
     for (const auto& mapping : keymap) {
